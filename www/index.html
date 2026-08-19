@@ -1,0 +1,1870 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Klipza.IA: converse, crie e trabalhe com seus arquivos.">
+<meta name="application-name" content="Klipza.IA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Klipza">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/assets/klipza-mark.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
+<title>Klipza.IA</title>
+<style>
+:root{
+  --bg:#fff;--panel:#fafafa;--panel2:#f4f4f4;--line:#e5e5e5;--line2:#d8d8d8;
+  --text:#111;--muted:#747474;--black:#000;--hover:#f0f0f0;--radius:14px;
+  --sidebar:300px;--content:820px;--danger:#b00020;
+  --install-shadow:0 18px 60px rgba(0,0,0,.20);
+}
+body.dark{
+  --bg:#2a2a2a;--panel:#333;--panel2:#3d3d3d;--line:#505050;--line2:#666;
+  --text:#f5f5f5;--muted:#c4c4c4;--black:#f5f5f5;--hover:#454545;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
+button,input,textarea{font:inherit;color:inherit}
+button{border:0;background:transparent;cursor:pointer}
+svg{display:block}
+img{max-width:100%}
+.hidden{display:none!important}
+.brand-lockup{display:flex;align-items:center;gap:8px;min-width:0}
+.brand-symbol{width:28px;height:28px;display:block;flex:0 0 auto}
+.login-brand-lockup{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px}
+.login-brand-lockup .brand-symbol{width:48px;height:48px}
+.login-brand{margin:0}
+.welcome-mark{overflow:hidden}
+.welcome-mark img{width:100%;height:100%;object-fit:cover}
+.install-prompt{position:fixed;left:50%;bottom:max(86px,calc(env(safe-area-inset-bottom) + 76px));z-index:160;width:min(440px,calc(100vw - 28px));transform:translate(-50%,0);padding:13px 14px;border:1px solid var(--black);border-radius:16px;background:var(--bg);color:var(--text);box-shadow:var(--install-shadow);display:flex;align-items:center;gap:11px;animation:installIn .22s cubic-bezier(.23,1,.32,1)}
+.install-prompt.hidden{display:none!important}
+.install-prompt-icon{width:42px;height:42px;border-radius:12px;flex:0 0 auto}
+.install-prompt-copy{min-width:0;flex:1}
+.install-prompt-title{font-size:13px;font-weight:750}
+.install-prompt-sub{font-size:10px;line-height:1.4;color:var(--muted);margin-top:3px}
+.install-prompt-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.install-prompt-button,.install-prompt-dismiss{height:32px;border-radius:9px;font-size:10px;font-weight:700;padding:0 10px;white-space:nowrap}
+.install-prompt-button{background:var(--black);color:var(--bg)}
+.install-prompt-dismiss{border:1px solid var(--line2);background:var(--bg);color:var(--text)}
+.install-prompt-button:active,.install-prompt-dismiss:active{transform:scale(.97)}
+.install-prompt-ios{display:none;margin-top:4px;font-size:10px;color:var(--muted);line-height:1.45}
+.install-prompt.ios .install-prompt-ios{display:block}
+@keyframes installIn{from{opacity:0;transform:translate(-50%,10px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@media(max-width:720px){.install-prompt{width:min(440px,calc(100vw - 20px));padding:11px;gap:8px}.install-prompt-icon{width:36px;height:36px;border-radius:10px}.install-prompt-title{font-size:12px}.install-prompt-sub{font-size:9px}.install-prompt-button,.install-prompt-dismiss{padding:0 8px;font-size:9px;height:30px}}
+#app.settings-mode{grid-template-columns:0 minmax(0,1fr)}
+#app.settings-mode>.sidebar{transform:translateX(-100%);opacity:0;pointer-events:none}
+
+/* LOGIN */
+#login{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:50;padding:24px}
+.login-card{width:min(390px,100%);text-align:center}
+.login-brand{font-size:34px;line-height:1;font-weight:700;letter-spacing:-1.8px;margin-bottom:12px}
+.login-brand span{font-weight:400}
+.login-copy{font-size:14px;color:var(--muted);margin-bottom:28px}
+.google-btn{width:100%;height:50px;border:1px solid var(--black);border-radius:11px;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;gap:11px;font-size:14px;font-weight:600;transition:.16s}
+.google-btn:hover{background:#000;color:#fff}
+.google-btn:active{transform:translateY(1px)}
+.google-icon{width:18px;height:18px}
+.login-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:18px}
+
+/* APP */
+#app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);height:100dvh;width:100%;transition:grid-template-columns .2s ease}
+#app.sidebar-collapsed{grid-template-columns:0 minmax(0,1fr)}
+.sidebar{height:100dvh;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden;transition:transform .22s ease,opacity .18s ease}
+#app.sidebar-collapsed .sidebar{transform:translateX(-100%);opacity:0;pointer-events:none}
+.side-head{height:58px;padding:0 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.brand{font-size:17px;font-weight:700;letter-spacing:-.5px;flex:1}
+.icon-btn{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto}
+.icon-btn:hover{background:var(--hover)}
+.icon-btn svg{width:17px;height:17px}
+.new-chat{margin:12px;height:42px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600}
+.new-chat:hover{border-color:#000;background:#000;color:#fff}
+.nav{padding:4px 9px 8px}
+.nav-btn{width:100%;height:40px;padding:0 10px;border-radius:9px;display:flex;align-items:center;gap:10px;text-align:left;font-size:13px;color:#444}
+.nav-btn:hover{background:var(--hover);color:#000}
+.nav-btn.active{background:#000;color:#fff}
+.nav-btn svg{width:16px;height:16px;flex:0 0 auto}
+.nav-label{flex:1}
+.nav-count{font-size:10px;opacity:.65}
+.history-head{padding:12px 14px 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#999;font-weight:700}
+.history{flex:1;overflow:auto;padding:2px 9px 10px}
+.chat-row{display:flex;align-items:center;gap:6px;min-height:38px;padding:0 7px 0 10px;border-radius:9px;color:#333;margin:2px 0}
+.chat-row:hover{background:var(--hover)}
+.chat-row.active{background:#e9e9e9;color:#000}
+.chat-title{flex:1;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.row-actions{display:none;align-items:center;gap:1px}
+.chat-row:hover .row-actions,.chat-row.active .row-actions{display:flex}
+.row-action{width:27px;height:27px;border-radius:7px;display:grid;place-items:center}
+.row-action:hover{background:#fff}
+.rename-input{min-width:0;width:100%;height:28px;border:1px solid #000;border-radius:7px;background:#fff;padding:0 7px;font-size:13px}
+.account{width:100%;text-align:left;border:0;background:transparent;cursor:pointer;}
+.account:focus-visible{outline:2px solid #000;outline-offset:2px;}
+.side-bottom{padding:10px;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:3px}
+.account{display:flex;align-items:center;gap:9px;padding:8px;border-radius:9px}
+.account:hover{background:var(--hover)}
+.avatar{width:32px;height:32px;border-radius:50%;background:#000;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700;flex:0 0 auto}
+.account-copy{min-width:0;flex:1}
+.account-name{font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-email{font-size:10px;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* MAIN */
+.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2vw,28px);flex:0 0 auto}
+.topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
+.topbar-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar-sub{font-size:11px;color:#999}
+.topbar-right{display:flex;gap:5px;align-items:center}
+
+.messages{flex:1;overflow:auto;padding:clamp(22px,3vw,38px) 0 18px;scroll-behavior:smooth}
+.msg-width{width:min(var(--content),calc(100% - 38px));margin:0 auto}
+.msg{display:flex;gap:12px;margin:0 0 30px}
+.msg:last-child{margin-bottom:4px}
+.msg-avatar{width:29px;height:29px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;font-size:11px;font-weight:700;margin-top:2px}
+.msg.user .msg-avatar{background:#000;color:#fff}
+.msg.ai .msg-avatar{border:1px solid #000;background:#fff}
+.msg-content{min-width:0;flex:1;font-size:15px;line-height:1.7}
+.msg-label{font-size:11px;font-weight:700;margin-bottom:4px;color:#777}
+.msg-content p{margin-bottom:10px}.msg-content p:last-child{margin-bottom:0}
+.msg-content pre{background:#f6f6f6;border:1px solid #dedede;border-radius:10px;padding:13px;overflow:auto;margin:10px 0;font-size:12px;line-height:1.55}
+.msg-content code{background:#f0f0f0;padding:2px 5px;border-radius:5px;font-size:.9em}
+.msg-content ul{padding-left:20px;margin:8px 0}
+.msg-attachments{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:12px}
+.msg-attachment-image{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--soft);max-width:280px}
+.msg-attachment-image img{display:block;width:100%;height:auto;max-height:280px;object-fit:cover}
+.msg-attachment-file{display:flex;align-items:center;gap:9px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--soft);font-size:12px;min-width:180px}
+.msg-attachment-file .file-icon{width:28px;height:28px;border-radius:8px;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:700}
+
+.welcome{min-height:100%;display:grid;place-items:center;padding:35px 18px}
+.welcome-inner{width:min(690px,100%);text-align:center}
+.welcome-mark{width:54px;height:54px;border:1px solid #111;border-radius:16px;margin:0 auto 18px;display:grid;place-items:center;font-size:20px;font-weight:700}
+.welcome h1{font-size:28px;letter-spacing:-.9px;margin-bottom:8px}
+.welcome p{font-size:13px;color:#777;margin-bottom:24px}
+.welcome-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+.welcome-prompt-wrap{width:min(690px,100%);margin:0 auto}
+.welcome-prompt{width:100%;min-height:84px;border:1px solid var(--line);border-radius:15px;text-align:left;padding:16px 17px;background:var(--bg);transition:border-color .18s,background .18s,transform .18s;display:flex;align-items:center;gap:14px}
+.welcome-prompt:hover{border-color:#000;background:#fafafa;transform:translateY(-1px)}
+.welcome-prompt:active{transform:scale(.99)}
+.welcome-prompt-icon{width:34px;height:34px;border-radius:10px;background:var(--black);color:var(--bg);display:grid;place-items:center;flex:0 0 auto;font-size:14px;font-weight:800}
+.welcome-prompt-copy{min-width:0;flex:1}
+.welcome-prompt-label{font-size:11px;font-weight:750;margin-bottom:5px}
+.welcome-prompt-text{font-size:13px;line-height:1.45;color:var(--muted);display:block}
+.welcome-prompt-meta{font-size:9px;color:#999;margin-top:5px}.welcome-prompt-meta:empty{display:none}
+.nav-expand{padding:0 9px 8px}
+.nav-more{height:36px!important;color:var(--muted)!important}
+.nav-more:hover{color:var(--text)!important}
+.nav-more .nav-chevron{font-size:16px;line-height:1;margin-left:auto;transition:transform .18s}
+.nav-more.open .nav-chevron{transform:rotate(180deg)}
+.nav-subnav{display:grid;gap:2px;padding:0 0 0 10px}
+.nav-subnav.hidden{display:none!important}
+.nav-subbtn{height:36px!important;font-size:12px!important}
+.nav-subbtn.active{background:var(--black);color:var(--bg)}
+.webklip-view{height:100%;overflow:auto;padding:24px 20px 48px;background:var(--bg);overscroll-behavior:contain}
+.webklip-inner{width:min(1120px,100%);margin:0 auto}
+.webklip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.webklip-eyebrow{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:750}
+.webklip-title{font-size:28px;letter-spacing:-.8px;margin-top:5px}
+.webklip-subtitle{font-size:12px;line-height:1.55;color:var(--muted);max-width:680px;margin-top:6px}
+.webklip-refresh{height:36px;padding:0 12px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);font-size:11px;font-weight:700;white-space:nowrap}
+.webklip-refresh:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.webklip-meta{font-size:10px;color:var(--muted);margin:0 0 12px}.webklip-topbar-label{font-size:10px;color:var(--muted);white-space:nowrap}.webklip-browser-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.webklip-toolbar-button{height:30px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-toolbar-button:hover{background:var(--hover)}.webklip-address{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 5px;color:var(--muted);font-size:10px}.webklip-iframe-wrap{height:calc(100dvh - 150px);min-height:420px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.webklip-iframe{width:100%;height:100%;display:block;border:0;background:var(--bg)}.webklip-frame-note{font-size:10px;line-height:1.45;color:var(--muted);margin-top:8px}.webklip-load-more{display:block;width:min(260px,100%);height:38px;margin:16px auto 0;border:1px solid var(--line2);border-radius:10px;background:var(--panel);color:var(--text);font-size:11px;font-weight:750}.webklip-load-more:hover{background:var(--hover)}.webklip-browser-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}.webklip-search-form{min-width:0;flex:1;height:42px;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);box-shadow:0 3px 12px rgba(0,0,0,.04)}.webklip-search-icon{font-size:19px;color:var(--muted);line-height:1}.webklip-search-form input{min-width:0;flex:1;height:34px;border:0;outline:0;background:transparent;color:var(--text);font-size:12px}.webklip-search-form button,.webklip-clear-search{height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-search-form button:hover,.webklip-clear-search:hover{background:var(--black);color:var(--bg);border-color:var(--black)}.webklip-ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 18px}.webklip-ai-label{font-size:10px;color:var(--muted);font-weight:750;margin-right:2px}.webklip-ai-link{height:28px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font-size:10px;text-decoration:none}.webklip-ai-link:hover{border-color:var(--black);background:var(--hover)}
+.webklip-tabs{display:flex;gap:6px;overflow:auto;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;scrollbar-width:none}
+.webklip-tabs::-webkit-scrollbar{display:none}
+.webklip-tab{height:32px;padding:0 12px;border-radius:8px;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
+.webklip-tab:hover{background:var(--hover);color:var(--text)}
+.webklip-tab.active{background:var(--black);color:var(--bg)}
+.webklip-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.webklip-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px;min-height:184px;cursor:pointer;content-visibility:auto;contain-intrinsic-size:184px;transition:border-color .18s,transform .18s,box-shadow .18s}
+.webklip-card:hover{border-color:#000;transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.06)}
+.webklip-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.webklip-tag{font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted)}
+.webklip-rank{font-size:10px;color:#999}
+.webklip-card-title{font-size:14px;line-height:1.35;font-weight:700;letter-spacing:-.15px}
+.webklip-card-summary{font-size:11px;line-height:1.5;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.webklip-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;font-size:9px;color:#999}
+.webklip-source{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.webklip-arrow{font-size:14px;color:var(--text)}
+.webklip-empty{padding:48px 20px;border:1px dashed var(--line2);border-radius:14px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
+.webklip-loading{display:grid;place-items:center;min-height:220px;color:var(--muted);font-size:12px}
+.webklip-detail{margin-bottom:14px;border:1px solid var(--black);border-radius:16px;padding:18px;background:var(--panel)}
+.webklip-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.webklip-back{height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:10px;font-weight:700}
+.webklip-back:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.webklip-detail-title{font-size:22px;line-height:1.25;letter-spacing:-.5px}
+.webklip-detail-summary{font-size:13px;line-height:1.65;color:var(--muted);margin-top:10px;white-space:pre-line}
+.webklip-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}
+.webklip-action{height:36px;padding:0 12px;border-radius:9px;background:var(--black);color:var(--bg);font-size:11px;font-weight:700}
+.webklip-action.secondary{background:var(--bg);color:var(--text);border:1px solid var(--line2)}
+.webklip-action.secondary:hover{background:var(--hover)}
+@media(max-width:980px){.webklip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-index:240;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.42);backdrop-filter:blur(7px)}
+.webklip-modal.open{display:flex;animation:primeFadeIn .18s ease}
+.webklip-modal-dialog{width:min(1120px,calc(100vw - 28px));max-height:min(820px,calc(100dvh - 28px));overflow:hidden;background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.26);display:flex;flex-direction:column}
+.webklip-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 22px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.webklip-modal-title{font-size:20px;font-weight:780;letter-spacing:-.4px}.webklip-modal-sub{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45}
+.webklip-modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--line2);background:var(--panel);display:grid;place-items:center;font-size:18px}.webklip-modal-close:hover{background:var(--hover)}
+.webklip-modal-body{overflow:auto;padding:0}.webklip-modal-body .webklip-view{height:auto;min-height:0;padding:18px 22px 26px}.webklip-modal-body .webklip-head{display:none}.webklip-modal-body .webklip-inner{width:100%}.webklip-country-select{height:34px;min-width:170px;padding:0 10px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);color:var(--text);font-size:11px}.webklip-country-select:focus{outline:2px solid var(--line2);outline-offset:1px}
+.confirm-modal{position:fixed;inset:0;z-index:310;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.42);backdrop-filter:blur(6px)}
+.confirm-modal.open{display:flex;animation:primeFadeIn .18s ease}.confirm-dialog{width:min(430px,calc(100vw - 28px));background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:18px;padding:22px;box-shadow:0 28px 80px rgba(0,0,0,.3)}.confirm-title{font-size:18px;font-weight:780}.confirm-copy{font-size:12px;line-height:1.55;color:var(--muted);margin-top:8px}.confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.confirm-btn{height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);font-size:11px;font-weight:750}.confirm-btn:hover{background:var(--hover)}.confirm-btn.danger{background:var(--text);color:var(--bg);border-color:var(--text)}
+@media(max-width:720px){.webklip-modal{padding:8px;align-items:flex-end}.webklip-modal-dialog{width:100%;max-height:calc(100dvh - 16px);border-radius:18px 18px 10px 10px}.webklip-modal-head{padding:16px 17px}.webklip-modal-body .webklip-view{padding:15px 14px 22px}.webklip-browser-toolbar{margin-bottom:10px}.webklip-iframe-wrap{height:calc(100dvh - 135px);min-height:360px}.webklip-browser-bar{align-items:stretch;flex-direction:column}.webklip-search-form{width:100%}.webklip-clear-search{width:100%}.webklip-grid{grid-template-columns:1fr}.confirm-modal{padding:10px;align-items:flex-end}.confirm-dialog{width:100%;border-radius:18px 18px 10px 10px;padding:19px}}
+
+.composer-wrap{padding:12px 16px 16px;flex:0 0 auto}
+.composer{width:min(var(--content),100%);margin:0 auto}
+.composer-box{position:relative;z-index:6;border:1px solid var(--black);border-radius:16px;background:var(--bg);box-shadow:0 2px 16px rgba(0,0,0,.05)}
+.attach-strip{display:none;padding:10px 11px;border-bottom:1px solid var(--line);gap:7px;flex-wrap:wrap}
+.attach-strip.open{display:flex}
+.attach-chip{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;background:#f0f0f0;font-size:11px}
+.attach-chip.attach-preview{padding:4px 7px 4px 4px}.attach-preview img{width:28px;height:28px;object-fit:cover;border-radius:6px}.attach-preview span{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.attach-chip button{font-size:15px;color:#666}
+.attach-menu{position:absolute;left:7px;bottom:58px;width:min(320px,calc(100vw - 24px));display:none;flex-direction:column;gap:2px;padding:7px;background:var(--panel);border:1px solid var(--line2);border-radius:17px;box-shadow:0 20px 55px rgba(0,0,0,.18);z-index:50;max-height:min(420px,64vh);overflow:auto}
+.attach-menu.open{display:flex;animation:menuUp .15s cubic-bezier(.2,.8,.2,1)}
+@keyframes menuUp{from{opacity:0;transform:translateY(10px) scale(.97);transform-origin:bottom left}to{opacity:1;transform:translateY(0) scale(1);transform-origin:bottom left}}
+.attach-menu::after{content:"";position:absolute;left:18px;bottom:-6px;width:11px;height:11px;background:var(--panel);border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);transform:rotate(45deg)}
+.attach-option{width:100%;flex:0 0 auto;border:0;border-radius:11px;padding:9px 10px;display:flex;align-items:center;gap:11px;text-align:left;background:transparent;color:var(--text);min-height:50px}
+.attach-option:hover{background:var(--hover)}
+.attach-option:active{background:var(--line)}
+.attach-option.upcoming{position:relative;cursor:pointer}
+.attach-option.upcoming:hover{background:var(--hover)}
+.attach-option.upcoming .attach-option-icon{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.soon-badge{margin-left:auto;font-size:8px;padding:3px 6px;border:1px solid var(--line2);border-radius:999px;color:var(--muted);white-space:nowrap;background:var(--panel2)}
+.attach-option-icon{width:32px;height:32px;border-radius:9px;background:var(--black);color:var(--bg);display:grid;place-items:center;flex:0 0 auto}
+.attach-option-icon svg{width:15px;height:15px}
+.attach-option-title{display:block;font-size:12px;font-weight:650;line-height:1.2}.attach-option-sub{display:block;font-size:10px;color:var(--muted);margin-top:2px;line-height:1.25}
+.attach-divider{height:1px;background:var(--line);margin:4px 6px}
+.attach-section-label{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:7px 9px 5px}
+@media(max-width:720px){.attach-menu{left:6px;bottom:60px;width:min(325px,calc(100vw - 18px));max-height:60vh;border-radius:16px}.attach-option{min-height:50px;padding:9px}.attach-option-icon{width:31px;height:31px}}
+@media(max-width:720px){.energy-banner{align-items:flex-start;margin:0 0 9px;width:100%;padding:10px}.energy-banner-copy{flex:1}.energy-prime{height:32px;padding:0 10px;font-size:10px}}
+.composer-row{display:flex;align-items:flex-end;gap:7px;padding:7px}
+.plus{width:37px;height:37px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;border:1px solid transparent;transition:.15s}.plus:hover{background:var(--hover);border-color:var(--line)}
+.plus.active{background:#000;color:#fff;border-color:#000;transform:rotate(45deg)}
+.plus svg{width:18px;height:18px}
+textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;padding:8px 6px;min-height:37px;max-height:180px;font-size:14px;line-height:1.5}
+.send{width:37px;height:37px;border-radius:10px;background:#000;color:#fff;display:grid;place-items:center;flex:0 0 auto}
+.send:disabled{background:#ccc;cursor:not-allowed}
+.composer-note{text-align:center;font-size:10px;color:#aaa;margin-top:7px}
+
+/* ARTIFACTS */
+.artifacts-view{height:100%;overflow:auto;padding:32px 20px 60px}
+.artifacts-inner{width:min(880px,100%);margin:0 auto}
+.page-title{font-size:26px;letter-spacing:-.7px;margin-bottom:4px}.page-sub{font-size:13px;color:#777;margin-bottom:24px}
+.artifact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.artifact-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);min-height:150px;display:flex;flex-direction:column;gap:11px;cursor:pointer}
+.artifact-card:hover{border-color:#000}
+.artifact-head{display:flex;align-items:center;gap:9px}.artifact-icon{width:34px;height:34px;background:#000;color:#fff;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:700}.artifact-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artifact-meta{font-size:10px;color:#999;margin-top:2px}.artifact-preview{font-size:11px;color:#666;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+.empty-page{padding:60px 10px;text-align:center;color:#999;font-size:13px;border:1px dashed #ddd;border-radius:14px}
+
+/* SETTINGS — REDESIGN */
+.settings-view{height:100%;overflow:auto;background:var(--bg);padding:28px 30px 60px}
+.settings-inner{width:min(1180px,100%);margin:0 auto}
+.settings-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0 20px}
+.settings-top-main{display:flex;align-items:center;gap:14px;min-width:0}
+.settings-avatar{width:48px;height:48px;border-radius:14px;background:var(--black);color:var(--bg);display:grid;place-items:center;font-size:15px;font-weight:800;flex:0 0 auto}
+.settings-head{min-width:0}.settings-title{font-size:24px;font-weight:700;letter-spacing:-.6px}.settings-subtitle{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.settings-back{padding:9px 13px;border:1px solid var(--line2);border-radius:10px;background:var(--panel);font-size:11px;font-weight:700;white-space:nowrap}.settings-back:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.settings-nav{display:flex;align-items:center;gap:4px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:auto;scrollbar-width:none;position:sticky;top:0;z-index:3}.settings-nav::-webkit-scrollbar{display:none}
+.settings-nav a{display:inline-flex;align-items:center;justify-content:center;padding:9px 14px;border-radius:8px;color:var(--muted);font-size:11px;font-weight:650;text-decoration:none;white-space:nowrap;transition:.15s}.settings-nav a:hover{background:var(--hover);color:var(--text)}.settings-nav a.active{background:var(--black);color:var(--bg)}
+.settings-sections{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:14px;align-items:start}
+.settings-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden;scroll-margin-top:74px}
+.settings-card.full{grid-column:1 / -1}.settings-card-header{padding:17px 18px 12px;border-bottom:1px solid var(--line)}
+.settings-card-title{font-size:13px;font-weight:750}.settings-card-desc{font-size:11px;line-height:1.5;color:var(--muted);margin-top:4px}
+.settings-rows{padding:0 18px}.settings-row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:64px;padding:13px 0;border-top:1px solid var(--line)}.settings-row:first-child{border-top:0}
+.settings-copy{min-width:0}.settings-name{font-size:12px;font-weight:650}.settings-detail{font-size:11px;color:var(--muted);line-height:1.45;margin-top:3px;overflow-wrap:anywhere}
+.settings-control{flex:0 0 auto;display:flex;align-items:center;gap:8px}.settings-value{font-size:11px;font-weight:600;color:var(--muted);text-align:right;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-action{padding:8px 11px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:11px;font-weight:650;white-space:nowrap}.settings-action:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.settings-action.danger{border-color:var(--black)}
+.settings-energy{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.settings-meter{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}.settings-meter-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.settings-meter-name{font-size:12px;font-weight:700}.settings-meter-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-top:3px}.settings-meter-value{font-size:19px;font-weight:750;white-space:nowrap}.settings-track{height:7px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:12px}.settings-track span{display:block;height:100%;background:var(--black);border-radius:999px;transition:width .25s}.settings-meter-foot{font-size:10px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:8px}
+.settings-themes{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.theme-card{border:1px solid var(--line);border-radius:13px;background:var(--bg);padding:10px;text-align:left;transition:.15s}.theme-card:hover{border-color:var(--black)}.theme-card.active{border:2px solid var(--black);padding:9px}.theme-swatch{height:92px;border-radius:9px;display:flex;align-items:flex-end;padding:12px;font-size:14px;font-weight:700;letter-spacing:-.2px}.theme-swatch.light{background:#fff;color:#111;border:1px solid #eee}.theme-swatch.dark{background:#2a2a2a;color:#fff;border:1px solid #666}.theme-name{font-size:12px;font-weight:700;margin-top:10px}.theme-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.settings-foot{font-size:10px;color:var(--muted);text-align:center;padding:18px 0 6px}
+@media(max-width:980px){.settings-sections{grid-template-columns:1fr}.settings-card.full{grid-column:auto}.settings-energy{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.settings-view{padding:16px 12px 42px}.settings-top{padding:8px 0 14px;align-items:flex-start}.settings-title{font-size:21px}.settings-subtitle{white-space:normal}.settings-back{padding:8px 10px}.settings-nav{margin-bottom:12px}.settings-nav a{padding:9px 12px;font-size:10px}.settings-sections{gap:10px}.settings-card{border-radius:13px}.settings-card-header{padding:15px}.settings-rows{padding:0 15px}.settings-row{align-items:flex-start;flex-direction:column;gap:10px;padding:14px 0}.settings-control{width:100%;justify-content:flex-start}.settings-value{max-width:none;text-align:left;white-space:normal}.settings-action{width:auto}.settings-energy,.settings-themes{padding:12px 15px;grid-template-columns:1fr}.theme-swatch{height:78px}.settings-avatar{width:44px;height:44px;border-radius:12px;font-size:14px}}
+
+/* MOBILE */
+.mobile-close{display:none}
+@media (max-width:900px){
+  :root{--sidebar:280px}
+  .artifact-grid{grid-template-columns:1fr 1fr}
+}
+@media (max-width:720px){
+  #app{grid-template-columns:1fr}
+  body{overflow:hidden}
+  .sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:min(88vw,300px);height:100dvh;box-shadow:14px 0 30px rgba(0,0,0,.18);will-change:transform}
+  #app.sidebar-collapsed{grid-template-columns:1fr}
+  #app.sidebar-collapsed .sidebar{transform:translateX(-104%);opacity:1;pointer-events:none}
+  .main{width:100vw;min-width:0;position:relative;z-index:1}
+  .topbar{position:relative;z-index:5;padding:0 12px;height:54px}.topbar-right .desktop-only{display:none}
+  .messages{padding-top:20px;padding-bottom:18px;min-height:0}.msg-width{width:calc(100% - 24px)}
+  .msg{gap:9px;margin-bottom:24px}.msg-content{font-size:14px}.msg-avatar{width:27px;height:27px}
+  .welcome{padding:28px 14px}.welcome h1{font-size:24px}.welcome-prompt{min-height:78px;padding:13px}.welcome-prompt-text{font-size:12px}.webklip-view{padding:24px 14px 50px}.webklip-head{display:block}.webklip-refresh{margin-top:12px}.webklip-grid{grid-template-columns:1fr}.webklip-detail-title{font-size:19px}
+  .composer-wrap{position:relative;z-index:4;padding:10px 9px max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line)}
+  .composer-box{z-index:6}
+  .composer-note{font-size:9px}
+  .attach-option{flex-basis:100%}.artifact-grid{grid-template-columns:1fr}.artifacts-view,.settings-view{padding:24px 14px 50px}
+  #app:not(.sidebar-collapsed)::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.28);z-index:90;pointer-events:auto}
+}
+@media (min-width:721px){#app.sidebar-collapsed .topbar .menu-toggle{display:grid}}
+
+/* NO MODALS: all views are inside the main area */
+
+
+/* MODO ANÔNIMO */
+.anonymous-btn{display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font-size:10px;font-weight:700;white-space:nowrap;transition:.15s}
+.anonymous-btn:hover{border-color:var(--black);background:var(--hover)}
+.anonymous-btn.active{background:var(--black);color:var(--bg);border-color:var(--black)}
+.anonymous-dot{width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.8}
+.anonymous-banner{display:none;align-items:center;justify-content:space-between;gap:10px;margin:0 auto 9px;width:min(var(--content),100%);padding:9px 12px;border:1px dashed var(--line2);border-radius:11px;background:var(--panel);font-size:10px;color:var(--muted)}
+.anonymous-banner.show{display:flex}
+.anonymous-banner strong{color:var(--text);font-weight:750}
+.anonymous-exit{height:28px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:10px;font-weight:700;white-space:nowrap}
+.anonymous-exit:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.anonymous-disabled{opacity:.45!important;pointer-events:none!important}
+@media(max-width:720px){.anonymous-btn{height:32px;padding:0 8px;font-size:9px}.anonymous-btn .anonymous-label{display:none}.anonymous-banner{align-items:flex-start}.anonymous-banner{font-size:9px}.anonymous-exit{height:30px}.topbar-right{gap:4px}}
+
+/* ENERGY SYSTEM */
+.energy-card{margin:12px 14px 10px;padding:13px;border:1px solid #e7e7e7;border-radius:14px;background:#fff;transition:opacity .2s,transform .2s}
+.energy-card.energy-empty{border-color:#111;box-shadow:0 8px 22px rgba(0,0,0,.05)}
+.energy-card.energy-empty .energy-meta{color:#111;font-weight:700}
+.energy-banner{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 auto 10px;width:min(var(--content),100%);padding:11px 13px;border:1px solid #111;border-radius:13px;background:var(--panel);box-shadow:0 10px 26px rgba(0,0,0,.06)}
+.energy-banner.show{display:flex;animation:energyBannerIn .22s ease}
+.energy-banner-copy{min-width:0}
+.energy-banner-title{font-size:12px;font-weight:750;color:var(--text)}
+.energy-banner-sub{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.energy-prime{height:34px;padding:0 12px;border-radius:9px;background:#000;color:#fff;font-size:11px;font-weight:700;white-space:nowrap;flex:0 0 auto}
+.energy-prime:hover{background:#222}
+@keyframes energyBannerIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.energy-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.energy-title{font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:#555}
+.energy-value{font-size:13px;font-weight:700}
+.energy-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.energy-ring{transition:background 1.15s cubic-bezier(.22,.61,.36,1);width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#000 var(--pct),#ededed 0);position:relative;flex:0 0 44px}
+.energy-ring:after{content:"";width:32px;height:32px;background:var(--bg);border-radius:50%;position:absolute}
+.energy-ring span{position:relative;z-index:1;font-size:10px;font-weight:700}
+.energy-copy{min-width:0;flex:1}
+.energy-label{font-size:12px;font-weight:600}
+.energy-meta{font-size:10px;color:#888;margin-top:3px}
+.energy-bar{height:5px;border-radius:999px;background:#ececec;overflow:hidden;margin-top:9px}
+.energy-bar span{display:block;height:100%;background:#000;border-radius:999px;transition:width 1.15s cubic-bezier(.22,.61,.36,1)}
+.energy-foot{margin-top:7px;font-size:9px;color:#8a8a8a;display:flex;justify-content:space-between;gap:8px}
+.quota-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #e8e8e8;border-radius:9px;background:#fafafa;font-size:10px;color:#555}
+.quota-dot{width:6px;height:6px;border-radius:50%;background:#000}
+.limit-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.limit-card + .limit-card{margin-top:10px}
+.limit-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.limit-name{font-size:13px;font-weight:700}
+.limit-caption{font-size:11px;color:#858585;margin-top:3px;line-height:1.45}
+.limit-number{font-size:18px;font-weight:700;white-space:nowrap}
+.limit-track{height:7px;border-radius:999px;background:#efefef;overflow:hidden;margin-top:12px}
+.limit-track > span{height:100%;display:block;background:#000;border-radius:999px;transition:width 1.15s cubic-bezier(.22,.61,.36,1)}
+.limit-note{margin-top:8px;font-size:10px;color:#8a8a8a}
+.settings-kicker{font-size:11px;color:#888;margin-top:4px}
+
+
+/* SETTINGS — workspace style */
+.settings-view{position:fixed;inset:0;z-index:40;background:var(--bg);padding:0;overflow:hidden}
+.settings-workspace{height:100%;display:grid;grid-template-columns:252px minmax(0,1fr);min-width:0}
+.settings-sidebar{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.settings-sidebar-top{padding:18px 14px 14px;display:flex;align-items:center;gap:10px}
+.settings-close{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--bg);display:grid;place-items:center;flex:0 0 auto}
+.settings-close:hover{background:var(--hover)}
+.settings-close svg{width:20px;height:20px}
+.settings-search{margin:0 12px 12px;position:relative}
+.settings-search input{width:100%;height:44px;padding:0 12px 0 38px;border:1px solid var(--line2);border-radius:22px;background:var(--bg);color:var(--text);font-size:13px}
+.settings-search svg{position:absolute;left:13px;top:13px;width:18px;height:18px;color:var(--muted)}
+.settings-menu{padding:0 8px 14px;overflow:auto}
+.settings-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:8px;color:var(--text);text-align:left;font-size:14px;line-height:1.1}
+.settings-item:hover{background:var(--hover)}
+.settings-item.active{background:var(--hover);font-weight:600}
+.settings-item svg{width:19px;height:19px;flex:0 0 auto;color:var(--text)}
+.settings-item .soon{margin-left:auto;font-size:9px;color:var(--muted);border:1px solid var(--line2);padding:3px 6px;border-radius:999px;white-space:nowrap}
+.settings-main{min-width:0;overflow:auto;background:var(--bg);display:block;position:relative;color:var(--text);z-index:1}
+.settings-workspace{display:grid;grid-template-columns:262px minmax(0,1fr);width:min(1080px,100%);height:calc(100dvh - 28px);margin:14px auto;border:1px solid var(--line2);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 18px 60px rgba(0,0,0,.12)}
+.settings-sidebar{min-width:0;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--panel)}
+.settings-main{background:var(--bg);min-width:0;min-height:0;overflow:auto}
+.settings-content{min-height:100%;width:100%;max-width:none;margin:0;padding:28px 36px 80px;display:block;visibility:visible;opacity:1}
+@media(max-width:760px){.settings-workspace{width:100%;height:100dvh;margin:0;border-radius:0;border:0;grid-template-columns:1fr}.settings-sidebar{position:absolute;inset:0 auto 0 0;width:min(88vw,320px);z-index:5}.settings-main{grid-column:1}.settings-sidebar.is-hidden{display:none}.settings-content{padding:22px 18px 60px}}
+
+.settings-content{width:min(900px,100%);margin:0 auto;padding:20px 28px 70px;color:var(--text);display:block;visibility:visible;opacity:1}
+.settings-titlebar{height:48px;display:flex;align-items:center;margin-bottom:16px;color:var(--text)}
+.settings-titlebar h1{font-size:22px;font-weight:500;letter-spacing:-.4px;color:var(--text)}
+.settings-panel{border-top:1px solid var(--line);display:block;color:var(--text)}
+.settings-promo{display:none}
+.settings-group-title{font-size:14px;color:var(--text);padding:22px 0 12px}
+.settings-line{min-height:74px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0}
+.settings-line:first-of-type{border-top:0}
+.settings-line-copy{min-width:0}
+.settings-line-name{font-size:15px;line-height:1.25}
+.settings-line-desc{font-size:13px;line-height:1.45;color:var(--muted);margin-top:5px;max-width:650px}
+.settings-line-value{font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.settings-line-value .muted{color:var(--muted)}
+.settings-chevron{width:18px;height:18px;color:var(--muted)}
+.settings-toggle{width:42px;height:24px;border-radius:999px;background:var(--line2);position:relative;flex:0 0 auto}
+.settings-toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.18s}
+.settings-toggle.on{background:var(--black)}
+.settings-toggle.on::after{left:20px}
+.settings-select{min-width:132px;display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.settings-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block}
+.settings-dot.dark{background:#000;border:1px solid #111}
+.settings-badge{font-size:11px;color:var(--muted);border:1px solid var(--line2);padding:4px 8px;border-radius:999px}
+.settings-account-card{padding:14px 0 4px}
+.settings-account-row{display:flex;align-items:center;gap:12px;padding:10px 0 18px}
+.settings-account-avatar{width:46px;height:46px;border-radius:50%;background:var(--black);color:var(--bg);display:grid;place-items:center;font-weight:700}
+.settings-account-meta strong{font-size:14px;font-weight:600}
+.settings-account-meta div{font-size:12px;color:var(--muted);margin-top:3px}
+.settings-note{font-size:12px;color:var(--muted);line-height:1.5;padding:16px 0 0}
+.settings-divider{height:1px;background:var(--line)}
+.settings-hidden{display:none!important}
+@media(max-width:800px){
+  .settings-workspace{grid-template-columns:220px minmax(0,1fr)}
+  .settings-content{padding:18px 20px 60px}
+  .settings-item{font-size:13px}
+}
+@media(max-width:640px){
+  .settings-workspace{grid-template-columns:1fr}
+  .settings-sidebar{position:absolute;inset:0 auto 0 0;width:min(88vw,300px);z-index:3;box-shadow:18px 0 40px rgba(0,0,0,.18)}
+  .settings-main{grid-column:1}
+  .settings-content{padding:18px 16px 50px}
+  .settings-line{align-items:flex-start;flex-direction:column;gap:9px}
+  .settings-line-value{width:100%;justify-content:flex-start;white-space:normal}
+  .settings-select{justify-content:flex-start}
+}
+
+
+/* CONFIGURAÇÕES — painel lateral sobre o aplicativo */
+.settings-view{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:120 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  background:rgba(0,0,0,.46) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  backdrop-filter:blur(3px);
+}
+.settings-workspace{
+  position:relative !important;
+  width:min(1080px,calc(100vw - 36px)) !important;
+  height:min(760px,calc(100dvh - 36px)) !important;
+  margin:0 !important;
+  display:grid !important;
+  grid-template-columns:262px minmax(0,1fr) !important;
+  overflow:hidden !important;
+  border:1px solid var(--line2) !important;
+  border-radius:18px !important;
+  background:var(--panel) !important;
+  box-shadow:0 30px 90px rgba(0,0,0,.34) !important;
+}
+.settings-sidebar{
+  min-width:0 !important;
+  position:relative !important;
+  inset:auto !important;
+  width:auto !important;
+  height:100% !important;
+  border-right:1px solid var(--line) !important;
+  background:var(--panel) !important;
+  overflow:hidden !important;
+}
+.settings-main{
+  min-width:0 !important;
+  min-height:0 !important;
+  height:100% !important;
+  overflow:auto !important;
+  background:var(--bg) !important;
+  display:block !important;
+}
+.settings-content{
+  width:min(760px,100%) !important;
+  min-height:100% !important;
+  margin:0 auto !important;
+  padding:32px 44px 64px !important;
+  color:var(--text) !important;
+  display:block !important;
+}
+.settings-titlebar{
+  height:auto !important;
+  min-height:54px !important;
+  display:flex !important;
+  align-items:center !important;
+  margin-bottom:18px !important;
+  border-bottom:1px solid var(--line) !important;
+  padding-bottom:16px !important;
+}
+.settings-titlebar h1{font-size:24px !important;font-weight:650 !important;letter-spacing:-.5px !important}
+.settings-panel{border-top:0 !important}
+.settings-group-title{padding:10px 0 12px !important;font-size:14px !important;font-weight:600 !important}
+.settings-line{min-height:74px !important}
+.settings-menu{padding:0 10px 14px !important}
+.settings-sidebar-top{padding:18px 12px 12px !important}
+.settings-search{margin:0 12px 14px !important}
+.settings-item{padding:11px 12px !important}
+@media (max-width:760px){
+  .settings-view{align-items:stretch !important;justify-content:stretch !important}
+  .settings-workspace{
+    width:100vw !important;height:100dvh !important;margin:0 !important;border-radius:0 !important;border:0 !important;box-shadow:none !important;
+    grid-template-columns:1fr !important;
+  }
+  .settings-sidebar{
+    position:absolute !important;left:0 !important;top:0 !important;bottom:0 !important;width:min(88vw,320px) !important;z-index:6 !important;
+    box-shadow:16px 0 40px rgba(0,0,0,.2) !important;
+  }
+  .settings-sidebar.is-hidden{display:none !important}
+  .settings-main{grid-column:1 !important}
+  .settings-content{padding:22px 18px 50px !important;width:100% !important}
+}
+
+
+/* RESPONSIVE FINAL FIX */
+@media (max-width:720px){
+  /* History drawer must sit above the entire chat/composer */
+  .sidebar{
+    z-index:1000 !important;
+    width:min(94vw,360px) !important;
+    background:var(--panel) !important;
+    box-shadow:22px 0 50px rgba(0,0,0,.28) !important;
+  }
+  #app:not(.sidebar-collapsed) .main{
+    z-index:1 !important;
+  }
+  #app:not(.sidebar-collapsed)::after{
+    z-index:999 !important;
+    backdrop-filter:blur(2px);
+  }
+  #app:not(.sidebar-collapsed) .composer-wrap,
+  #app:not(.sidebar-collapsed) .topbar,
+  #app:not(.sidebar-collapsed) .messages{
+    pointer-events:none !important;
+  }
+  .composer-wrap{position:relative !important;z-index:4 !important;}
+
+  /* Settings: one pane at a time on phones, like a real mobile settings app */
+  .settings-view{
+    padding:0 !important;
+    min-height:100dvh !important;
+    overflow:hidden !important;
+  }
+  .settings-inner{width:100% !important;}
+  .settings-workspace{
+    width:100% !important;
+    height:100dvh !important;
+    min-height:100dvh !important;
+    margin:0 !important;
+    display:grid !important;
+    grid-template-columns:1fr !important;
+    border:0 !important;
+    border-radius:0 !important;
+    box-shadow:none !important;
+    overflow:hidden !important;
+  }
+  .settings-sidebar{
+    position:relative !important;
+    inset:auto !important;
+    width:100% !important;
+    height:100% !important;
+    z-index:2 !important;
+    border-right:0 !important;
+    display:flex !important;
+  }
+  .settings-main{
+    position:absolute !important;
+    inset:0 !important;
+    z-index:3 !important;
+    width:100% !important;
+    height:100% !important;
+    transform:translateX(100%) !important;
+    transition:transform .22s ease !important;
+    overflow:auto !important;
+  }
+  .settings-view.mobile-detail .settings-main{transform:translateX(0) !important;}
+  .settings-view.mobile-detail .settings-sidebar{display:none !important;}
+  .settings-sidebar-top{padding:14px 14px 10px !important;}
+  .settings-close{width:40px !important;height:40px !important;}
+  .settings-search{margin:0 14px 10px !important;}
+  .settings-search input{height:46px !important;}
+  .settings-menu{padding:0 10px 22px !important;}
+  .settings-item{min-height:48px !important;padding:12px 11px !important;font-size:14px !important;}
+  .settings-content{
+    width:100% !important;
+    max-width:none !important;
+    min-height:100% !important;
+    padding:18px 16px 54px !important;
+  }
+  .settings-mobile-back{
+    display:flex !important;
+    align-items:center !important;
+    gap:8px !important;
+    margin:0 0 14px !important;
+    padding:9px 11px !important;
+    border:1px solid var(--line2) !important;
+    border-radius:9px !important;
+    background:var(--panel) !important;
+    color:var(--text) !important;
+    font-size:12px !important;
+    font-weight:700 !important;
+  }
+  .settings-line{min-height:0 !important;display:grid !important;grid-template-columns:minmax(0,1fr) auto !important;align-items:center !important;gap:14px !important;padding:15px 0 !important;}
+  .settings-line-value{width:auto !important;justify-content:flex-end !important;white-space:normal !important;text-align:right !important;}
+  .settings-line-desc{max-width:none !important;}
+}
+@media (min-width:721px){
+  .settings-mobile-back{display:none !important;}
+}
+
+/* PRIME / TOKENS MODAL */
+body.prime-modal-open{overflow:hidden}
+.prime-modal{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.42);backdrop-filter:blur(6px)}
+.prime-modal.open{display:flex;animation:primeFadeIn .18s ease}
+.prime-dialog{width:min(860px,calc(100vw - 32px));max-height:min(760px,calc(100dvh - 32px));overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.24)}
+.prime-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 18px;border-bottom:1px solid var(--line)}
+.prime-eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.prime-title{font-size:25px;font-weight:760;letter-spacing:-.5px;margin-top:4px}
+.prime-sub{font-size:12px;line-height:1.5;color:var(--muted);margin-top:5px;max-width:640px}
+.prime-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--text);background:var(--bg);flex:0 0 auto}
+.prime-close:hover{background:var(--hover)}
+.prime-close svg{width:18px;height:18px}
+.prime-tabs{display:flex;gap:4px;padding:12px 24px 0}
+.prime-tab{border:1px solid transparent;padding:9px 12px;border-radius:9px;color:var(--muted);font-size:11px;font-weight:700;background:transparent}
+.prime-tab.active{background:var(--black);color:var(--bg)}
+.prime-tab:hover{background:var(--hover);color:var(--text)}
+.prime-body{padding:18px 24px 24px}
+.prime-panel{display:none}.prime-panel.active{display:block}
+.prime-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prime-card{border:1px solid var(--line);border-radius:15px;background:var(--bg);padding:17px;position:relative;overflow:hidden}
+.prime-card.featured{border-color:var(--black);box-shadow:0 12px 30px rgba(0,0,0,.08)}
+.prime-card-badge{position:absolute;right:14px;top:14px;font-size:9px;padding:4px 7px;border-radius:999px;background:var(--black);color:var(--bg);font-weight:800}
+.prime-card h3{font-size:16px;font-weight:760}.prime-card p{font-size:11px;color:var(--muted);line-height:1.5;margin-top:5px}
+.prime-price{font-size:25px;font-weight:800;margin-top:16px;letter-spacing:-.5px}.prime-price small{font-size:10px;font-weight:600;color:var(--muted)}
+.prime-list{display:grid;gap:8px;margin:15px 0 17px}.prime-list div{font-size:11px;display:flex;gap:8px;align-items:flex-start}.prime-list span:first-child{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--black);color:var(--bg);font-size:9px;flex:0 0 16px}
+.prime-action{width:100%;height:40px;border-radius:10px;background:var(--black);color:var(--bg);font-size:11px;font-weight:750}.prime-action:hover{background:#222}.prime-action.secondary{background:var(--bg);color:var(--text);border:1px solid var(--line2)}.prime-action.secondary:hover{background:var(--hover)}
+.token-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.token-card{border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:16px}.token-amount{font-size:20px;font-weight:800}.token-label{font-size:11px;color:var(--muted);margin-top:2px}.token-note{font-size:10px;line-height:1.45;color:var(--muted);margin:12px 0 15px;min-height:30px}
+.prime-footnote{font-size:10px;line-height:1.5;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.energy-settings-box{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:15px}.energy-settings-box-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.energy-settings-box-title{font-size:13px;font-weight:760}.energy-settings-box-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-top:4px}.energy-settings-box-value{font-size:19px;font-weight:800}.energy-settings-box-track{height:7px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:12px}.energy-settings-box-track span{display:block;height:100%;background:var(--black);border-radius:999px;transition:width .3s}.energy-settings-box-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:11px;flex-wrap:wrap}.energy-settings-box-meta{font-size:10px;color:var(--muted)}.energy-more-btn{height:34px;padding:0 11px;border-radius:9px;background:var(--black);color:var(--bg);font-size:10px;font-weight:750}.energy-more-btn:hover{background:#222}
+@keyframes primeFadeIn{from{opacity:0}to{opacity:1}}
+@media(max-width:720px){.prime-modal{padding:10px;align-items:flex-end}.prime-dialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px 18px 10px 10px}.prime-head{padding:18px 17px 15px}.prime-title{font-size:21px}.prime-tabs{padding:10px 17px 0;overflow:auto}.prime-body{padding:15px 17px 20px}.prime-grid,.token-grid{grid-template-columns:1fr}.prime-card{padding:15px}.prime-card-badge{position:static;display:inline-block;margin-bottom:7px}.prime-footnote{margin-bottom:4px}}
+
+
+/* VOICE / STREAM CONTROLS */
+.response-status{display:none;align-items:center;justify-content:center;gap:8px;max-width:760px;margin:0 auto 8px;padding:0 16px;font-size:11px;color:#777;text-align:center}
+.response-status.show{display:flex}
+.response-status strong{color:#111;font-weight:600}
+.stop-wrap{display:none;align-items:center;gap:8px;flex:1}
+.stop-btn{width:36px;height:36px;border:1px solid #111;background:#111;color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.stop-btn:hover{background:#333}
+.stop-btn svg{width:15px;height:15px}
+.mic-btn{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#222;transition:.15s}
+.mic-btn:hover{background:#f0f0f0}
+.mic-btn.listening{position:relative;background:var(--hover);color:var(--text);animation:micBreathe 2.2s ease-in-out infinite;box-shadow:0 0 0 1px var(--line2)}
+  .mic-btn.listening::before,.mic-btn.listening::after{content:'';position:absolute;inset:3px;border:1px solid currentColor;border-radius:50%;opacity:0;pointer-events:none}
+  .mic-btn.listening::before{animation:micWave 2.2s ease-out infinite}
+  .mic-btn.listening::after{animation:micWave 2.2s ease-out .75s infinite}
+  @keyframes micBreathe{0%,100%{transform:translateY(0);box-shadow:0 0 0 1px var(--line2),0 0 0 0 rgba(255,255,255,0)}50%{transform:translateY(-1px);box-shadow:0 0 0 1px var(--line2),0 0 0 6px rgba(255,255,255,.08)}}
+  @keyframes micWave{0%{transform:scale(.7);opacity:.55}70%,100%{transform:scale(1.8);opacity:0}}
+  .voice-hint{font-size:11px;color:var(--muted);display:none;align-items:center;gap:6px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+  .voice-hint.show::before{content:'';width:6px;height:6px;border-radius:50%;background:#8fbf9a;box-shadow:0 0 0 4px rgba(143,191,154,.14);flex:0 0 auto}
+.voice-hint.show{display:flex}
+.voice-cancel{font-size:11px;color:#777;background:transparent;border:0;cursor:pointer;padding:3px 0}
+.voice-cancel:hover{color:#000}
+  .voice-panel{display:none;align-items:center;gap:11px;width:min(var(--content),100%);margin:0 auto 9px;padding:10px 13px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 6px 22px rgba(0,0,0,.06)}
+  .voice-panel.show{display:flex;animation:voicePanelIn .22s ease}
+  .voice-orb{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--text);color:var(--bg);flex:0 0 auto}
+  .voice-orb::before,.voice-orb::after{content:'';position:absolute;inset:-4px;border:1px solid var(--text);border-radius:50%;opacity:0;animation:voiceOrbWave 2.4s ease-out infinite}
+  .voice-orb::after{animation-delay:1.1s}.voice-orb svg{width:16px;height:16px;position:relative;z-index:1}
+  .voice-panel-copy{min-width:0;flex:1;display:grid;gap:2px}.voice-panel-copy strong{font-size:11px}.voice-panel-copy span{font-size:10px;color:var(--muted)}
+  .voice-panel-stop{height:30px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;font-size:10px;font-weight:700}.voice-panel-stop:hover{background:var(--hover)}
+  @keyframes voicePanelIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes voiceOrbWave{0%{transform:scale(.75);opacity:.5}70%,100%{transform:scale(1.7);opacity:0}}
+  .msg-status{margin-top:8px;font-size:11px;color:#777}
+.msg-status strong{color:#111;font-weight:600}
+@media(max-width:720px){
+  .response-status{padding:0 12px}
+  .mic-btn,.stop-btn{width:38px;height:38px}
+  .voice-hint{max-width:140px}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login-card">
+    <div class="login-brand-lockup"><img class="brand-symbol" src="/assets/klipza-mark.png" alt="" aria-hidden="true"><div class="login-brand">Klipza<span>.IA</span></div></div>
+    <div class="login-copy">Entre na sua conta para continuar.</div>
+    <button class="google-btn" id="googleBtn">
+      <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#4285F4" d="M21.35 12.23c0-.72-.06-1.25-.19-1.82H12v3.44h5.36a4.58 4.58 0 0 1-1.99 3.01v2.5h3.22c1.89-1.74 2.76-4.3 2.76-7.13Z"/>
+        <path fill="#34A853" d="M12 21.75c2.7 0 4.97-.89 6.63-2.4l-3.22-2.5c-.89.59-2.03 1.01-3.41 1.01-2.61 0-4.82-1.76-5.61-4.13H3.06v2.57A10.01 10.01 0 0 0 12 21.75Z"/>
+        <path fill="#FBBC05" d="M6.39 13.73A6.03 6.03 0 0 1 6.07 12c0-.6.11-1.18.32-1.73V7.7H3.06A9.99 9.99 0 0 0 2 12c0 1.61.39 3.13 1.06 4.3l3.33-2.57Z"/>
+        <path fill="#EA4335" d="M12 6.14c1.47 0 2.79.51 3.83 1.5l2.87-2.87C16.96 3.16 14.7 2.25 12 2.25a10.01 10.01 0 0 0-8.94 5.48l3.33 2.57C7.18 7.9 9.39 6.14 12 6.14Z"/>
+      </svg>
+      Continuar com Google
+    </button>
+    <div class="login-note">Ao continuar, você concorda com os Termos e com a Política de Privacidade do Klipza.IA.</div>
+  </div>
+</div>
+
+<div id="app" class="sidebar-collapsed hidden">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-head">
+      <button class="icon-btn" id="closeSidebar" title="Fechar histórico" aria-label="Fechar histórico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="brand-lockup"><img class="brand-symbol" src="/assets/klipza-mark.png" alt="" aria-hidden="true"><div class="brand">Klipza.IA</div></div>
+      <button class="icon-btn" id="headNew" title="Nova conversa">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <button class="new-chat" id="newChatBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      Nova conversa
+    </button>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.7 8.7 0 0 1-3.8-.87L4 20l.87-3.7A8.7 8.7 0 0 1 4 12a8.5 8.5 0 1 1 16 0v-.5Z"/></svg><span class="nav-label">Conversas</span></button>
+      <button class="nav-btn" data-view="artifacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 16h8M8 12h8M8 8h5"/></svg><span class="nav-label">Artefatos</span><span class="nav-count" id="artifactCount">0</span></button>
+    </nav>
+    <div class="nav-expand">
+      <button class="nav-btn nav-more" id="webKlipToggle" type="button" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="nav-label">Mais</span><span class="nav-chevron">⌄</span>
+      </button>
+      <div class="nav-subnav hidden" id="webKlipSubnav">
+        <button class="nav-btn nav-subbtn" data-view="webklip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="nav-label">web.klip</span></button>
+      </div>
+    </div>
+    <div class="history-head">Histórico</div>
+    <div class="history" id="history"></div>
+    <div id="sideQuota"></div><div class="side-bottom">
+      <button class="account" id="accountBtn" type="button" title="Abrir perfil e configurações">
+        <div class="avatar" id="avatar">K</div>
+        <div class="account-copy"><div class="account-name" id="accountName">Usuário Google</div><div class="account-email" id="accountEmail">usuario@gmail.com</div></div>
+      </button>
+      <button class="nav-btn" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M21 3v18"/></svg><span class="nav-label">Sair</span></button>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<input class="hidden" id="fileInput" type="file">
+<input class="hidden" id="imageInput" type="file" accept="image/*">
+<input class="hidden" id="cameraInput" type="file" accept="image/*" capture="environment">
+
+<div class="install-prompt hidden" id="installPrompt" role="status" aria-live="polite">
+  <img class="install-prompt-icon" src="/assets/icon-192.png" alt="" aria-hidden="true">
+  <div class="install-prompt-copy">
+    <div class="install-prompt-title">Instalar Klipza</div>
+    <div class="install-prompt-sub">Tenha o Klipza.IA na tela inicial e abra mais rápido.</div>
+    <div class="install-prompt-ios">No iPhone: toque em Compartilhar e depois em “Adicionar à Tela de Início”.</div>
+  </div>
+  <div class="install-prompt-actions">
+    <button class="install-prompt-button" type="button" id="installPromptAction">Instalar</button>
+    <button class="install-prompt-dismiss" type="button" id="installPromptDismiss" aria-label="Fechar aviso de instalação">Agora não</button>
+  </div>
+</div>
+
+<div class="prime-modal" id="primeModal" aria-hidden="true">
+  <div class="prime-dialog" role="dialog" aria-modal="true" aria-labelledby="primeModalTitle">
+    <div class="prime-head">
+      <div>
+        <div class="prime-eyebrow">Klipza</div>
+        <div class="prime-title" id="primeModalTitle">Mais do Klipza</div>
+        <div class="prime-sub">Escolha o Klipza.Prime ou veja opções para obter mais energia. O pagamento real ainda está em desenvolvimento.</div>
+      </div>
+      <button class="prime-close" type="button" onclick="window.K.closePrimeModal()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="prime-tabs" role="tablist">
+      <button class="prime-tab active" type="button" data-prime-tab="prime">Klipza.Prime</button>
+      <button class="prime-tab" type="button" data-prime-tab="tokens">Mais tokens</button>
+    </div>
+    <div class="prime-body">
+      <section class="prime-panel active" data-prime-panel="prime">
+        <div class="prime-grid">
+          <article class="prime-card featured">
+            <span class="prime-card-badge">PRINCIPAL</span>
+            <h3>Klipza.Prime Mensal</h3>
+            <p>Mais energia e benefícios do Klipza em um ciclo mensal.</p>
+            <div class="prime-price">Preço em breve <small>/mês</small></div>
+            <div class="prime-list">
+              <div><span>✓</span><div>Mais energia disponível por ciclo</div></div>
+              <div><span>✓</span><div>Limites maiores para uso</div></div>
+              <div><span>✓</span><div>Recursos premium conforme forem liberados</div></div>
+            </div>
+            <button class="prime-action" type="button" onclick="window.K.primeComingSoon('Klipza.Prime Mensal')">Assinar · em breve</button>
+          </article>
+          <article class="prime-card">
+            <h3>Klipza.Prime Anual</h3>
+            <p>Uma opção anual do Prime para quem usa o Klipza com frequência.</p>
+            <div class="prime-price">Preço em breve <small>/ano</small></div>
+            <div class="prime-list">
+              <div><span>✓</span><div>Mais energia disponível por ciclo</div></div>
+              <div><span>✓</span><div>Limites maiores para uso</div></div>
+              <div><span>✓</span><div>Recursos premium conforme forem liberados</div></div>
+            </div>
+            <button class="prime-action secondary" type="button" onclick="window.K.primeComingSoon('Klipza.Prime Anual')">Escolher · em breve</button>
+          </article>
+        </div>
+        <div class="prime-footnote">As opções de compra aparecem aqui, mas cobrança, pagamento e ativação automática ainda não estão conectados.</div>
+      </section>
+      <section class="prime-panel" data-prime-panel="tokens">
+        <div class="token-grid">
+          <article class="token-card"><div class="token-amount">100</div><div class="token-label">tokens extras</div><div class="token-note">Pacote pequeno para completar seu ciclo de uso.</div><button class="prime-action" type="button" onclick="window.K.primeComingSoon('100 tokens')">Obter · em breve</button></article>
+          <article class="token-card"><div class="token-amount">500</div><div class="token-label">tokens extras</div><div class="token-note">Mais espaço para continuar conversando quando a energia acabar.</div><button class="prime-action" type="button" onclick="window.K.primeComingSoon('500 tokens')">Obter · em breve</button></article>
+          <article class="token-card"><div class="token-amount">1.000</div><div class="token-label">tokens extras</div><div class="token-note">Pacote maior para uso intenso do Klipza.IA.</div><button class="prime-action" type="button" onclick="window.K.primeComingSoon('1.000 tokens')">Obter · em breve</button></article>
+        </div>
+        <div class="prime-footnote">Os pacotes acima são apenas a interface de compra por enquanto. O sistema de pagamento e a entrega real dos tokens ainda estão em desenvolvimento.</div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-modal" id="confirmModal" aria-hidden="true">
+  <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalCopy">
+    <div class="confirm-title" id="confirmModalTitle">Tem certeza?</div>
+    <div class="confirm-copy" id="confirmModalCopy">Essa ação não poderá ser desfeita.</div>
+    <div class="confirm-actions"><button class="confirm-btn" type="button" id="confirmCancel">Cancelar</button><button class="confirm-btn danger" type="button" id="confirmAccept">Sim, apagar</button></div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const KEY = 'klipza_pro_v1';
+  let state = loadState();
+  state.theme = state.theme || 'light';
+  state.settings = {...{notifications:false,sounds:false,language:'pt-BR',country:'BR'},...(state.settings||{})};
+  const ENERGY_MAX=100, MSG_COST=2, ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000;
+  let currentView = 'chat';
+  let webKlipReturnView = 'chat';
+  let activeChatId = state.activeChatId || null;
+  let attached = [];
+  let anonymousMode = false;
+  let previousChatId = null;
+  let anonymousChat = null;
+  let deferredInstallPrompt = null;
+
+  function isStandalone(){
+    return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+  function isIOS(){
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !isStandalone();
+  }
+  function hideInstallPrompt(){
+    const prompt=$('installPrompt');
+    if(prompt) prompt.classList.add('hidden');
+  }
+  function showInstallPrompt(force=false){
+    const prompt=$('installPrompt');
+    if(!prompt || isStandalone()) return;
+    if(!force && localStorage.getItem('klipza_install_dismissed_v1')) return;
+    if(!deferredInstallPrompt && !isIOS()) return;
+    prompt.classList.toggle('ios',isIOS());
+    prompt.classList.remove('hidden');
+  }
+  function dismissInstallPrompt(){
+    localStorage.setItem('klipza_install_dismissed_v1','1');
+    hideInstallPrompt();
+  }
+  async function installApp(){
+    if(deferredInstallPrompt){
+      const promptEvent=deferredInstallPrompt;
+      deferredInstallPrompt=null;
+      try{
+        await promptEvent.prompt();
+        await promptEvent.userChoice;
+      }catch(e){
+        console.warn('O prompt nativo de instalação não pôde ser concluído.',e);
+      }finally{
+        hideInstallPrompt();
+      }
+      return;
+    }
+    if(isIOS()){
+      showInstallPrompt(true);
+      return;
+    }
+    alert('A instalação aparecerá quando este navegador reconhecer o Klipza como instalável. Use HTTPS e um navegador atualizado.');
+  }
+  function registerAppShell(){
+    if(!('serviceWorker' in navigator)) return;
+    if(!['https:','http:'].includes(location.protocol)) return;
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+  window.addEventListener('beforeinstallprompt',(event)=>{
+    event.preventDefault();
+    deferredInstallPrompt=event;
+    showInstallPrompt();
+  });
+  window.addEventListener('appinstalled',()=>{
+    deferredInstallPrompt=null;
+    localStorage.removeItem('klipza_install_dismissed_v1');
+    hideInstallPrompt();
+  });
+
+  function currentChat(){ return anonymousMode ? anonymousChat : state.chats[activeChatId]; }
+  function persistIfNeeded(){ if(!anonymousMode) save(); }
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(raw) return JSON.parse(raw);
+    }catch(e){}
+    return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false}};
+  }
+
+  function ensureQuota(){
+    state.quota=state.quota||{energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
+    const now=Date.now();
+    if(!state.quota.resetAt || now>=state.quota.resetAt){
+      state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:now+CYCLE_MS};
+      save();
+    }
+  }
+  function timeLeft(ms){
+    const total=Math.max(0,Math.floor(ms/1000));
+    const h=Math.floor(total/3600), m=Math.floor((total%3600)/60);
+    if(h>=1) return `${h}h ${String(m).padStart(2,'0')}min`;
+    return `${m}min`;
+  }
+  function energyPercent(){ensureQuota(); return Math.max(0,Math.min(100,state.quota.energy));}
+  function quotaHTML(compact=false){
+    ensureQuota();
+    const pct=energyPercent();
+    const attachPct=Math.max(0,Math.min(100,((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100));
+    const empty=state.quota.energy<MSG_COST;
+    return `<div class="energy-card ${empty?'energy-empty':''}">
+      <div class="energy-head"><div class="energy-title">Energia</div><div class="energy-value">${state.quota.energy}</div></div>
+      <div class="energy-row"><div class="energy-ring" style="--pct:${pct}%"><span>${pct}</span></div><div class="energy-copy"><div class="energy-label">${empty?'Ciclo esgotado':'Uso diário'}</div><div class="energy-meta">${empty?'Mude para Klipza.Prime ou aguarde a recarga':'Pronta para a próxima mensagem'}</div></div></div>
+      <div class="energy-bar"><span style="width:${pct}%"></span></div>
+      <div class="energy-foot"><span>Recarrega em ${timeLeft(state.quota.resetAt-Date.now())}</span><span>${state.quota.attachUsed}/${ATTACH_LIMIT} anexos</span></div>
+    </div>`;
+  }
+  function updateEnergyBanner(){
+    const banner=document.getElementById('energyEmptyBanner');
+    const text=document.getElementById('energyEmptyText');
+    if(!banner)return;
+    ensureQuota();
+    const empty=state.quota.energy<MSG_COST;
+    banner.classList.toggle('show',empty);
+    if(empty && text){text.textContent=`Seu ciclo termina em ${timeLeft(state.quota.resetAt-Date.now())}. O Klipza.Prime ainda está em desenvolvimento.`;}
+  }
+  function paintEnergyValue(value){
+    const pct=Math.max(0,Math.min(100,value));
+    const bar=document.querySelector('#sideQuota .energy-bar span');
+    const ring=document.querySelector('#sideQuota .energy-ring');
+    const ringText=document.querySelector('#sideQuota .energy-ring span');
+    const valueText=document.querySelector('#sideQuota .energy-value');
+    if(bar)bar.style.width=pct+'%';
+    if(ring)ring.style.background=`conic-gradient(#000 ${pct}%,#ededed 0)`;
+    if(ringText)ringText.textContent=Math.round(pct);
+    if(valueText)valueText.textContent=Math.round(pct);
+  }
+  function animateEnergyChange(from,to){
+    const start=Math.max(0,Math.min(100,from)), target=Math.max(0,Math.min(100,to)), t0=performance.now(), dur=1150;
+    function frame(now){
+      const p=Math.min(1,(now-t0)/dur), eased=1-Math.pow(1-p,3);
+      paintEnergyValue(start+(target-start)*eased);
+      if(p<1)requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+  function refreshQuotaUI(){
+    ensureQuota();
+    const side=document.getElementById('sideQuota'); if(side) side.innerHTML=quotaHTML(true);
+    const energy=document.getElementById('energySettings'); if(energy) energy.innerHTML=renderEnergySettings();
+    const status=document.getElementById('composerQuota'); if(status) status.innerHTML=`<span class="quota-dot"></span> ${state.quota.energy} energia · ${ATTACH_LIMIT-state.quota.attachUsed} anexos disponíveis · recarrega em ${timeLeft(state.quota.resetAt-Date.now())}`;
+    updateEnergyBanner();
+  }
+  function renderEnergySettings(){
+    ensureQuota();
+    return `<div class="limit-card"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Cada mensagem consome ${MSG_COST} pontos.</div></div><div class="limit-number">${state.quota.energy}</div></div><div class="limit-track"><span style="width:${energyPercent()}%"></span></div><div class="limit-note">Até 50 mensagens por ciclo, dependendo do consumo.</div></div>
+    <div class="limit-card"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário.</div></div><div class="limit-number">${ATTACH_LIMIT-state.quota.attachUsed}</div></div><div class="limit-track"><span style="width:${((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100}%"></span></div><div class="limit-note">Limite renovado junto com a energia.</div></div>`;
+  }
+  function applyTheme(){
+    const dark=state.theme==='dark';
+    document.body.classList.toggle('dark',dark);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#2a2a2a':'#ffffff');
+  }
+  function setTheme(theme){
+    state.theme=theme==='dark'?'dark':'light';
+    save(); applyTheme();
+    if(currentView==='settings') renderSettingsPage();
+  }
+  async function toggleNotifications(){
+    if(!('Notification' in window)){ alert('Seu navegador não oferece notificações.'); return; }
+    if(!state.settings.notifications){
+      if(Notification.permission==='default'){
+        const permission=await Notification.requestPermission();
+        if(permission!=='granted'){ state.settings.notifications=false; save(); renderSettingsPage(); return; }
+      }
+      if(Notification.permission!=='granted'){ alert('Permissão de notificações não concedida.'); return; }
+      state.settings.notifications=true;
+    }else{ state.settings.notifications=false; }
+    save(); renderSettingsPage();
+  }
+  function toggleSounds(){
+    state.settings.sounds=!state.settings.sounds; save(); renderSettingsPage();
+  }
+  function clearAllLocalData(){
+    openConfirmModal('Limpar dados locais?', 'Conversas, artefatos, energia e preferências salvas neste navegador serão removidos. Essa ação não pode ser desfeita.', ()=>{
+      const user=state.user; localStorage.removeItem(KEY);
+      state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR'}};
+      applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter();
+    });
+  }
+  function browserNotification(title,body){
+    if(state.settings.notifications && 'Notification' in window && Notification.permission==='granted'){ try{new Notification(title,{body});}catch(e){} }
+  }
+  function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+  function uid(prefix){return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)}
+  function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+  function initials(name){return (name||'K').trim().charAt(0).toUpperCase()}
+
+  function loginDemo(){
+    state.user = {name:'Usuário Google',email:'usuario@gmail.com'};
+    save(); enter();
+  }
+  function enter(){
+    ensureQuota();
+    $('login').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    $('accountName').textContent=state.user.name;
+    $('accountEmail').textContent=state.user.email;
+    $('avatar').textContent=initials(state.user.name);
+    renderHistory(); renderArtifactsCount();
+    if(!Object.keys(state.chats).length) createChat();
+    else { activeChatId=state.activeChatId || Object.keys(state.chats)[0]; save(); renderChat(); }
+    adaptSidebar();
+  }
+  function logout(){
+    state.user=null; save(); location.reload();
+  }
+
+  function adaptSidebar(){
+    if(window.innerWidth<=720) $('app').classList.add('sidebar-collapsed');
+  }
+  window.addEventListener('resize',adaptSidebar);
+
+  function setView(view){
+    if(view==='webklip'){
+      webKlipReturnView=currentView==='webklip'?'chat':currentView;
+      currentView='webklip';
+      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+      $('app').classList.remove('settings-mode');
+      renderWebKlipPage();
+      return;
+    }
+    if(currentView==='webklip')closeWebKlipModal(false);
+    currentView=view;
+    document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+    $('app').classList.toggle('settings-mode',view==='settings');
+    if(view==='chat') renderChat();
+    if(view==='artifacts') renderArtifactsPage();
+    if(view==='settings'){ window.__klipzaSettingsMobileDetail=false; renderSettingsPage(); }
+    if(window.innerWidth<=720) $('app').classList.add('sidebar-collapsed');
+  }
+  function openWebKlipModal(){setView('webklip');}
+  function closeWebKlipModal(restore=true){document.body.classList.remove('webklip-modal-open');if(restore&&currentView==='webklip'){const next=webKlipReturnView==='webklip'?'chat':webKlipReturnView;currentView=next;document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='chat')renderChat();if(next==='artifacts')renderArtifactsPage();if(next==='settings'){window.__klipzaSettingsMobileDetail=false;renderSettingsPage();}}}
+  function toggleSidebar(){ $('app').classList.toggle('sidebar-collapsed'); }
+
+  function createChat(){
+    const id=uid('chat');
+    state.chats[id]={id,title:'Nova conversa',messages:[],created:Date.now(),updated:Date.now()};
+    activeChatId=id; state.activeChatId=id; save(); renderHistory(); setView('chat');
+  }
+  function openChat(id){activeChatId=id;state.activeChatId=id;save();setView('chat');renderHistory();}
+  function deleteChat(id){
+    delete state.chats[id];
+    const ids=Object.keys(state.chats).sort((a,b)=>state.chats[b].updated-state.chats[a].updated);
+    activeChatId=ids[0]||null; state.activeChatId=activeChatId; save(); renderHistory();
+    if(!activeChatId) createChat(); else renderChat();
+  }
+  function renameChat(id){
+    const row=document.querySelector(`[data-chat-id="${id}"]`); if(!row)return;
+    const title=row.querySelector('.chat-title'); const old=state.chats[id].title;
+    title.innerHTML=`<input class="rename-input" value="${esc(old)}">`;
+    const input=title.querySelector('input'); input.focus(); input.select();
+    const finish=()=>{const v=input.value.trim()||old;state.chats[id].title=v;state.chats[id].updated=Date.now();save();renderHistory();renderChat()};
+    input.addEventListener('blur',finish,{once:true});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finish()} if(e.key==='Escape'){input.value=old;input.blur()}});
+  }
+  let confirmAction=null;
+  function openConfirmModal(title,copy,action){
+    const modal=$('confirmModal');if(!modal)return;
+    confirmAction=action;$('confirmModalTitle').textContent=title;$('confirmModalCopy').textContent=copy;modal.classList.add('open');modal.setAttribute('aria-hidden','false');$('confirmCancel')?.focus();
+  }
+  function closeConfirmModal(){const modal=$('confirmModal');if(!modal)return;confirmAction=null;modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}
+  function acceptConfirmModal(){const action=confirmAction;closeConfirmModal();if(action)action();}
+  function clearHistory(){
+    openConfirmModal('Apagar histórico?', 'Todas as conversas salvas neste navegador serão removidas. Essa ação não altera seus artefatos.', ()=>{state.chats={};activeChatId=null;state.activeChatId=null;save();renderHistory();createChat();});
+  }
+  function renderHistory(){
+    const box=$('history'); const ids=Object.keys(state.chats).sort((a,b)=>state.chats[b].updated-state.chats[a].updated);
+    if(!ids.length){box.innerHTML='<div style="padding:22px 12px;color:#999;font-size:12px">Nenhuma conversa.</div>';return}
+    box.innerHTML=ids.map(id=>{
+      const c=state.chats[id];
+      return `<div class="chat-row ${id===activeChatId?'active':''}" data-chat-id="${id}">
+        <div class="chat-title" onclick="window.K.openChat('${id}')">${esc(c.title)}</div>
+        <div class="row-actions">
+          <button class="row-action" title="Renomear" onclick="event.stopPropagation();window.K.renameChat('${id}')">✎</button>
+          <button class="row-action" title="Apagar" onclick="event.stopPropagation();window.K.deleteChat('${id}')">×</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderChat(){
+    if(!anonymousMode && !state.chats[activeChatId]){createChat();return}
+    const chat=currentChat();
+
+    $('main').innerHTML=`
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-btn menu-toggle" title="Abrir histórico" onclick="window.K.toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+          <div class="topbar-title">${esc(chat.title)}</div>
+        </div>
+        <div class="topbar-right">
+          <button class="icon-btn" title="Artefatos" onclick="window.K.setView('artifacts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 16h8M8 12h8M8 8h5"/></svg></button>
+          <button class="anonymous-btn ${anonymousMode?'active':''}" type="button" onclick="window.K.toggleAnonymous()" title="Mensagens anônimas"><span class="anonymous-dot"></span><span class="anonymous-label">Mensagens anônimas</span></button>
+        </div>
+      </header>
+      <section class="messages" id="messages"></section>
+      <div class="response-status" id="responseStatus" aria-live="polite"></div>
+      <section class="composer-wrap"><div class="composer">
+        <div class="anonymous-banner ${anonymousMode?'show':''}" id="anonymousBanner">
+          <div><strong>Mensagens anônimas</strong> · esta conversa não será salva no histórico. Anexos ficam desativados neste modo.</div>
+          <button class="anonymous-exit" type="button" onclick="window.K.toggleAnonymous(false)">Sair</button>
+        </div>
+        <div class="energy-banner" id="energyEmptyBanner">
+          <div class="energy-banner-copy">
+            <div class="energy-banner-title">Sua energia acabou</div>
+            <div class="energy-banner-sub" id="energyEmptyText">Você pode continuar quando seu ciclo recarregar.</div>
+          </div>
+          <button class="energy-prime" type="button" onclick="window.K.upcoming('Klipza.Prime')">Mudar para Klipza.Prime</button>
+        </div>
+        <div class="voice-panel" id="voicePanel" aria-live="polite" aria-hidden="true">
+          <div class="voice-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></div>
+          <div class="voice-panel-copy"><strong id="voicePanelTitle">Estou ouvindo</strong><span id="voicePanelText">Fale no seu ritmo</span></div>
+          <button class="voice-panel-stop" type="button" onclick="window.K.toggleDictation()">Parar</button>
+        </div>
+        <div class="composer-box">
+          <div class="attach-strip" id="attachStrip"></div>
+          <div class="attach-menu" id="attachMenu">
+            <div class="attach-section-label">Adicionar ao chat</div>
+            <button class="attach-option" onclick="window.K.pick('camera')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
+              <span><span class="attach-option-title">Câmera</span><span class="attach-option-sub">Tirar uma foto</span></span>
+            </button>
+            <button class="attach-option" onclick="window.K.pick('image')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
+              <span><span class="attach-option-title">Fotos e imagens</span><span class="attach-option-sub">Escolher do dispositivo</span></span>
+            </button>
+            <button class="attach-option" onclick="window.K.pick('file')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></span>
+              <span><span class="attach-option-title">Arquivos</span><span class="attach-option-sub">PDF, DOC, TXT e outros</span></span>
+            </button>
+            <div class="attach-divider"></div>
+            <div class="attach-section-label">Recursos</div>
+            <button class="attach-option upcoming" onclick="window.K.upcoming('Pesquisa na web')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
+              <span><span class="attach-option-title">Pesquisa na web</span><span class="attach-option-sub">Busca online</span></span><span class="soon-badge">Em breve</span>
+            </button>
+            <button class="attach-option upcoming" onclick="window.K.upcoming('Projetos')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7l2 2h7v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg></span>
+              <span><span class="attach-option-title">Projetos</span><span class="attach-option-sub">Conteúdo de projetos</span></span><span class="soon-badge">Em breve</span>
+            </button>
+            <button class="attach-option upcoming" onclick="window.K.upcoming('Conexões')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.1.1l2.1-2.1a5 5 0 0 0-7.1-7.1L11 4.9"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2.1 2.1a5 5 0 0 0 7.1 7.1l1.1-1"/></svg></span>
+              <span><span class="attach-option-title">Conexões</span><span class="attach-option-sub">Serviços conectados</span></span><span class="soon-badge">Em breve</span>
+            </button>
+            <button class="attach-option upcoming" onclick="window.K.upcoming('Voz')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></span>
+              <span><span class="attach-option-title">Voz</span><span class="attach-option-sub">Conversar por voz</span></span><span class="soon-badge">Em breve</span>
+            </button>
+            <button class="attach-option upcoming" onclick="window.K.upcoming('Criar artefato')">
+              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 3h14v18H5z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg></span>
+              <span><span class="attach-option-title">Criar artefato</span><span class="attach-option-sub">Gerar conteúdo editável</span></span><span class="soon-badge">Em breve</span>
+            </button>
+          </div>
+          <div class="composer-row">
+            <button class="plus ${anonymousMode?'anonymous-disabled':''}" id="plusBtn" onclick="window.K.toggleAttach()" title="Adicionar" ${anonymousMode?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
+            <textarea id="prompt" rows="1" placeholder="Envie uma mensagem para o Klipza.IA"></textarea>
+            <button class="mic-btn" id="micBtn" title="Ditado por voz" aria-label="Ditado por voz" onclick="window.K.toggleDictation()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></button>
+            <span class="voice-hint" id="voiceHint">Ouvindo...</span>
+            <button class="send" id="sendBtn" disabled onclick="window.K.send()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+            <button class="stop-btn" id="stopBtn" title="Parar resposta" aria-label="Parar resposta" onclick="window.K.stopResponse()" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>
+          </div>
+        </div>
+        <div class="composer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
+      </div></section>`;
+    bindComposer(); renderMessages();
+  }
+  let responseState={active:false,timer:null,stopped:false};
+  let recognition=null, dictating=false, dictationSession=0, dictationRestartTimer=null;
+  function bindComposer(){
+    const input=$('prompt'), send=$('sendBtn');
+    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';send.disabled=responseState.active || (!input.value.trim()&&!attached.length);});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!responseState.active && !send.disabled)window.K.send()}});
+  }
+  function setResponseUI(active){
+    responseState.active=active;
+    const send=$('sendBtn'), stop=$('stopBtn'), mic=$('micBtn');
+    if(send) send.style.display=active?'none':'flex';
+    if(stop) stop.style.display=active?'flex':'none';
+    if(mic) mic.disabled=active;
+    if(active && $('prompt')) $('prompt').disabled=true;
+    if(!active && $('prompt')) $('prompt').disabled=false;
+    if(!active && $('prompt')) send.disabled=!$('prompt').value.trim()&&!attached.length;
+  }
+  function showResponseStatus(text,emphasis=false){
+    const el=$('responseStatus'); if(!el)return;
+    el.classList.toggle('show',!!text);
+    el.innerHTML=text?`<span>${emphasis?'<strong>'+esc(text)+'</strong>':esc(text)}</span>`:'';
+  }
+  function appendStreamingMessage(content){
+    const box=$('messages'); const chat=currentChat();
+    const wrap=box.querySelector('.msg-width');
+    if(!wrap){renderMessages();return;}
+    let row=wrap.querySelector('.msg.ai.streaming');
+    if(!row){
+      row=document.createElement('div');row.className='msg ai streaming';
+      row.innerHTML=`<div class="msg-avatar">K</div><div class="msg-content"><div class="msg-label">Klipza</div><div class="stream-content"></div></div>`;
+      wrap.appendChild(row);
+    }
+    row.querySelector('.stream-content').innerHTML=formatMessage(content);
+    box.scrollTop=box.scrollHeight;
+  }
+  function stopResponse(){
+    if(!responseState.active)return;
+    clearInterval(responseState.timer); responseState.timer=null; responseState.active=false; responseState.stopped=true;
+    const row=$('messages')?.querySelector('.msg.ai.streaming');
+    if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat(); chat.messages.push({role:'ai',content:text,stopped:true}); chat.updated=Date.now(); persistIfNeeded();} row.remove(); renderMessages();}
+    setResponseUI(false); showResponseStatus('Você parou a resposta.'); setTimeout(()=>showResponseStatus(''),3200);
+  }
+  function fakeReply(prompt){
+    const chat=currentChat();
+    const reply='Recebi sua mensagem. O Klipza.IA está pronto para conversar assim que a conexão com a inteligência artificial estiver disponível.';
+    responseState.stopped=false; setResponseUI(true); showResponseStatus('Klipza está respondendo…');
+    let i=0, partial='';
+    responseState.timer=setInterval(()=>{
+      if(responseState.stopped){clearInterval(responseState.timer);return;}
+      partial+=reply[i++]||''; appendStreamingMessage(partial);
+      if(i>=reply.length){
+        clearInterval(responseState.timer); responseState.timer=null;
+        const row=$('messages')?.querySelector('.msg.ai.streaming'); if(row)row.remove();
+        chat.messages.push({role:'ai',content:reply}); chat.updated=Date.now(); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
+        setResponseUI(false); showResponseStatus('');
+      }
+    },28);
+  }
+  function toggleDictation(){
+    if(responseState.active)return;
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SpeechRecognition){alert('O ditado por voz não está disponível neste navegador.');return;}
+    if(dictating){endDictation();return;}
+    const session=++dictationSession;
+    const input=$('prompt'), mic=$('micBtn'), hint=$('voiceHint'), panel=$('voicePanel');
+    let base=input.value.trim();
+    let committedResults=0;
+    dictating=true;
+    mic?.classList.add('listening'); hint?.classList.add('show');
+    if(panel){panel.classList.add('show');panel.setAttribute('aria-hidden','false');}
+    input.placeholder='Fale no seu ritmo...';
+    const updateTranscript=(interim='')=>{input.value=base+(interim?(base?' ':'')+interim:'');input.dispatchEvent(new Event('input'));};
+    const startRecognition=()=>{
+      if(!dictating||session!==dictationSession)return;
+      committedResults=0;
+      recognition=new SpeechRecognition();
+      recognition.lang=state.settings?.language||navigator.language||'pt-BR';
+      recognition.interimResults=true; recognition.continuous=false; recognition.maxAlternatives=1;
+      recognition.onresult=e=>{
+        let interim='';
+        for(let i=e.resultIndex;i<e.results.length;i++){
+          const result=e.results[i], text=result?.[0]?.transcript?.trim()||'';
+          if(!text)continue;
+          if(result.isFinal){
+            if(i>=committedResults){base=(base?base+' ':'')+text;committedResults=i+1;}
+          } else interim+=(interim?' ':'')+text;
+        }
+        updateTranscript(interim);
+      };
+      recognition.onerror=e=>{
+        if(!dictating||session!==dictationSession)return;
+        if(e.error==='not-allowed'||e.error==='service-not-allowed'){if($('voicePanelText'))$('voicePanelText').textContent='Permita o microfone para continuar.';endDictation();return;}
+        if($('voicePanelText'))$('voicePanelText').textContent='Ajustando a escuta...';
+      };
+      recognition.onend=()=>{
+        recognition=null;
+        if(dictating&&session===dictationSession){clearTimeout(dictationRestartTimer);dictationRestartTimer=setTimeout(startRecognition,140);}
+      };
+      try{recognition.start();}catch(error){if(error?.name!=='InvalidStateError')endDictation();}
+    };
+    if($('voicePanelTitle'))$('voicePanelTitle').textContent='Estou ouvindo';
+    if($('voicePanelText'))$('voicePanelText').textContent='Fale com calma; eu acompanho sua frase.';
+    startRecognition();
+  }
+  function endDictation(){
+    dictating=false; dictationSession++; clearTimeout(dictationRestartTimer); dictationRestartTimer=null;
+    if(recognition){try{recognition.onend=null;recognition.stop()}catch(e){} recognition=null;}
+    $('micBtn')?.classList.remove('listening'); $('voiceHint')?.classList.remove('show');
+    const panel=$('voicePanel'); if(panel){panel.classList.remove('show');panel.setAttribute('aria-hidden','true');}
+    if($('prompt')){$('prompt').placeholder='Envie uma mensagem para o Klipza.IA';$('prompt').dispatchEvent(new Event('input'));}
+  }
+  function renderMessages(){
+    const chat=currentChat(), box=$('messages');
+    if(!chat.messages.length){
+      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta"></span></span><span aria-hidden="true">→</span></button></div></div></div>`; startWelcomeRotator(); return;
+    }
+    const wrap=document.createElement('div');wrap.className='msg-width';
+    chat.messages.forEach(m=>{
+      const row=document.createElement('div');row.className='msg '+m.role;
+      const files=(m.attachments||[]).map(a=>{
+        if(a.data && (a.type||'').startsWith('image/')) return `<div class="msg-attachment-image"><img src="${a.data}" alt="${esc(a.name)}" loading="lazy"></div>`;
+        return `<div class="msg-attachment-file"><span class="file-icon">${(a.type||'').startsWith('image/')?'IMG':'FILE'}</span><span>${esc(a.name)}</span></div>`;
+      }).join('');
+      row.innerHTML=`<div class="msg-avatar">${m.role==='user'?esc(initials(state.user.name)):'K'}</div><div class="msg-content"><div class="msg-label">${m.role==='user'?'Você':'Klipza'}</div>${formatMessage(m.content)}${files?`<div class="msg-attachments">${files}</div>`:''}</div>`;
+      wrap.appendChild(row);
+    }); box.innerHTML='';box.appendChild(wrap);box.scrollTop=box.scrollHeight;
+  }
+  function formatMessage(text){
+    let s=esc(text);
+    s=s.replace(/```([\s\S]*?)```/g,'<pre>$1</pre>');
+    s=s.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    s=s.replace(/`([^`]+)`/g,'<code>$1</code>');
+    s=s.split(/\n\n+/).map(p=>'<p>'+p.replace(/\n/g,'<br>')+'</p>').join('');
+    return s;
+  }
+  function useSuggestion(t){$('prompt').value=t;$('prompt').dispatchEvent(new Event('input'));$('prompt').focus()}
+
+  const WEBKLIP_CACHE_KEY='klipza_webklip_daily_v2';
+  const WEBKLIP_ROTATION_MS=25000;
+  let welcomeRotatorTimer=null;
+  let welcomePromptIndex=0;
+  const WEBKLIP_API_BASE=(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://klipza-zzz.vercel.app':'';
+  const WEBKLIP_PAGE_SIZE=18;
+  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE};
+  const WEBKLIP_LOCALES={BR:{label:'Brasil',language:'pt-BR',hl:'pt-BR',gl:'BR',ceid:'BR:pt'},PT:{label:'Portugal',language:'pt-PT',hl:'pt-PT',gl:'PT',ceid:'PT:pt'},US:{label:'Estados Unidos',language:'en-US',hl:'en-US',gl:'US',ceid:'US:en'},GB:{label:'Reino Unido',language:'en-GB',hl:'en-GB',gl:'GB',ceid:'GB:en'},ES:{label:'Espanha',language:'es-ES',hl:'es-ES',gl:'ES',ceid:'ES:es'},MX:{label:'México',language:'es-MX',hl:'es-419',gl:'MX',ceid:'MX:es'},FR:{label:'França',language:'fr-FR',hl:'fr-FR',gl:'FR',ceid:'FR:fr'},DE:{label:'Alemanha',language:'de-DE',hl:'de-DE',gl:'DE',ceid:'DE:de'},JP:{label:'Japão',language:'ja-JP',hl:'ja',gl:'JP',ceid:'JP:ja'},IN:{label:'Índia',language:'en-IN',hl:'en-IN',gl:'IN',ceid:'IN:en'}};
+  const WEBKLIP_AI_LINKS=[{name:'ChatGPT',url:'https://chatgpt.com/'},{name:'Claude',url:'https://claude.ai/'},{name:'Gemini',url:'https://gemini.google.com/'},{name:'Perplexity',url:'https://www.perplexity.ai/'},{name:'Microsoft Copilot',url:'https://copilot.microsoft.com/'}];
+  const WELCOME_PROMPTS=[
+    'O que está mudando no mundo da tecnologia hoje?',
+    'Quais projetos de código aberto estão ganhando atenção?',
+    'Que jogos e experiências interativas estão surgindo?',
+    'Quais ideias de design estão aparecendo na web?',
+    'Mostre as principais notícias globais sem fofoca de celebridades.'
+  ];
+  const BLOCKED_NEWS_TERMS=['celebridade','celebridades','famoso','famosa','famosos','influencer','influenciador','influenciadora','hollywood','reality show','red carpet','namoro de','casamento de','separação de','rapper','cantor','cantora','ator','atriz','youtuber','tiktoker','celebrity','influencer','hollywood','gossip','entertainment','executor','activator','activation','without subscription','no subscription','crack','keygen','piracy','pirated','torrent','cheat','aimbot','stealer','malware','ransomware','phishing','credential','token grabber','password dump','bypass','no more refusals','auto claim points','nsfw','porn'];
+
+  function currentWebKlipLocale(){return WEBKLIP_LOCALES[state.settings?.country]||WEBKLIP_LOCALES.BR;}
+  function webKlipCountryOptions(){const current=state.settings?.country||'BR';return Object.entries(WEBKLIP_LOCALES).map(([code,locale])=>`<option value="${code}" ${code===current?'selected':''}>${locale.label}</option>`).join('');}
+  function setWebKlipCountry(country){if(!WEBKLIP_LOCALES[country])return;state.settings.country=country;state.settings.language=WEBKLIP_LOCALES[country].language;save();      webKlipState={...webKlipState,dayKey:null,items:[],searchResults:[],visibleLimit:WEBKLIP_PAGE_SIZE,error:null};renderWebKlipPage();}
+  function localDayKey(date=new Date()){
+    const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+    return local.toISOString().slice(0,10);
+  }
+  function greetingCopy(){
+    const hour=new Date().getHours();
+    if(hour<12)return {kicker:'Bom dia',title:'O que vamos fazer hoje?',sub:'Descubra as novidades do mundo e transforme uma referência em conversa.'};
+    if(hour<18)return {kicker:'Boa tarde',title:'O que vamos construir hoje?',sub:'Encontre novidades, referências e ideias no web.klip.'};
+    return {kicker:'Boa noite',title:'O que vamos explorar hoje?',sub:'Veja o que movimentou o mundo e continue a conversa no Klipza.'};
+  }
+  function setWelcomeCopy(){
+    const copy=greetingCopy();
+    if($('welcomeKicker'))$('welcomeKicker').textContent=copy.kicker;
+    if($('welcomeTitle'))$('welcomeTitle').textContent=copy.title;
+    if($('welcomeSub'))$('welcomeSub').textContent=copy.sub;
+  }
+  function paintWelcomePrompt(){
+    const text=WELCOME_PROMPTS[welcomePromptIndex%WELCOME_PROMPTS.length];
+    if($('welcomePromptText'))$('welcomePromptText').textContent=text;
+    if($('welcomePromptMeta'))$('welcomePromptMeta').textContent='';
+  }
+  function startWelcomeRotator(){
+    clearInterval(welcomeRotatorTimer);
+    setWelcomeCopy();
+    paintWelcomePrompt();
+    welcomeRotatorTimer=setInterval(()=>{
+      if(currentView!=='chat' || !$('welcomePrompt')){clearInterval(welcomeRotatorTimer);return;}
+      welcomePromptIndex=(welcomePromptIndex+1)%WELCOME_PROMPTS.length;
+      paintWelcomePrompt();
+    },WEBKLIP_ROTATION_MS);
+  }
+  function useWelcomePrompt(){
+    const prompt=$('welcomePromptText')?.textContent||WELCOME_PROMPTS[0];
+    setView('webklip');
+    setTimeout(()=>searchWebKlip(prompt),0);
+  }
+  function toggleWebKlipMenu(){
+    const button=$('webKlipToggle'), submenu=$('webKlipSubnav');
+    if(!button||!submenu)return;
+    const open=submenu.classList.toggle('hidden')===false;
+    button.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));
+  }
+  function webKlipCacheRead(){
+    try{const raw=localStorage.getItem(WEBKLIP_CACHE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
+  }
+  function webKlipCacheWrite(payload){try{localStorage.setItem(WEBKLIP_CACHE_KEY,JSON.stringify(payload));}catch(e){}}
+  function cleanText(value){return String(value||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();}
+  function blockedNews(title){const normalized=cleanText(title).toLowerCase();return BLOCKED_NEWS_TERMS.some(term=>normalized.includes(term));}
+  function webKlipId(prefix,value){return `${prefix}_${btoa(unescape(encodeURIComponent(String(value)))).replace(/[^a-z0-9]/gi,'').slice(0,18)}`;}
+  function webKlipDateLabel(value){
+    if(!value)return 'Hoje';
+    const date=new Date(value);
+    if(Number.isNaN(date.getTime()))return 'Hoje';
+    return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  }
+  function fallbackWebKlipItems(){
+    return [
+      {id:'fallback_news',category:'news',title:'O web.klip está preparando o pacote público do dia',summary:'As fontes públicas ainda não responderam. Atualize novamente para buscar novidades globais sem inventar manchetes.',source:'Klipza · fallback',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_code',category:'code',title:'Projetos abertos para explorar',summary:'Quando a API do GitHub estiver disponível, esta categoria mostrará projetos públicos recentes, descrição, linguagem e sinais de interesse.',source:'GitHub · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_games',category:'games',title:'Novos jogos e experiências interativas',summary:'A categoria de jogos usa projetos públicos e referências técnicas; não inclui fofoca ou notícias de pessoas famosas.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_design',category:'design',title:'Referências de design para criar melhor',summary:'A categoria de design reunirá ferramentas, sistemas visuais e projetos publicados na web.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true}
+    ];
+  }
+  function ensureNewsItem(items,error=''){
+    if(items.some(item=>item.category==='news'))return {items,error};
+    const unavailable={id:'news_source_unavailable',category:'news',title:'Notícias globais aguardando fonte',summary:'A fonte jornalística pública não respondeu neste momento. Atualize novamente quando o endpoint server-side estiver disponível; nenhuma manchete foi inventada.',source:'Klipza · fonte indisponível',url:'',date:new Date().toISOString(),fallback:true};
+    return {items:[...items,unavailable],error:error||'A fonte de notícias está indisponível neste momento; mostrando estado transparente.'};
+  }
+  async function fetchJSON(url,options={}){
+    const response=await fetch(url,{...options,headers:{Accept:'application/json',...(options.headers||{})}});
+    if(!response.ok)throw new Error(`Fonte respondeu ${response.status}`);
+    return response.json();
+  }
+  function normalizeGdelt(data){
+    const articles=Array.isArray(data?.articles)?data.articles:[];
+    return articles.filter(article=>article?.title&&!blockedNews(article.title)).map((article,index)=>({
+      id:webKlipId('news',article.url||article.title+index),category:'news',title:cleanText(article.title),summary:`Cobertura recente em ${cleanText(article.domain||'fonte pública')}. Abra para ver o contexto e continuar a pesquisa no chat.`,source:cleanText(article.domain||article.language||'GDELT'),url:article.url||'',date:article.seendate||new Date().toISOString(),image:article.socialimage||''
+    }));
+  }
+  function normalizeGithub(data,category){
+    const repos=Array.isArray(data?.items)?data.items:[];
+    return repos.filter(repo=>repo?.name&&repo?.html_url&&!blockedNews(`${repo.full_name||repo.name} ${repo.description||''}`)).map(repo=>({
+      id:webKlipId(category,repo.html_url),category,title:repo.full_name||repo.name,summary:cleanText(repo.description)||'Projeto público sem descrição informada.',source:`GitHub · ${repo.language||'open source'}`,url:repo.html_url,date:repo.created_at||repo.updated_at||new Date().toISOString(),meta:`${repo.stargazers_count||0} estrelas · ${repo.language||'código aberto'}`
+    }));
+  }
+  async function fetchWebKlipItems(){
+    const today=localDayKey();
+    const cached=webKlipCacheRead();
+    if(cached?.dayKey===today&&Array.isArray(cached.items)&&cached.items.length){const cachedReady=ensureNewsItem(cached.items);webKlipState={...webKlipState,dayKey:today,items:cachedReady.items,loading:false,error:cachedReady.error};if(currentView==='webklip')renderWebKlipPage();return;}
+    webKlipState={...webKlipState,dayKey:today,loading:true,error:null,selected:null};
+    if(currentView==='webklip')renderWebKlipPage();
+    try{
+      const locale=currentWebKlipLocale();
+      const data=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?date=${encodeURIComponent(today)}&country=${encodeURIComponent(state.settings.country||'BR')}&language=${encodeURIComponent(locale.language)}`);
+      const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>!blockedNews(`${item.title||''} ${item.summary||''} ${item.source||''}`)).slice(0,50);
+      const baseItems=items.length?items:fallbackWebKlipItems();
+      const ready=ensureNewsItem(baseItems,items.length?'':'O endpoint diário não encontrou itens públicos agora; mostrando estado de fallback.');
+      webKlipState={...webKlipState,dayKey:today,items:ready.items,loading:false,error:ready.error};
+      webKlipCacheWrite({dayKey:today,items:ready.items,savedAt:Date.now()});
+    }catch(apiError){
+      const day=new Date();day.setDate(day.getDate()-1);const yyyyMMdd=day.toISOString().slice(0,10);
+      const githubBase='https://api.github.com/search/repositories?sort=stars&order=desc&per_page=16&';
+      const queries={code:`q=created%3A%3E%3D${yyyyMMdd}+language%3AJavaScript`,games:`q=created%3A%3E%3D${yyyyMMdd}+topic%3Agame-development`,design:`q=created%3A%3E%3D${yyyyMMdd}+topic%3Adesign`};
+      const results=await Promise.allSettled([fetchJSON(githubBase+queries.code),fetchJSON(githubBase+queries.games),fetchJSON(githubBase+queries.design)]);
+      const code=results[0].status==='fulfilled'?normalizeGithub(results[0].value,'code'):[];
+      const games=results[1].status==='fulfilled'?normalizeGithub(results[1].value,'games'):[];
+      const design=results[2].status==='fulfilled'?normalizeGithub(results[2].value,'design'):[];
+      const unique=[];const seen=new Set();
+      [...games,...code,...design].forEach(item=>{if(!seen.has(item.url||item.id)&&unique.length<50){seen.add(item.url||item.id);unique.push(item);}});
+      const baseItems=unique.length?unique:fallbackWebKlipItems();
+      const ready=ensureNewsItem(baseItems,unique.length?'Notícias diárias exigem endpoint server-side; mostrando fontes públicas de projetos enquanto ele não estiver publicado.':'As fontes públicas não responderam agora; mostrando estado de fallback.');
+      webKlipState={...webKlipState,dayKey:today,items:ready.items,loading:false,error:ready.error};
+      webKlipCacheWrite({dayKey:today,items:ready.items,savedAt:Date.now()});
+    }
+    if(currentView==='webklip')renderWebKlipPage();
+  }
+  function webKlipCategoryLabel(category){return ({all:'Tudo',news:'Notícias',games:'Jogos',code:'Código',design:'Design',search:'Pesquisa'})[category]||category;}
+  function webKlipFilteredItems(){return webKlipState.category==='all'?webKlipState.items:webKlipState.items.filter(item=>item.category===webKlipState.category);}
+  function webKlipItemHTML(item,index){return `<article class="webklip-card" data-webklip-id="${esc(item.id)}"><div class="webklip-card-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))}</span><span class="webklip-rank">#${index+1}</span></div><div class="webklip-card-title">${esc(item.title)}</div><div class="webklip-card-summary">${esc(item.summary)}</div><div class="webklip-card-foot"><span class="webklip-source">${esc(item.source||'Fonte pública')}</span><span class="webklip-arrow">→</span></div></article>`;}
+  async function searchWebKlip(query){
+    const clean=String(query||'').trim().slice(0,180);
+    webKlipState={...webKlipState,query:clean,searchResults:[],searchLoading:Boolean(clean),visibleLimit:WEBKLIP_PAGE_SIZE,error:null};
+    renderWebKlipPage();
+    if(!clean)return;
+    try{
+      const locale=currentWebKlipLocale();
+      const data=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?q=${encodeURIComponent(clean)}&country=${encodeURIComponent(state.settings.country||'BR')}&language=${encodeURIComponent(locale.language)}`);
+      const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>item?.url&&!blockedNews(`${item.title||''} ${item.summary||''}`)).slice(0,50);
+      webKlipState={...webKlipState,query:clean,searchResults:items,searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,error:items.length?'': 'Nenhum resultado público encontrado para esta busca.'};
+    }catch(error){webKlipState={...webKlipState,searchLoading:false,error:'A pesquisa pública está indisponível agora. Tente novamente em instantes.'};}
+    renderWebKlipPage();
+  }
+  function isSafeWebKlipUrl(value){try{const url=new URL(value,location.href);return ['http:','https:'].includes(url.protocol)?url.toString():'';}catch{return '';}}
+  function openWebKlipPage(url,title='Página web'){const safe=isSafeWebKlipUrl(url);if(!safe)return;webKlipState.page={url:safe,title:String(title||'Página web').slice(0,120)};renderWebKlipPage();}
+  function closeWebKlipPage(){webKlipState.page=null;renderWebKlipPage();}
+  function renderWebKlipPage(){
+    const mount=$('main');if(!mount)return;
+    const locale=currentWebKlipLocale();
+    const feedItems=webKlipFilteredItems();
+    const searching=Boolean(webKlipState.query);
+    const items=searching?webKlipState.searchResults:feedItems;
+    if(webKlipState.page){
+      const page=webKlipState.page;
+      mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">Navegação interna</span></div></header><section class="webklip-view webklip-page-view"><div class="webklip-inner"><div class="webklip-browser-toolbar"><button class="webklip-toolbar-button" id="webKlipPageBack" type="button">‹ Voltar</button><div class="webklip-address" title="${esc(page.url)}">${esc(page.title)}</div><button class="webklip-toolbar-button" id="webKlipPageHome" type="button">Início</button></div><div class="webklip-iframe-wrap"><iframe class="webklip-iframe" src="${esc(page.url)}" title="${esc(page.title)}" loading="eager" referrerpolicy="no-referrer" sandbox="allow-forms allow-modals allow-presentation allow-scripts allow-same-origin"></iframe></div><p class="webklip-frame-note">Algumas páginas bloqueiam visualização incorporada. Nesse caso, use a opção de abrir a fonte no próprio navegador do dispositivo.</p></div></section>`;
+      mount.querySelector('#webKlipBack')?.addEventListener('click',()=>setView('chat'));
+      mount.querySelector('#webKlipPageBack')?.addEventListener('click',closeWebKlipPage);
+      mount.querySelector('#webKlipPageHome')?.addEventListener('click',closeWebKlipPage);
+      return;
+    }
+    const visibleItems=items.slice(0,webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE);
+    const moreItems=items.length>visibleItems.length;
+    const aiLinks=WEBKLIP_AI_LINKS.map(link=>`<button class="webklip-ai-link" type="button" data-open-webklip-url="${esc(link.url)}" data-open-webklip-title="${esc(link.name)}">${esc(link.name)} <span aria-hidden="true">↗</span></button>`).join('');
+    mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">${esc(locale.label)} · ${esc(locale.language)}</span></div></header><section class="webklip-view"><div class="webklip-inner"><div class="webklip-browser-bar"><form class="webklip-search-form" id="webKlipSearchForm" role="search"><span class="webklip-search-icon" aria-hidden="true">⌕</span><input id="webKlipSearchInput" value="${esc(webKlipState.query)}" maxlength="180" autocomplete="off" placeholder="Pesquisar na web…" aria-label="Pesquisar na web"><button type="submit">Pesquisar</button></form>${searching?'<button class="webklip-clear-search" type="button" id="webKlipClearSearch">Ver feed diário</button>':''}</div><div class="webklip-ai-row"><span class="webklip-ai-label">Abrir dentro do Klipza</span>${aiLinks}</div><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · pesquisa diária</div><h1 class="webklip-title">${searching?'Resultados da pesquisa':'web.klip'}</h1><p class="webklip-subtitle">${searching?'Resultados públicos filtrados para navegar sem sair do app.':'Pesquise e explore notícias, jogos, código e design sem sair do Klipza.'}</p></div><button class="webklip-refresh" id="webKlipRefresh" type="button">Atualizar</button></div><div class="webklip-meta">${searching?(webKlipState.searchLoading?'Pesquisando fontes públicas…':`${items.length} resultado(s) · exibindo ${visibleItems.length} · limite de 50`):(webKlipState.loading?'Buscando fontes públicas…':`${items.length} item(ns) disponíveis · exibindo ${visibleItems.length} · ${locale.label}`)}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div>${searching?'':`<div class="webklip-tabs">${['all','news','games','code','design'].map(category=>`<button class="webklip-tab ${webKlipState.category===category?'active':''}" type="button" data-webklip-category="${category}">${webKlipCategoryLabel(category)}</button>`).join('')}</div>`}${(webKlipState.loading||webKlipState.searchLoading)?'<div class="webklip-loading">Consultando o web.klip…</div>':items.length?`<div class="webklip-grid">${visibleItems.map(webKlipItemHTML).join('')}</div>${moreItems?`<button class="webklip-load-more" id="webKlipLoadMore" type="button">Carregar mais ${Math.min(WEBKLIP_PAGE_SIZE,items.length-visibleItems.length)}</button>`:''}`:'<div class="webklip-empty">Nenhum item disponível ainda. Tente atualizar novamente.</div>'}</div></section>`;
+    mount.querySelector('#webKlipBack')?.addEventListener('click',()=>setView('chat'));
+    const form=mount.querySelector('#webKlipSearchForm');
+    form?.addEventListener('submit',event=>{event.preventDefault();searchWebKlip(mount.querySelector('#webKlipSearchInput')?.value||'');});
+    mount.querySelector('#webKlipClearSearch')?.addEventListener('click',()=>{webKlipState={...webKlipState,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,error:null};renderWebKlipPage();});
+    mount.querySelector('#webKlipRefresh')?.addEventListener('click',refreshWebKlip);
+    mount.querySelector('#webKlipLoadMore')?.addEventListener('click',()=>{webKlipState.visibleLimit=(webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE)+WEBKLIP_PAGE_SIZE;renderWebKlipPage();});
+    mount.querySelectorAll('[data-webklip-category]').forEach(button=>button.addEventListener('click',()=>{webKlipState.category=button.dataset.webklipCategory;webKlipState.visibleLimit=WEBKLIP_PAGE_SIZE;renderWebKlipPage();}));
+    mount.querySelectorAll('[data-webklip-id]').forEach(card=>card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId)));
+    mount.querySelectorAll('[data-open-webklip-url]').forEach(button=>button.addEventListener('click',()=>openWebKlipPage(button.dataset.openWebklipUrl,button.dataset.openWebklipTitle)));
+    if(!webKlipState.items.length&&!webKlipState.loading&&!searching)fetchWebKlipItems();
+  }
+  function openWebKlipItem(id){
+    const item=[...webKlipState.items,...webKlipState.searchResults].find(entry=>entry.id===id);if(!item)return;
+    webKlipState.selected=item;
+    const card=document.querySelector(`[data-webklip-id="${CSS.escape(id)}"]`);if(card)card.scrollIntoView({block:'center',behavior:'smooth'});
+    const summary=`${item.summary}${item.meta?`\n\n${item.meta}`:''}`;
+    const detail=document.createElement('section');detail.className='webklip-detail';detail.innerHTML=`<div class="webklip-detail-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))} · ${esc(item.source||'Fonte pública')}</span><button class="webklip-back" type="button">Fechar</button></div><h2 class="webklip-detail-title">${esc(item.title)}</h2><p class="webklip-detail-summary">${esc(summary)}</p><div class="webklip-detail-actions"><button class="webklip-action" type="button" id="webKlipSendReference">Codar com referência</button>${item.url?`<button class="webklip-action secondary" type="button" id="webKlipOpenSource">Abrir dentro do Klipza</button>`:''}</div>`;
+    const view=document.querySelector('.webklip-view .webklip-inner');if(!view)return;view.prepend(detail);detail.querySelector('.webklip-back').addEventListener('click',()=>detail.remove());detail.querySelector('#webKlipSendReference')?.addEventListener('click',()=>sendWebKlipToChat(item));detail.querySelector('#webKlipOpenSource')?.addEventListener('click',()=>openWebKlipPage(item.url,item.title));detail.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function sendWebKlipToChat(item){
+    setView('chat');
+    const input=$('prompt');if(!input)return;
+    input.value=`Quero continuar esta referência do web.klip no chat.\n\nTítulo: ${item.title}\nCategoria: ${webKlipCategoryLabel(item.category)}\nResumo: ${item.summary}\nFonte: ${item.url||item.source||'fonte pública'}`;
+    input.dispatchEvent(new Event('input'));input.focus();
+  }
+  function refreshWebKlip(){
+    const today=localDayKey();
+    webKlipState={...webKlipState,dayKey:null,items:[],selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE};
+    try{localStorage.removeItem(WEBKLIP_CACHE_KEY);}catch(e){}
+    renderWebKlipPage();
+  }
+  setInterval(()=>{
+    if(currentView==='webklip'&&webKlipState.dayKey&&webKlipState.dayKey!==localDayKey())fetchWebKlipItems();
+  },60000);
+
+  function send(){
+    ensureQuota();
+    const input=$('prompt'); const text=input.value.trim(); if(!text && !attached.length)return;
+    if(state.quota.energy<MSG_COST){refreshQuotaUI();updateEnergyBanner();return;}
+    if(anonymousMode && attached.length){attached=[];renderAttached();}
+    const energyBefore=state.quota.energy;
+    state.quota.energy-=MSG_COST;
+    const chat=currentChat();
+    const messageText=text || 'Enviei um anexo.';
+    const attachments=attached.map(a=>({name:a.name,type:a.type||'file',data:a.data||null}));
+    chat.messages.push({role:'user',content:messageText,attachments});
+    if(chat.title==='Nova conversa'){chat.title=(text || attachments[0]?.name || 'Nova conversa').slice(0,48)+((text || attachments[0]?.name || '').length>48?'…':'')}
+    chat.updated=Date.now(); attached=[]; persistIfNeeded(); renderHistory(); renderMessages();
+    input.value='';input.style.height='37px';$('sendBtn').disabled=true;
+    renderAttached();
+    refreshQuotaUI();
+    animateEnergyChange(energyBefore,state.quota.energy);
+    fakeReply(messageText);
+  }
+  function openPrimeModal(tab='prime') {
+    const modal=$('primeModal'); if(!modal)return;
+    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    document.querySelectorAll('.prime-tab').forEach(b=>b.classList.toggle('active',b.dataset.primeTab===tab));
+    document.querySelectorAll('.prime-panel').forEach(p=>p.classList.toggle('active',p.dataset.primePanel===tab));
+    document.body.classList.add('prime-modal-open');
+  }
+  function closePrimeModal(){
+    const modal=$('primeModal'); if(!modal)return;
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('prime-modal-open');
+  }
+  function primeComingSoon(label){
+    alert(label+' ainda está em desenvolvimento. O pagamento e a ativação serão conectados aqui quando estiverem disponíveis.');
+  }
+  function upcoming(label){
+    if(label==='Klipza.Prime') openPrimeModal('prime');
+    else alert(label+' está em desenvolvimento. Em breve estará disponível no Klipza.IA.');
+  }
+
+  function toggleAnonymous(force){
+    const next = typeof force==='boolean' ? force : !anonymousMode;
+    if(next===anonymousMode) return;
+    if(next){
+      previousChatId=activeChatId;
+      anonymousMode=true;
+      anonymousChat={id:'anonymous',title:'Mensagem anônima',messages:[],created:Date.now(),updated:Date.now()};
+      attached=[];
+      currentView='chat';
+      renderChat();
+    }else{
+      anonymousMode=false;
+      attached=[];
+      activeChatId=previousChatId || Object.keys(state.chats).sort((a,b)=>state.chats[b].updated-state.chats[a].updated)[0] || null;
+      previousChatId=null;
+      currentView='chat';
+      if(!activeChatId) createChat(); else renderChat();
+      renderHistory();
+    }
+  }
+
+  function toggleAttach(){
+    if(anonymousMode)return;
+    const menu=$('attachMenu'), btn=$('plusBtn'); menu.classList.toggle('open');btn.classList.toggle('active');
+  }
+  function closeAttach(){if($('attachMenu')){$('attachMenu').classList.remove('open');$('plusBtn').classList.remove('active')}}
+  function pick(kind){
+    if(anonymousMode){return;}
+    ensureQuota();
+    if(state.quota.attachUsed>=ATTACH_LIMIT){ alert('Você já usou os 3 anexos deste ciclo.'); return; }
+    closeAttach();
+    const input=kind==='camera'?$('cameraInput'):kind==='image'?$('imageInput'):$('fileInput');
+    input.value='';
+    input.multiple = kind!=='camera';
+    input.onchange=async()=>{
+      const files=[...input.files];
+      const available=ATTACH_LIMIT-state.quota.attachUsed;
+      const chosen=files.slice(0,available);
+      if(!chosen.length)return;
+      for(const file of chosen){
+        let data=null;
+        if(file.type && file.type.startsWith('image/')) data=await readImagePreview(file);
+        attached.push({name:file.name,type:file.type||'file',data});
+      }
+      state.quota.attachUsed+=chosen.length;
+      save(); renderAttached(); refreshQuotaUI();
+      $('sendBtn').disabled=!$('prompt').value.trim()&&!attached.length;
+      if(files.length>available) alert(`Você pode adicionar mais ${available} anexo(s) neste ciclo.`);
+    };
+    input.click();
+  }
+
+  function renderAttached(){
+    const strip=$('attachStrip'); if(!attached.length){strip.classList.remove('open');strip.innerHTML='';return}
+    strip.classList.add('open');strip.innerHTML=attached.map((f,i)=>f.data?`<span class="attach-chip attach-preview"><img src="${f.data}" alt=""><span>${esc(f.name)}</span><button onclick="window.K.removeAttach(${i})">×</button></span>`:`<span class="attach-chip">${esc(f.name)} <button onclick="window.K.removeAttach(${i})">×</button></span>`).join('');
+  }
+  function removeAttach(i){attached.splice(i,1);renderAttached();if($('prompt'))$('sendBtn').disabled=!$('prompt').value.trim()&&!attached.length}
+  function readImagePreview(file){
+    return new Promise(resolve=>{
+      const r=new FileReader();
+      r.onload=()=>{
+        const img=new Image();
+        img.onload=()=>{
+          const max=900, scale=Math.min(1,max/Math.max(img.width,img.height));
+          const w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
+          const c=document.createElement('canvas'); c.width=w; c.height=h;
+          const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+          resolve(c.toDataURL('image/jpeg',0.82));
+        };
+        img.onerror=()=>resolve(r.result); img.src=r.result;
+      };
+      r.onerror=()=>resolve(null); r.readAsDataURL(file);
+    });
+  }
+
+  function renderArtifactsCount(){$('artifactCount').textContent=Object.keys(state.artifacts).length}
+  function renderArtifactsPage(){
+    const items=Object.values(state.artifacts).sort((a,b)=>b.created-a.created);
+    $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Artefatos</div></div></header>
+      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos</h1><div class="page-sub">Tudo que o Klipza.IA gerar pode ficar reunido aqui.</div>
+      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':a.type==='image'?'IMG':'TXT'}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)}</div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>`;
+  }
+
+  function renderSettingsPage(){
+    const ini=initials(state.user?.name||'K');
+    const items=[
+      ['geral','Geral','M0 0'],
+      ['instalacao','Instalação','M12 16V4M7 9l5-5 5 5M5 20h14'],
+      ['energia','Energia','M12 3a9 9 0 1 0 9 9h-9z'],
+      ['notificacoes','Notificações','M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'],
+      ['personalizacao','Personalização','M12 3v18M3 12h18'],
+      ['plugins','Plugins','M7 3h10v18H7z'],
+      ['voz','Voz','M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3M5 11a7 7 0 0 0 14 0M12 18v4'],
+      ['faturamento','Faturamento','M4 7h16v10H4zM4 11h16'],
+      ['dados','Controles de dados','M6 4h12v16H6zM9 8h6M9 12h6M9 16h4'],
+      ['armazenamento','Armazenamento','M4 6h16v12H4zM8 10h8'],
+      ['seguranca','Segurança','M12 3l7 4v5c0 4.5-3 7-7 9-4-2-7-4.5-7-9V7l7-4z'],
+      ['login','Segurança e login','M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5z'],
+      ['parental','Controles parentais','M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M3 21a5 5 0 0 1 10 0'],
+      ['contato','Contato confiável','M4 4h16v16H4zM8 12h8M12 8v8'],
+      ['conta','Conta','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0'],
+      ['teclado','Teclado','M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M19 10h.01M7 14h10']
+    ];
+    const active=window.__klipzaSettingsSection||'geral';
+    function icon(path){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path==='M0 0'?'':''}<path d="${path}"/></svg>`}
+    const menu=items.map(([id,label,path])=>`<button type="button" class="settings-item ${active===id?'active':''}" data-setting="${id}">${icon(path)}<span>${label}</span>${id!=='geral'&&id!=='instalacao'&&id!=='energia'&&id!=='conta'&&id!=='dados'&&id!=='armazenamento'&&id!=='seguranca'&&id!=='login'&&id!=='personalizacao'&&id!=='notificacoes'&&id!=='teclado'?'<span class="soon">Em breve</span>':''}</button>`).join('');
+    const unavailable=(title,desc='Este recurso ainda não está disponível no Klipza.IA.')=>`
+      <div class="settings-titlebar"><h1>${title}</h1></div>
+      <div class="settings-panel">
+        <div class="settings-group-title">${title}</div>
+        <div class="settings-line">
+          <div class="settings-line-copy"><div class="settings-line-name">Recurso ainda não disponível</div><div class="settings-line-desc">${desc}</div></div>
+          <div class="settings-line-value"><span class="settings-badge">Em breve</span></div>
+        </div>
+        <div class="settings-line">
+          <div class="settings-line-copy"><div class="settings-line-name">Status</div><div class="settings-line-desc">Quando este recurso estiver disponível, as opções aparecerão aqui, no painel à direita.</div></div>
+          <div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div>
+        </div>
+      </div>`;
+    let content='';
+    if(active==='geral'){
+      content=`
+        <div class="settings-titlebar"><h1>Geral</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Aparência</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Aparência</div><div class="settings-line-desc">Escolha o tema da interface.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('${state.theme==='dark'?'light':'dark'}')">${state.theme==='dark'?'Cinza':'Claro'} · trocar</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Contraste</div></div><div class="settings-line-value"><span class="muted">Em breve</span><span class="settings-chevron">⌄</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Cor de ênfase</div></div><div class="settings-line-value"><span class="settings-dot"></span><span class="muted">Padrão · em breve</span><span class="settings-chevron">⌄</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Cor do ícone</div></div><div class="settings-line-value"><span class="settings-dot dark"></span><span class="muted">Preto · em breve</span><span class="settings-chevron">⌄</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">País e idioma do web.klip</div><div class="settings-line-desc">Escolha a região das notícias e o idioma das fontes públicas.</div></div><div class="settings-line-value"><select class="webklip-country-select" aria-label="País e idioma do web.klip" onchange="window.K.setWebKlipCountry(this.value)">${webKlipCountryOptions()}</select></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Inteligência avançada</div><div class="settings-line-desc">Recurso ainda em desenvolvimento.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em desenvolvimento</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Ativar ditado</div><div class="settings-line-desc">Entrada por voz ainda não disponível.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='instalacao'){
+      const installed=isStandalone();
+      const ios=isIOS();
+      content=`<div class="settings-titlebar"><h1>Instalação</h1></div><div class="settings-panel"><div class="settings-group-title">Klipza no seu dispositivo</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Status</div><div class="settings-line-desc">${installed?'O Klipza já está instalado como aplicativo.':'Instale o Klipza.IA na tela inicial para abrir com mais rapidez e ocupar a tela inteira.'}</div></div><div class="settings-line-value"><span class="settings-badge">${installed?'Instalado':'Disponível'}</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Instalar Klipza</div><div class="settings-line-desc">${ios?'No iPhone ou iPad, use o menu Compartilhar e escolha “Adicionar à Tela de Início”.':'Use o botão abaixo quando o navegador oferecer a instalação.'}</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.showInstallPrompt(true)">${installed?'Abrir instruções':'Instalar agora'}</button></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Segurança do pacote</div><div class="settings-line-desc">O PWA usa HTTPS, manifesto próprio e service worker com escopo limitado ao domínio.</div></div><div class="settings-line-value"><span class="settings-badge">Ativo</span></div></div>
+      </div>`;
+    } else if(active==='personalizacao'){
+      content=`
+        <div class="settings-titlebar"><h1>Personalização</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Tema</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema claro</div><div class="settings-line-desc">Interface clara do Klipza.IA.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('light')">${state.theme==='light'?'Ativo':'Usar'}</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema cinza</div><div class="settings-line-desc">Interface escura em cinza confortável, com contraste suave.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('dark')">${state.theme==='dark'?'Ativo':'Usar'}</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Outras personalizações</div><div class="settings-line-desc">Cores, densidade e outros ajustes ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='dados'){
+      content=`
+        <div class="settings-titlebar"><h1>Controles de dados</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Seus dados neste navegador</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Conversas</div><div class="settings-line-desc">${Object.keys(state.chats).length} conversa(s) salva(s) localmente.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.clearHistory()">Apagar histórico</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Artefatos</div><div class="settings-line-desc">${Object.keys(state.artifacts).length} artefato(s) armazenado(s).</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setView('artifacts')">Abrir artefatos</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Exportação de dados</div><div class="settings-line-desc">Ainda não disponível.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='armazenamento'){
+      content=`
+        <div class="settings-titlebar"><h1>Armazenamento</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Uso local</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Conversas</div><div class="settings-line-desc">Dados mantidos neste navegador.</div></div><div class="settings-line-value">${Object.keys(state.chats).length}</div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Artefatos</div><div class="settings-line-desc">Arquivos e resultados salvos localmente.</div></div><div class="settings-line-value">${Object.keys(state.artifacts).length}</div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Limpar todos os dados locais</div><div class="settings-line-desc">Remove conversas, artefatos, energia e preferências salvas neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.clearAllLocalData()">Limpar tudo</button></div></div>
+        </div>`;
+    } else if(active==='conta'){
+      content=`
+        <div class="settings-titlebar"><h1>Conta</h1></div>
+        <div class="settings-panel">
+          <div class="settings-account-card"><div class="settings-account-row"><div class="settings-account-avatar">${esc(ini)}</div><div class="settings-account-meta"><strong>${esc(state.user.name)}</strong><div>${esc(state.user.email)}</div></div></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">A conta foi conectada usando Google.</div></div><div class="settings-line-value"><span class="settings-badge">Google conectado</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Gerenciamento da conta</div><div class="settings-line-desc">Ferramentas de conta ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='energia'){
+      ensureQuota();
+      const pct=energyPercent();
+      const left=ATTACH_LIMIT-state.quota.attachUsed;
+      content=`<div class="settings-titlebar"><h1>Energia</h1></div><div class="settings-panel">
+        <div class="settings-group-title">Uso atual</div>
+        <div class="energy-settings-box">
+          <div class="energy-settings-box-head"><div><div class="energy-settings-box-title">Energia disponível</div><div class="energy-settings-box-desc">Seu ciclo renova automaticamente a cada 24 horas.</div></div><div class="energy-settings-box-value">${Math.round(state.quota.energy)}</div></div>
+          <div class="energy-settings-box-track"><span style="width:${pct}%"></span></div>
+          <div class="energy-settings-box-actions"><div class="energy-settings-box-meta">Recarrega em ${timeLeft(state.quota.resetAt-Date.now())} · ${left} anexos disponíveis</div><button class="energy-more-btn" type="button" onclick="window.K.openPrimeModal('tokens')">Obter mais do Klipza</button></div>
+        </div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Consumo por mensagem</div><div class="settings-line-desc">Cada mensagem enviada consome ${MSG_COST} pontos de energia.</div></div><div class="settings-line-value">Até 50 mensagens por ciclo</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Anexos</div><div class="settings-line-desc">Câmera, fotos e arquivos usam o mesmo limite de 3 anexos por ciclo.</div></div><div class="settings-line-value">${ATTACH_LIMIT-state.quota.attachUsed} restantes</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Klipza.Prime</div><div class="settings-line-desc">Veja planos e benefícios premium em uma área própria.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.openPrimeModal('prime')">Ver planos</button></div></div>
+      </div>`;
+    } else if(active==='notificacoes'){
+      content=`<div class="settings-titlebar"><h1>Notificações</h1></div><div class="settings-panel"><div class="settings-group-title">Preferências</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Notificações do navegador</div><div class="settings-line-desc">Receba um aviso quando uma resposta do Klipza.IA terminar.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.toggleNotifications()">${state.settings.notifications?'Ativas':'Ativar'}</button></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Sons da interface</div><div class="settings-line-desc">Sons ainda são opcionais; o estado é salvo neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.toggleSounds()">${state.settings.sounds?'Ativos':'Desativados'}</button></div></div>
+      </div>`;
+    } else if(active==='teclado'){
+      content=`<div class="settings-titlebar"><h1>Teclado</h1></div><div class="settings-panel"><div class="settings-group-title">Atalhos disponíveis</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Enter</div><div class="settings-line-desc">Enviar mensagem.</div></div><div class="settings-line-value">Ativo</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Shift + Enter</div><div class="settings-line-desc">Inserir uma nova linha.</div></div><div class="settings-line-value">Ativo</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Atalhos personalizados</div><div class="settings-line-desc">Edição completa dos atalhos ainda está em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
+      </div>`;
+    } else if(active==='seguranca'||active==='login'){
+      content=`<div class="settings-titlebar"><h1>${active==='seguranca'?'Segurança':'Segurança e login'}</h1></div><div class="settings-panel"><div class="settings-group-title">Proteção da conta</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão atual autenticada pelo fluxo Google demo.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação avançada</div><div class="settings-line-desc">2FA e gerenciamento avançado ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
+      </div>`;
+    } else if(active==='plugins'){
+      content=unavailable('Plugins','Integrações e plugins ainda estão em desenvolvimento. Nenhuma integração é ativada sem a sua confirmação.');
+    } else if(active==='voz'){
+      content=unavailable('Voz','Entrada e saída de voz ainda estão em desenvolvimento no Klipza.IA.');
+    } else if(active==='faturamento'){
+      content=unavailable('Faturamento','O sistema de planos e pagamentos ainda está em desenvolvimento.');
+    } else if(active==='parental'){
+      content=unavailable('Controles parentais','Controles parentais ainda estão em desenvolvimento e ainda não estão disponíveis.');
+    } else if(active==='contato'){
+      content=unavailable('Contato confiável','O recurso de contato confiável ainda está em desenvolvimento.');
+    } else {
+      content=unavailable('Configurações');
+    }
+    $('main').innerHTML=`<section class="settings-view ${window.__klipzaSettingsMobileDetail && window.innerWidth<=720 ? 'mobile-detail' : ''}">
+      <div class="settings-workspace">
+        <aside class="settings-sidebar">
+          <div class="settings-sidebar-top"><button class="settings-close" onclick="window.K.setView('chat')" title="Fechar configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="settings-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="settingsSearch" placeholder="Pesquisar configurações"></div>
+          <nav class="settings-menu" id="settingsMenu">${menu}</nav>
+        </aside>
+        <div class="settings-main" id="settingsMain">
+          <div class="settings-content" id="settingsContent">
+            <button type="button" class="settings-mobile-back" onclick="window.K.settingsBack()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>Configurações</button>
+            ${content}
+          </div>
+        </div>
+      </div>
+    </section>`;
+    const search=$('settingsSearch');
+    if(search) search.addEventListener('input',()=>{
+      const q=search.value.trim().toLowerCase();
+      document.querySelectorAll('.settings-item').forEach(btn=>{btn.classList.toggle('settings-hidden',!!q&&!btn.textContent.toLowerCase().includes(q));});
+    });
+    const settingsMenu=$('settingsMenu');
+    if(settingsMenu){
+      settingsMenu.addEventListener('click',(ev)=>{
+        const btn=ev.target.closest('.settings-item');
+        if(!btn || !settingsMenu.contains(btn)) return;
+        ev.preventDefault();
+        window.__klipzaSettingsSection=btn.dataset.setting;
+        window.__klipzaSettingsMobileDetail = window.innerWidth <= 720;
+        renderSettingsPage();
+      });
+    }
+    const settingsMain=$('settingsMain');
+    if(settingsMain){settingsMain.scrollTop=0;}
+  }
+
+  function settingsBack(){
+    window.__klipzaSettingsMobileDetail=false;
+    renderSettingsPage();
+  }
+  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal};
+  $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
+  $('installPromptAction').addEventListener('click',installApp);$('installPromptDismiss').addEventListener('click',dismissInstallPrompt);
+  document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
+  const primeModal=$('primeModal');
+  if(primeModal){ primeModal.addEventListener('click',e=>{if(e.target===primeModal)closePrimeModal();}); }
+  const confirmModal=$('confirmModal');
+  if(confirmModal){confirmModal.addEventListener('click',e=>{if(e.target===confirmModal)closeConfirmModal();});$('confirmCancel')?.addEventListener('click',closeConfirmModal);$('confirmAccept')?.addEventListener('click',acceptConfirmModal);}
+  const webKlipModal=$('webKlipModal');
+  if(webKlipModal){webKlipModal.addEventListener('click',e=>{if(e.target===webKlipModal)closeWebKlipModal();});$('webKlipModalClose')?.addEventListener('click',()=>closeWebKlipModal());}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();if(e.key==='Escape' && $('confirmModal')?.classList.contains('open')) closeConfirmModal();if(e.key==='Escape' && $('webKlipModal')?.classList.contains('open')) closeWebKlipModal();});
+  document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+  $('webKlipToggle')?.addEventListener('click',toggleWebKlipMenu);
+  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 1000);
+  applyTheme();
+  registerAppShell();
+  if(state.user) enter();
+  if(isIOS()) showInstallPrompt();
+})();
+</script>
+</body>
+</html>
