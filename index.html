@@ -9,27 +9,31 @@
 :root{
   --bg:#fff;--panel:#fafafa;--panel2:#f4f4f4;--line:#e5e5e5;--line2:#d8d8d8;
   --text:#111;--muted:#747474;--black:#000;--hover:#f0f0f0;--radius:14px;
-  --sidebar:286px;--content:790px;
+  --sidebar:300px;--content:820px;--danger:#b00020;
+}
+body.dark{
+  --bg:#0b0b0b;--panel:#111;--panel2:#171717;--line:#262626;--line2:#333;
+  --text:#f3f3f3;--muted:#9a9a9a;--black:#fff;--hover:#1b1b1b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 button,input,textarea{font:inherit;color:inherit}
 button{border:0;background:transparent;cursor:pointer}
 svg{display:block}
 .hidden{display:none!important}
 
 /* LOGIN */
-#login{position:fixed;inset:0;background:#fff;display:grid;place-items:center;z-index:50;padding:24px}
+#login{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:50;padding:24px}
 .login-card{width:min(390px,100%);text-align:center}
 .login-brand{font-size:34px;line-height:1;font-weight:700;letter-spacing:-1.8px;margin-bottom:12px}
 .login-brand span{font-weight:400}
-.login-copy{font-size:14px;color:#686868;margin-bottom:28px}
-.google-btn{width:100%;height:50px;border:1px solid #111;border-radius:11px;background:#fff;display:flex;align-items:center;justify-content:center;gap:11px;font-size:14px;font-weight:600;transition:.16s}
+.login-copy{font-size:14px;color:var(--muted);margin-bottom:28px}
+.google-btn{width:100%;height:50px;border:1px solid var(--black);border-radius:11px;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;gap:11px;font-size:14px;font-weight:600;transition:.16s}
 .google-btn:hover{background:#000;color:#fff}
 .google-btn:active{transform:translateY(1px)}
 .google-icon{width:18px;height:18px}
-.login-note{font-size:11px;line-height:1.6;color:#999;margin-top:18px}
+.login-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:18px}
 
 /* APP */
 #app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);height:100dvh;width:100%;transition:grid-template-columns .2s ease}
@@ -41,7 +45,7 @@ svg{display:block}
 .icon-btn{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto}
 .icon-btn:hover{background:var(--hover)}
 .icon-btn svg{width:17px;height:17px}
-.new-chat{margin:12px;height:42px;border:1px solid var(--line2);border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600}
+.new-chat{margin:12px;height:42px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600}
 .new-chat:hover{border-color:#000;background:#000;color:#fff}
 .nav{padding:4px 9px 8px}
 .nav-btn{width:100%;height:40px;padding:0 10px;border-radius:9px;display:flex;align-items:center;gap:10px;text-align:left;font-size:13px;color:#444}
@@ -72,14 +76,14 @@ svg{display:block}
 .account-email{font-size:10px;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* MAIN */
-.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:#fff}
-.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 18px;flex:0 0 auto}
+.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2vw,28px);flex:0 0 auto}
 .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .topbar-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .topbar-sub{font-size:11px;color:#999}
 .topbar-right{display:flex;gap:5px;align-items:center}
 
-.messages{flex:1;overflow:auto;padding:28px 0 18px;scroll-behavior:smooth}
+.messages{flex:1;overflow:auto;padding:clamp(22px,3vw,38px) 0 18px;scroll-behavior:smooth}
 .msg-width{width:min(var(--content),calc(100% - 38px));margin:0 auto}
 .msg{display:flex;gap:12px;margin:0 0 30px}
 .msg:last-child{margin-bottom:4px}
@@ -99,14 +103,14 @@ svg{display:block}
 .welcome h1{font-size:28px;letter-spacing:-.9px;margin-bottom:8px}
 .welcome p{font-size:13px;color:#777;margin-bottom:24px}
 .suggestions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.suggestion{min-height:72px;border:1px solid var(--line);border-radius:12px;text-align:left;padding:13px;background:#fff;transition:.15s}
+.suggestion{min-height:72px;border:1px solid var(--line);border-radius:12px;text-align:left;padding:13px;background:var(--bg);transition:.15s}
 .suggestion:hover{border-color:#000;background:#fafafa}
 .suggestion strong{display:block;font-size:12px;margin-bottom:4px}
 .suggestion span{font-size:11px;line-height:1.5;color:#777}
 
 .composer-wrap{padding:12px 16px 16px;flex:0 0 auto}
 .composer{width:min(var(--content),100%);margin:0 auto}
-.composer-box{border:1px solid #000;border-radius:16px;background:#fff;box-shadow:0 2px 16px rgba(0,0,0,.05)}
+.composer-box{border:1px solid var(--black);border-radius:16px;background:var(--bg);box-shadow:0 2px 16px rgba(0,0,0,.05)}
 .attach-strip{display:none;padding:10px 11px;border-bottom:1px solid var(--line);gap:7px;flex-wrap:wrap}
 .attach-strip.open{display:flex}
 .attach-chip{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;background:#f0f0f0;font-size:11px}
@@ -132,15 +136,35 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .artifacts-inner{width:min(880px,100%);margin:0 auto}
 .page-title{font-size:26px;letter-spacing:-.7px;margin-bottom:4px}.page-sub{font-size:13px;color:#777;margin-bottom:24px}
 .artifact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.artifact-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:#fff;min-height:150px;display:flex;flex-direction:column;gap:11px;cursor:pointer}
+.artifact-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);min-height:150px;display:flex;flex-direction:column;gap:11px;cursor:pointer}
 .artifact-card:hover{border-color:#000}
 .artifact-head{display:flex;align-items:center;gap:9px}.artifact-icon{width:34px;height:34px;background:#000;color:#fff;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:700}.artifact-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artifact-meta{font-size:10px;color:#999;margin-top:2px}.artifact-preview{font-size:11px;color:#666;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
 .empty-page{padding:60px 10px;text-align:center;color:#999;font-size:13px;border:1px dashed #ddd;border-radius:14px}
 
-/* SETTINGS */
-.settings-view{height:100%;overflow:auto;padding:32px 20px 70px}.settings-inner{width:min(720px,100%);margin:0 auto}
-.settings-group{border-top:1px solid var(--line);padding:20px 0}.settings-group:first-of-type{border-top:0;padding-top:0}.settings-group-title{text-transform:uppercase;letter-spacing:.08em;font-size:10px;font-weight:800;color:#999;margin-bottom:10px}
-.setting-row{display:flex;gap:15px;align-items:center;justify-content:space-between;padding:13px 0}.setting-copy{min-width:0}.setting-name{font-size:13px;font-weight:600}.setting-desc{font-size:11px;color:#888;margin-top:3px;line-height:1.45}.setting-action{padding:8px 12px;border:1px solid #111;border-radius:8px;font-size:11px;background:#fff;white-space:nowrap}.setting-action:hover{background:#000;color:#fff}.danger{border-color:#000}
+/* SETTINGS — REDESIGN */
+.settings-view{height:100%;overflow:auto;background:var(--bg);padding:28px 30px 60px}
+.settings-inner{width:min(1180px,100%);margin:0 auto}
+.settings-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0 20px}
+.settings-top-main{display:flex;align-items:center;gap:14px;min-width:0}
+.settings-avatar{width:48px;height:48px;border-radius:14px;background:var(--black);color:var(--bg);display:grid;place-items:center;font-size:15px;font-weight:800;flex:0 0 auto}
+.settings-head{min-width:0}.settings-title{font-size:24px;font-weight:700;letter-spacing:-.6px}.settings-subtitle{font-size:12px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.settings-back{padding:9px 13px;border:1px solid var(--line2);border-radius:10px;background:var(--panel);font-size:11px;font-weight:700;white-space:nowrap}.settings-back:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.settings-nav{display:flex;align-items:center;gap:4px;padding:5px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:16px;overflow:auto;scrollbar-width:none;position:sticky;top:0;z-index:3}.settings-nav::-webkit-scrollbar{display:none}
+.settings-nav a{display:inline-flex;align-items:center;justify-content:center;padding:9px 14px;border-radius:8px;color:var(--muted);font-size:11px;font-weight:650;text-decoration:none;white-space:nowrap;transition:.15s}.settings-nav a:hover{background:var(--hover);color:var(--text)}.settings-nav a.active{background:var(--black);color:var(--bg)}
+.settings-sections{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,.75fr);gap:14px;align-items:start}
+.settings-card{background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden;scroll-margin-top:74px}
+.settings-card.full{grid-column:1 / -1}.settings-card-header{padding:17px 18px 12px;border-bottom:1px solid var(--line)}
+.settings-card-title{font-size:13px;font-weight:750}.settings-card-desc{font-size:11px;line-height:1.5;color:var(--muted);margin-top:4px}
+.settings-rows{padding:0 18px}.settings-row{display:flex;align-items:center;justify-content:space-between;gap:18px;min-height:64px;padding:13px 0;border-top:1px solid var(--line)}.settings-row:first-child{border-top:0}
+.settings-copy{min-width:0}.settings-name{font-size:12px;font-weight:650}.settings-detail{font-size:11px;color:var(--muted);line-height:1.45;margin-top:3px;overflow-wrap:anywhere}
+.settings-control{flex:0 0 auto;display:flex;align-items:center;gap:8px}.settings-value{font-size:11px;font-weight:600;color:var(--muted);text-align:right;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.settings-action{padding:8px 11px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:11px;font-weight:650;white-space:nowrap}.settings-action:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.settings-action.danger{border-color:var(--black)}
+.settings-energy{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.settings-meter{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}.settings-meter-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.settings-meter-name{font-size:12px;font-weight:700}.settings-meter-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-top:3px}.settings-meter-value{font-size:19px;font-weight:750;white-space:nowrap}.settings-track{height:7px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:12px}.settings-track span{display:block;height:100%;background:var(--black);border-radius:999px;transition:width .25s}.settings-meter-foot{font-size:10px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:8px}
+.settings-themes{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.theme-card{border:1px solid var(--line);border-radius:13px;background:var(--bg);padding:10px;text-align:left;transition:.15s}.theme-card:hover{border-color:var(--black)}.theme-card.active{border:2px solid var(--black);padding:9px}.theme-swatch{height:92px;border-radius:9px;display:flex;align-items:flex-end;padding:12px;font-size:14px;font-weight:700;letter-spacing:-.2px}.theme-swatch.light{background:#fff;color:#111;border:1px solid #eee}.theme-swatch.dark{background:#0b0b0b;color:#fff;border:1px solid #222}.theme-name{font-size:12px;font-weight:700;margin-top:10px}.theme-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.settings-foot{font-size:10px;color:var(--muted);text-align:center;padding:18px 0 6px}
+@media(max-width:980px){.settings-sections{grid-template-columns:1fr}.settings-card.full{grid-column:auto}.settings-energy{grid-template-columns:1fr 1fr}}
+@media(max-width:720px){.settings-view{padding:16px 12px 42px}.settings-top{padding:8px 0 14px;align-items:flex-start}.settings-title{font-size:21px}.settings-subtitle{white-space:normal}.settings-back{padding:8px 10px}.settings-nav{margin-bottom:12px}.settings-nav a{padding:9px 12px;font-size:10px}.settings-sections{gap:10px}.settings-card{border-radius:13px}.settings-card-header{padding:15px}.settings-rows{padding:0 15px}.settings-row{align-items:flex-start;flex-direction:column;gap:10px;padding:14px 0}.settings-control{width:100%;justify-content:flex-start}.settings-value{max-width:none;text-align:left;white-space:normal}.settings-action{width:auto}.settings-energy,.settings-themes{padding:12px 15px;grid-template-columns:1fr}.theme-swatch{height:78px}.settings-avatar{width:44px;height:44px;border-radius:12px;font-size:14px}}
 
 /* MOBILE */
 .mobile-close{display:none}
@@ -165,6 +189,35 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 @media (min-width:721px){#app.sidebar-collapsed .topbar .menu-toggle{display:grid}}
 
 /* NO MODALS: all views are inside the main area */
+
+/* ENERGY SYSTEM */
+.energy-card{margin:12px 14px 10px;padding:13px;border:1px solid #e7e7e7;border-radius:14px;background:#fff}
+.energy-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.energy-title{font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:#555}
+.energy-value{font-size:13px;font-weight:700}
+.energy-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.energy-ring{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(#000 var(--pct),#ededed 0);position:relative;flex:0 0 44px}
+.energy-ring:after{content:"";width:32px;height:32px;background:var(--bg);border-radius:50%;position:absolute}
+.energy-ring span{position:relative;z-index:1;font-size:10px;font-weight:700}
+.energy-copy{min-width:0;flex:1}
+.energy-label{font-size:12px;font-weight:600}
+.energy-meta{font-size:10px;color:#888;margin-top:3px}
+.energy-bar{height:5px;border-radius:999px;background:#ececec;overflow:hidden;margin-top:9px}
+.energy-bar span{display:block;height:100%;background:#000;border-radius:999px;transition:width .25s}
+.energy-foot{margin-top:7px;font-size:9px;color:#8a8a8a;display:flex;justify-content:space-between;gap:8px}
+.quota-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #e8e8e8;border-radius:9px;background:#fafafa;font-size:10px;color:#555}
+.quota-dot{width:6px;height:6px;border-radius:50%;background:#000}
+.limit-card{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg)}
+.limit-card + .limit-card{margin-top:10px}
+.limit-top{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+.limit-name{font-size:13px;font-weight:700}
+.limit-caption{font-size:11px;color:#858585;margin-top:3px;line-height:1.45}
+.limit-number{font-size:18px;font-weight:700;white-space:nowrap}
+.limit-track{height:7px;border-radius:999px;background:#efefef;overflow:hidden;margin-top:12px}
+.limit-track > span{height:100%;display:block;background:#000;border-radius:999px;transition:width .2s}
+.limit-note{margin-top:8px;font-size:10px;color:#8a8a8a}
+.settings-kicker{font-size:11px;color:#888;margin-top:4px}
+
 </style>
 </head>
 <body>
@@ -207,7 +260,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     </nav>
     <div class="history-head">Histórico</div>
     <div class="history" id="history"></div>
-    <div class="side-bottom">
+    <div id="sideQuota"></div><div class="side-bottom">
       <button class="account" id="accountBtn" type="button" title="Abrir perfil e configurações">
         <div class="avatar" id="avatar">K</div>
         <div class="account-copy"><div class="account-name" id="accountName">Usuário Google</div><div class="account-email" id="accountEmail">usuario@gmail.com</div></div>
@@ -227,6 +280,8 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   const $ = id => document.getElementById(id);
   const KEY = 'klipza_pro_v1';
   let state = loadState();
+  state.theme = state.theme || 'light';
+  const ENERGY_MAX=100, MSG_COST=2, ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000;
   let currentView = 'chat';
   let activeChatId = state.activeChatId || null;
   let attached = [];
@@ -236,7 +291,57 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
       const raw = localStorage.getItem(KEY);
       if(raw) return JSON.parse(raw);
     }catch(e){}
-    return {user:null,chats:{},artifacts:{},activeChatId:null};
+    return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light'};
+  }
+
+  function ensureQuota(){
+    state.quota=state.quota||{energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
+    const now=Date.now();
+    if(!state.quota.resetAt || now>=state.quota.resetAt){
+      state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:now+CYCLE_MS};
+      save();
+    }
+  }
+  function timeLeft(ms){
+    const total=Math.max(0,Math.floor(ms/1000));
+    const h=Math.floor(total/3600), m=Math.floor((total%3600)/60);
+    if(h>=1) return `${h}h ${String(m).padStart(2,'0')}min`;
+    return `${m}min`;
+  }
+  function energyPercent(){ensureQuota(); return Math.max(0,Math.min(100,state.quota.energy));}
+  function quotaHTML(compact=false){
+    ensureQuota();
+    const pct=energyPercent();
+    const attachPct=Math.max(0,Math.min(100,((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100));
+    return `<div class="energy-card">
+      <div class="energy-head"><div class="energy-title">Energia</div><div class="energy-value">${state.quota.energy}</div></div>
+      <div class="energy-row"><div class="energy-ring" style="--pct:${pct}%"><span>${pct}</span></div><div class="energy-copy"><div class="energy-label">Uso diário</div><div class="energy-meta">${state.quota.energy>=MSG_COST?'Pronta para a próxima mensagem':'Sem energia no momento'}</div></div></div>
+      <div class="energy-bar"><span style="width:${pct}%"></span></div>
+      <div class="energy-foot"><span>Recarrega em ${timeLeft(state.quota.resetAt-Date.now())}</span><span>${state.quota.attachUsed}/${ATTACH_LIMIT} anexos</span></div>
+    </div>`;
+  }
+  function refreshQuotaUI(){
+    ensureQuota();
+    const side=document.getElementById('sideQuota'); if(side) side.innerHTML=quotaHTML(true);
+    const energy=document.getElementById('energySettings'); if(energy) energy.innerHTML=renderEnergySettings();
+    const status=document.getElementById('composerQuota'); if(status){
+      status.innerHTML=`<span class="quota-dot"></span> ${state.quota.energy} energia · ${ATTACH_LIMIT-state.quota.attachUsed} anexos disponíveis · recarrega em ${timeLeft(state.quota.resetAt-Date.now())}`;
+    }
+  }
+  function renderEnergySettings(){
+    ensureQuota();
+    return `<div class="limit-card"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Cada mensagem consome ${MSG_COST} pontos.</div></div><div class="limit-number">${state.quota.energy}</div></div><div class="limit-track"><span style="width:${energyPercent()}%"></span></div><div class="limit-note">Até 50 mensagens por ciclo, dependendo do consumo.</div></div>
+    <div class="limit-card"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário.</div></div><div class="limit-number">${ATTACH_LIMIT-state.quota.attachUsed}</div></div><div class="limit-track"><span style="width:${((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100}%"></span></div><div class="limit-note">Limite renovado junto com a energia.</div></div>`;
+  }
+  function applyTheme(){
+    const dark=state.theme==='dark';
+    document.body.classList.toggle('dark',dark);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#0b0b0b':'#ffffff');
+  }
+  function setTheme(theme){
+    state.theme=theme==='dark'?'dark':'light';
+    save(); applyTheme();
+    if(currentView==='settings') renderSettingsPage();
   }
   function save(){localStorage.setItem(KEY,JSON.stringify(state));}
   function uid(prefix){return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)}
@@ -248,6 +353,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     save(); enter();
   }
   function enter(){
+    ensureQuota();
     $('login').classList.add('hidden');
     $('app').classList.remove('hidden');
     $('accountName').textContent=state.user.name;
@@ -382,7 +488,10 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   function useSuggestion(t){$('prompt').value=t;$('prompt').dispatchEvent(new Event('input'));$('prompt').focus()}
 
   function send(){
+    ensureQuota();
     const input=$('prompt'); const text=input.value.trim(); if(!text)return;
+    if(state.quota.energy<MSG_COST){render(); refreshQuotaUI(); alert('Sua energia diária acabou. Ela será recarregada em 24 horas.'); return;}
+    state.quota.energy-=MSG_COST;
     const chat=state.chats[activeChatId];
     const content = attached.length ? text+'\n\nAnexos: '+attached.map(a=>a.name).join(', ') : text;
     chat.messages.push({role:'user',content});
@@ -404,9 +513,25 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   }
   function closeAttach(){if($('attachMenu')){$('attachMenu').classList.remove('open');$('plusBtn').classList.remove('active')}}
   function pick(kind){
-    closeAttach(); const input=kind==='camera'?$('cameraInput'):kind==='image'?$('imageInput'):$('fileInput');
-    input.value=''; input.onchange=()=>{[...input.files].forEach(file=>attached.push({name:file.name,type:file.type||'file'}));renderAttached();}; input.click();
+    ensureQuota();
+    if(state.quota.attachUsed>=ATTACH_LIMIT){ alert('Você já usou os 3 anexos deste ciclo.'); return; }
+    closeAttach();
+    const input=kind==='camera'?$('cameraInput'):kind==='image'?$('imageInput'):$('fileInput');
+    input.value='';
+    input.multiple = kind!=='camera';
+    input.onchange=()=>{
+      const files=[...input.files];
+      const available=ATTACH_LIMIT-state.quota.attachUsed;
+      const chosen=files.slice(0,available);
+      if(!chosen.length)return;
+      chosen.forEach(file=>attached.push({name:file.name,type:file.type||'file'}));
+      state.quota.attachUsed+=chosen.length;
+      save(); renderAttached(); refreshQuotaUI();
+      if(files.length>available) alert(`Você pode adicionar mais ${available} anexo(s) neste ciclo.`);
+    };
+    input.click();
   }
+
   function renderAttached(){
     const strip=$('attachStrip'); if(!attached.length){strip.classList.remove('open');strip.innerHTML='';return}
     strip.classList.add('open');strip.innerHTML=attached.map((f,i)=>`<span class="attach-chip">${esc(f.name)} <button onclick="window.K.removeAttach(${i})">×</button></span>`).join('');
@@ -422,17 +547,59 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   }
 
   function renderSettingsPage(){
-    $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Configurações</div></div></header>
-      <section class="settings-view"><div class="settings-inner"><h1 class="page-title">Configurações</h1><div class="page-sub">Conta e dados do seu Klipza.IA.</div>
-      <div class="settings-group"><div class="settings-group-title">Conta</div><div class="setting-row"><div class="setting-copy"><div class="setting-name">Conta Google</div><div class="setting-desc">${esc(state.user.name)} · ${esc(state.user.email)}</div></div></div></div>
-      <div class="settings-group"><div class="settings-group-title">Dados</div><div class="setting-row"><div class="setting-copy"><div class="setting-name">Apagar histórico</div><div class="setting-desc">Remove todas as conversas salvas neste navegador.</div></div><button class="setting-action danger" onclick="window.K.clearHistory()">Apagar histórico</button></div></div>
-      <div class="settings-group"><div class="settings-group-title">Sessão</div><div class="setting-row"><div class="setting-copy"><div class="setting-name">Sair</div><div class="setting-desc">Encerrar a sessão atual.</div></div><button class="setting-action" onclick="window.K.logout()">Sair</button></div></div>
+    const ini=initials(state.user?.name||'K');
+    $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()" title="Abrir histórico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Configurações</div></div></header>
+      <section class="settings-view"><div class="settings-inner">
+        <div class="settings-top">
+          <div class="settings-top-main"><div class="settings-avatar">${esc(ini)}</div><div class="settings-head"><div class="settings-title">Configurações</div><div class="settings-subtitle">${esc(state.user.name)} · ${esc(state.user.email)}</div></div></div>
+          <button class="settings-back" onclick="window.K.setView('chat')">Voltar ao chat</button>
+        </div>
+        <nav class="settings-nav">
+          <a class="active" href="#conta">Conta</a><a href="#dados">Dados</a><a href="#energia">Energia</a><a href="#aparencia">Aparência</a><a href="#sessao">Sessão</a>
+        </nav>
+        <div class="settings-sections">
+          <section class="settings-card" id="conta"><div class="settings-card-header"><div class="settings-card-title">Conta</div><div class="settings-card-desc">Informações da conta conectada ao Klipza.IA.</div></div><div class="settings-rows">
+            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Nome</div><div class="settings-detail">Nome usado no seu perfil.</div></div><div class="settings-control"><div class="settings-value">${esc(state.user.name)}</div></div></div>
+            <div class="settings-row"><div class="settings-copy"><div class="settings-name">E-mail</div><div class="settings-detail">Conta usada para entrar no Klipza.IA.</div></div><div class="settings-control"><div class="settings-value">${esc(state.user.email)}</div></div></div>
+            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Acesso</div><div class="settings-detail">Sua conta está conectada pelo Google.</div></div><div class="settings-control"><span class="settings-value">Google conectado</span></div></div>
+          </div></section>
+
+          <section class="settings-card" id="dados"><div class="settings-card-header"><div class="settings-card-title">Dados</div><div class="settings-card-desc">Gerencie o conteúdo armazenado neste navegador.</div></div><div class="settings-rows">
+            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Conversas</div><div class="settings-detail">${Object.keys(state.chats).length} conversa(s) salva(s).</div></div><div class="settings-control"><button class="settings-action danger" onclick="window.K.clearHistory()">Apagar histórico</button></div></div>
+            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Artefatos</div><div class="settings-detail">${Object.keys(state.artifacts).length} artefato(s) salvo(s).</div></div><div class="settings-control"><button class="settings-action" onclick="window.K.setView('artifacts')">Abrir artefatos</button></div></div>
+          </div></section>
+
+          <section class="settings-card full" id="energia"><div class="settings-card-header"><div class="settings-card-title">Energia e anexos</div><div class="settings-card-desc">Os limites são renovados automaticamente a cada ciclo de 24 horas.</div></div><div class="settings-energy">
+            <div class="settings-meter"><div class="settings-meter-top"><div><div class="settings-meter-name">Energia</div><div class="settings-meter-desc">100 pontos por ciclo · ${MSG_COST} pontos por mensagem.</div></div><div class="settings-meter-value">${state.quota.energy}</div></div><div class="settings-track"><span style="width:${energyPercent()}%"></span></div><div class="settings-meter-foot"><span>Restante</span><span>Recarrega em ${timeLeft(state.quota.resetAt-Date.now())}</span></div></div>
+            <div class="settings-meter"><div class="settings-meter-top"><div><div class="settings-meter-name">Anexos</div><div class="settings-meter-desc">Câmera, fotos e arquivos.</div></div><div class="settings-meter-value">${ATTACH_LIMIT-state.quota.attachUsed}</div></div><div class="settings-track"><span style="width:${((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100}%"></span></div><div class="settings-meter-foot"><span>Disponíveis</span><span>Limite: ${ATTACH_LIMIT}</span></div></div>
+          </div></section>
+
+          <section class="settings-card" id="aparencia"><div class="settings-card-header"><div class="settings-card-title">Aparência</div><div class="settings-card-desc">Escolha o visual do Klipza.IA neste dispositivo.</div></div><div class="settings-themes">
+            <button class="theme-card ${state.theme==='light'?'active':''}" onclick="window.K.setTheme('light')"><div class="theme-swatch light">Klipza.IA</div><div class="theme-name">Claro</div><div class="theme-desc">Interface clara, limpa e neutra.</div></button>
+            <button class="theme-card ${state.theme==='dark'?'active':''}" onclick="window.K.setTheme('dark')"><div class="theme-swatch dark">Klipza.IA</div><div class="theme-name">Preto</div><div class="theme-desc">Interface escura para ambientes com pouca luz.</div></button>
+          </div></section>
+
+          <section class="settings-card" id="sessao"><div class="settings-card-header"><div class="settings-card-title">Sessão</div><div class="settings-card-desc">Ações da conta neste dispositivo.</div></div><div class="settings-rows">
+            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Sair</div><div class="settings-detail">Voltar para a tela de entrada e encerrar a sessão atual.</div></div><div class="settings-control"><button class="settings-action" onclick="window.K.logout()">Sair da conta</button></div></div>
+          </div></section>
+        </div>
+        <div class="settings-foot">Klipza.IA · Configurações</div>
       </div></section>`;
+    refreshQuotaUI();
+    const links=[...document.querySelectorAll('.settings-nav a')];
+    const cards=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+    links.forEach(a=>a.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));a.classList.add('active')}));
+    if('IntersectionObserver' in window){
+      const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{root:document.querySelector('.settings-view'),rootMargin:'-90px 0px -55% 0px',threshold:.01});
+      cards.forEach(card=>obs.observe(card));
+    }
   }
 
-  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,toggleAttach,pick,removeAttach,renderAttached};
+  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,toggleAttach,pick,removeAttach,renderAttached,setTheme};
   $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 30000);
+  applyTheme();
   if(state.user) enter();
 })();
 </script>
