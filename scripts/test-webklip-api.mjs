@@ -15,7 +15,14 @@ if (response.statusCode !== 200 || !response.body || !Array.isArray(response.bod
 }
 if (response.body.items.length > 50) throw new Error('Endpoint retornou mais de 50 itens');
 const serialized = JSON.stringify(response.body.items).toLowerCase();
-for (const term of ['celebrity', 'executor', 'activator', 'malware', 'piracy', 'cheat']) {
-  if (serialized.includes(term)) throw new Error(`Termo bloqueado encontrado: ${term}`);
+for (const term of ['celebrity', 'executor', 'activator', 'malware', 'piracy', 'cheat', 'trailer', 'reality show', 'netflix', 'red carpet', 'showbiz', 'singer', 'album']) {
+  const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\s+/g, '\\s+');
+  if (new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i').test(serialized)) {
+    throw new Error(`Termo bloqueado encontrado: ${term}`);
+  }
 }
-console.log(JSON.stringify({ status: response.statusCode, count: response.body.count, sources: response.body.status }, null, 2));
+const categories = response.body.items.reduce((acc, item) => (acc[item.category] = (acc[item.category] || 0) + 1, acc), {});
+if (response.body.items.some((item) => item.category === 'news') && !response.body.items.some((item) => item.category === 'games')) {
+  console.warn('Aviso: a fonte de jogos está indisponível nesta execução.');
+}
+console.log(JSON.stringify({ status: response.statusCode, count: response.body.count, categories, sources: response.body.status }, null, 2));

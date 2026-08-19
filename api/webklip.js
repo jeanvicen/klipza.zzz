@@ -20,7 +20,10 @@ function cleanText(value) {
 
 function hasBlockedTerm(value, terms = BLOCKED_TERMS) {
   const normalized = cleanText(value).toLowerCase();
-  return terms.some((term) => normalized.includes(term));
+  return terms.some((term) => {
+    const escaped = String(term).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\\s+/g, '\\s+');
+    return new RegExp(`(?:^|[^a-z0-9])${escaped}(?:$|[^a-z0-9])`, 'i').test(normalized);
+  });
 }
 
 function idFor(prefix, value) {

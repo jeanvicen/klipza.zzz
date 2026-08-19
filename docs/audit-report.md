@@ -53,3 +53,7 @@ A seção Personalização abriu. O tema preto foi ativado e exibido em alto con
 ## Categorias auditadas
 
 Depois de retornar ao web.klip, a categoria Código mostrou 14 itens exclusivamente de código e a categoria Design mostrou 14 itens exclusivamente de design. Os cards continuaram clicáveis e o layout em grade permaneceu estável.
+
+## Deploy final após correção
+
+Após o push do commit `5e47376`, o domínio público continuou respondendo pela tela de autenticação e confirmou HTTPS, manifesto em `/manifest.webmanifest`, service worker `activated` e botão Instalar. O commit não é exposto no HTML, mas o deploy público respondeu corretamente após a publicação.
