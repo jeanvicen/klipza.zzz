@@ -551,77 +551,29 @@ body.prime-modal-open{overflow:hidden}
 @media(max-width:720px){.prime-modal{padding:10px;align-items:flex-end}.prime-dialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px 18px 10px 10px}.prime-head{padding:18px 17px 15px}.prime-title{font-size:21px}.prime-tabs{padding:10px 17px 0;overflow:auto}.prime-body{padding:15px 17px 20px}.prime-grid,.token-grid{grid-template-columns:1fr}.prime-card{padding:15px}.prime-card-badge{position:static;display:inline-block;margin-bottom:7px}.prime-footnote{margin-bottom:4px}}
 
 
-/* MOBILE POLISH */
+/* VOICE / STREAM CONTROLS */
+.response-status{display:none;align-items:center;justify-content:center;gap:8px;max-width:760px;margin:0 auto 8px;padding:0 16px;font-size:11px;color:#777;text-align:center}
+.response-status.show{display:flex}
+.response-status strong{color:#111;font-weight:600}
+.stop-wrap{display:none;align-items:center;gap:8px;flex:1}
+.stop-btn{width:36px;height:36px;border:1px solid #111;background:#111;color:#fff;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.stop-btn:hover{background:#333}
+.stop-btn svg{width:15px;height:15px}
+.mic-btn{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#222;transition:.15s}
+.mic-btn:hover{background:#f0f0f0}
+.mic-btn.listening{background:#111;color:#fff;animation:micPulse 1.2s ease-in-out infinite}
+@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}50%{box-shadow:0 0 0 5px rgba(0,0,0,.08)}}
+.voice-hint{font-size:11px;color:#777;display:none;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+.voice-hint.show{display:block}
+.voice-cancel{font-size:11px;color:#777;background:transparent;border:0;cursor:pointer;padding:3px 0}
+.voice-cancel:hover{color:#000}
+.msg-status{margin-top:8px;font-size:11px;color:#777}
+.msg-status strong{color:#111;font-weight:600}
 @media(max-width:720px){
-  html,body{overflow:hidden;touch-action:manipulation}
-  #app{min-height:100dvh}
-  .topbar{height:52px;padding:0 10px;gap:6px}
-  .topbar-left{gap:6px;min-width:0}
-  .topbar-title{font-size:13px}
-  .topbar-sub{display:none}
-  .topbar-right{gap:4px;overflow:hidden;min-width:0}
-  .topbar-right .icon-btn{width:32px;height:32px}
-  .anonymous-btn{max-width:40px;justify-content:center;padding:0 9px}
-  .main{height:100dvh}
-  .messages{padding:16px 0 12px}
-  .msg-width{width:calc(100% - 20px)}
-  .msg{gap:8px;margin-bottom:20px}
-  .msg-content{font-size:14px;line-height:1.6}
-  .msg-avatar{width:26px;height:26px;font-size:10px}
-  .composer-wrap{padding:8px 8px max(10px,env(safe-area-inset-bottom));}
-  .composer{width:100%}
-  .composer-box{border-radius:14px}
-  .composer-row{padding:6px;gap:5px}
-  .plus,.send{width:36px;height:36px}
-  textarea#prompt{font-size:14px;min-height:36px;max-height:150px;padding:8px 4px}
-  .composer-note{font-size:9px;margin-top:6px}
-
-  /* Settings: single-column phone layout, no squeezed two-column cards */
-  .settings-view{height:100dvh;overflow-y:auto;padding:12px 10px max(24px,env(safe-area-inset-bottom));}
-  .settings-inner{width:100%;}
-  .settings-top{position:sticky;top:0;z-index:10;background:var(--bg);padding:10px 2px 12px;gap:10px;border-bottom:1px solid var(--line)}
-  .settings-top-main{gap:10px}
-  .settings-avatar{width:42px;height:42px;border-radius:11px;font-size:13px}
-  .settings-title{font-size:20px}
-  .settings-subtitle{font-size:10px;white-space:normal;line-height:1.4}
-  .settings-back{font-size:10px;padding:8px 10px}
-  .settings-nav{margin:10px 0 12px;padding:4px;border-radius:11px;position:sticky;top:67px;z-index:9;gap:3px}
-  .settings-nav a{padding:9px 11px;font-size:10px}
-  .settings-sections{display:flex;flex-direction:column;gap:10px}
-  .settings-card,.settings-card.full{width:100%;grid-column:auto}
-  .settings-card-header{padding:14px 14px 11px}
-  .settings-card-title{font-size:13px}
-  .settings-card-desc{font-size:10px}
-  .settings-rows{padding:0 14px}
-  .settings-row{display:flex;flex-direction:column;align-items:stretch;gap:8px;min-height:0;padding:13px 0}
-  .settings-copy{width:100%}
-  .settings-name{font-size:12px}
-  .settings-detail{font-size:10px}
-  .settings-control{width:100%;justify-content:flex-start}
-  .settings-value{max-width:none;text-align:left;white-space:normal;overflow:visible}
-  .settings-action{min-height:36px;padding:8px 12px;font-size:10px}
-  .settings-energy,.settings-themes{display:flex;flex-direction:column;padding:11px 14px;gap:9px}
-  .settings-meter{padding:12px}
-  .theme-swatch{height:74px}
-  .settings-foot{padding:14px 0 4px}
-
-  /* settings detail page from the account flow */
-  .settings-workspace{height:100dvh;min-height:100dvh;display:block;}
-  .settings-view.mobile-detail .settings-sidebar{display:none}
-  .settings-view.mobile-detail .settings-main{width:100%;min-height:100dvh}
-  .settings-view.mobile-detail .settings-content{padding:12px 12px 32px}
-  .settings-mobile-back{position:sticky;top:0;z-index:12;width:auto;margin:0 0 10px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:11px;font-weight:700}
-
-  /* Sidebar as true overlay */
-  .sidebar{z-index:120}
-  #app:not(.sidebar-collapsed)::after{z-index:110}
-  .composer-wrap,.composer-box{z-index:5}
-
-  /* Prime/token modal on phones */
-  .prime-modal-card{width:calc(100vw - 20px)!important;max-height:calc(100dvh - 20px)!important;border-radius:18px!important}
-  .prime-modal{padding:10px!important}
+  .response-status{padding:0 12px}
+  .mic-btn,.stop-btn{width:38px;height:38px}
+  .voice-hint{max-width:140px}
 }
-
 </style>
 </head>
 <body>
@@ -667,7 +619,7 @@ body.prime-modal-open{overflow:hidden}
     <div id="sideQuota"></div><div class="side-bottom">
       <button class="account" id="accountBtn" type="button" title="Abrir perfil e configurações">
         <div class="avatar" id="avatar">K</div>
-        <div class="account-copy"><div class="account-name" id="accountName">Sua conta</div><div class="account-email" id="accountEmail">Google</div></div>
+        <div class="account-copy"><div class="account-name" id="accountName">Usuário Google</div><div class="account-email" id="accountEmail">usuario@gmail.com</div></div>
       </button>
       <button class="nav-btn" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M21 3v18"/></svg><span class="nav-label">Sair</span></button>
     </div>
@@ -686,7 +638,7 @@ body.prime-modal-open{overflow:hidden}
       <div>
         <div class="prime-eyebrow">Klipza</div>
         <div class="prime-title" id="primeModalTitle">Mais do Klipza</div>
-        <div class="prime-sub">Escolha o Klipza.Prime ou veja opções para obter mais energia. Os pagamentos serão disponibilizados em breve.</div>
+        <div class="prime-sub">Escolha o Klipza.Prime ou veja opções para obter mais energia. O pagamento real ainda está em desenvolvimento.</div>
       </div>
       <button class="prime-close" type="button" onclick="window.K.closePrimeModal()" aria-label="Fechar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -871,7 +823,7 @@ body.prime-modal-open{overflow:hidden}
   function initials(name){return (name||'K').trim().charAt(0).toUpperCase()}
 
   function loginDemo(){
-    state.user = {name:'Sua conta',email:'Google'};
+    state.user = {name:'Usuário Google',email:'usuario@gmail.com'};
     save(); enter();
   }
   function enter(){
@@ -962,6 +914,7 @@ body.prime-modal-open{overflow:hidden}
         </div>
       </header>
       <section class="messages" id="messages"></section>
+      <div class="response-status" id="responseStatus" aria-live="polite"></div>
       <section class="composer-wrap"><div class="composer">
         <div class="anonymous-banner ${anonymousMode?'show':''}" id="anonymousBanner">
           <div><strong>Mensagens anônimas</strong> · esta conversa não será salva no histórico. Anexos ficam desativados neste modo.</div>
@@ -1016,17 +969,91 @@ body.prime-modal-open{overflow:hidden}
           <div class="composer-row">
             <button class="plus ${anonymousMode?'anonymous-disabled':''}" id="plusBtn" onclick="window.K.toggleAttach()" title="Adicionar" ${anonymousMode?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
             <textarea id="prompt" rows="1" placeholder="Envie uma mensagem para o Klipza.IA"></textarea>
+            <button class="mic-btn" id="micBtn" title="Ditado por voz" aria-label="Ditado por voz" onclick="window.K.toggleDictation()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></button>
+            <span class="voice-hint" id="voiceHint">Ouvindo...</span>
             <button class="send" id="sendBtn" disabled onclick="window.K.send()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 5l7 7-7 7"/></svg></button>
+            <button class="stop-btn" id="stopBtn" title="Parar resposta" aria-label="Parar resposta" onclick="window.K.stopResponse()" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg></button>
           </div>
         </div>
         <div class="composer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
       </div></section>`;
     bindComposer(); renderMessages();
   }
+  let responseState={active:false,timer:null,stopped:false};
+  let recognition=null, dictating=false;
   function bindComposer(){
     const input=$('prompt'), send=$('sendBtn');
-    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';send.disabled=!input.value.trim()&&!attached.length;});
-    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!send.disabled)window.K.send()}});
+    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';send.disabled=responseState.active || (!input.value.trim()&&!attached.length);});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!responseState.active && !send.disabled)window.K.send()}});
+  }
+  function setResponseUI(active){
+    responseState.active=active;
+    const send=$('sendBtn'), stop=$('stopBtn'), mic=$('micBtn');
+    if(send) send.style.display=active?'none':'flex';
+    if(stop) stop.style.display=active?'flex':'none';
+    if(mic) mic.disabled=active;
+    if(active && $('prompt')) $('prompt').disabled=true;
+    if(!active && $('prompt')) $('prompt').disabled=false;
+    if(!active && $('prompt')) send.disabled=!$('prompt').value.trim()&&!attached.length;
+  }
+  function showResponseStatus(text,emphasis=false){
+    const el=$('responseStatus'); if(!el)return;
+    el.classList.toggle('show',!!text);
+    el.innerHTML=text?`<span>${emphasis?'<strong>'+esc(text)+'</strong>':esc(text)}</span>`:'';
+  }
+  function appendStreamingMessage(content){
+    const box=$('messages'); const chat=currentChat();
+    const wrap=box.querySelector('.msg-width');
+    if(!wrap){renderMessages();return;}
+    let row=wrap.querySelector('.msg.ai.streaming');
+    if(!row){
+      row=document.createElement('div');row.className='msg ai streaming';
+      row.innerHTML=`<div class="msg-avatar">K</div><div class="msg-content"><div class="msg-label">Klipza</div><div class="stream-content"></div></div>`;
+      wrap.appendChild(row);
+    }
+    row.querySelector('.stream-content').innerHTML=formatMessage(content);
+    box.scrollTop=box.scrollHeight;
+  }
+  function stopResponse(){
+    if(!responseState.active)return;
+    clearInterval(responseState.timer); responseState.timer=null; responseState.active=false; responseState.stopped=true;
+    const row=$('messages')?.querySelector('.msg.ai.streaming');
+    if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat(); chat.messages.push({role:'ai',content:text,stopped:true}); chat.updated=Date.now(); persistIfNeeded();} row.remove(); renderMessages();}
+    setResponseUI(false); showResponseStatus('Você parou a resposta.'); setTimeout(()=>showResponseStatus(''),3200);
+  }
+  function fakeReply(prompt){
+    const chat=currentChat();
+    const reply='Recebi sua mensagem. O Klipza.IA está pronto para conversar assim que a conexão com a inteligência artificial estiver disponível.';
+    responseState.stopped=false; setResponseUI(true); showResponseStatus('Klipza está respondendo…');
+    let i=0, partial='';
+    responseState.timer=setInterval(()=>{
+      if(responseState.stopped){clearInterval(responseState.timer);return;}
+      partial+=reply[i++]||''; appendStreamingMessage(partial);
+      if(i>=reply.length){
+        clearInterval(responseState.timer); responseState.timer=null;
+        const row=$('messages')?.querySelector('.msg.ai.streaming'); if(row)row.remove();
+        chat.messages.push({role:'ai',content:reply}); chat.updated=Date.now(); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
+        setResponseUI(false); showResponseStatus('');
+      }
+    },28);
+  }
+  function toggleDictation(){
+    if(responseState.active)return;
+    const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SpeechRecognition){alert('O ditado por voz não está disponível neste navegador.');return;}
+    if(dictating){recognition?.stop();return;}
+    recognition=new SpeechRecognition(); recognition.lang='pt-BR'; recognition.interimResults=true; recognition.continuous=true;
+    dictating=true; const mic=$('micBtn'), hint=$('voiceHint'), input=$('prompt');
+    mic.classList.add('listening'); hint.classList.add('show'); input.placeholder='Ouvindo...';
+    let base=input.value.trim();
+    recognition.onresult=e=>{let interim=''; let finalText=''; for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript; if(e.results[i].isFinal)finalText+=t; else interim+=t;} if(finalText){base=(base?base+' ':'')+finalText.trim();} input.value=base+(interim?(base?' ':'')+interim:''); input.dispatchEvent(new Event('input'));};
+    recognition.onerror=()=>endDictation(); recognition.onend=()=>endDictation();
+    recognition.start();
+  }
+  function endDictation(){
+    dictating=false; if(recognition){try{recognition.stop()}catch(e){} recognition=null;}
+    $('micBtn')?.classList.remove('listening'); $('voiceHint')?.classList.remove('show');
+    if($('prompt')){ $('prompt').placeholder='Envie uma mensagem para o Klipza.IA'; $('prompt').dispatchEvent(new Event('input')); }
   }
   function renderMessages(){
     const chat=currentChat(), box=$('messages');
@@ -1078,14 +1105,6 @@ body.prime-modal-open{overflow:hidden}
     animateEnergyChange(energyBefore,state.quota.energy);
     fakeReply(messageText);
   }
-  function fakeReply(prompt){
-    const chat=currentChat();
-    setTimeout(()=>{
-      const reply='Recebi sua mensagem. O Klipza.IA está pronto para conversar assim que a conexão com a inteligência artificial estiver disponível.';
-      chat.messages.push({role:'ai',content:reply}); chat.updated=Date.now(); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
-    },450);
-  }
-
   function openPrimeModal(tab='prime') {
     const modal=$('primeModal'); if(!modal)return;
     modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
@@ -1301,12 +1320,12 @@ body.prime-modal-open{overflow:hidden}
       </div>`;
     } else if(active==='seguranca'||active==='login'){
       content=`<div class="settings-titlebar"><h1>${active==='seguranca'?'Segurança':'Segurança e login'}</h1></div><div class="settings-panel"><div class="settings-group-title">Proteção da conta</div>
-        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sua sessão está conectada pelo Google.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão atual autenticada pelo fluxo Google demo.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação avançada</div><div class="settings-line-desc">2FA e gerenciamento avançado ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
       </div>`;
     } else if(active==='plugins'){
-      content=unavailable('Plugins','Integrações e plugins ainda estão em desenvolvimento. Integrações e conexões estarão disponíveis em breve.');
+      content=unavailable('Plugins','Integrações e plugins ainda estão em desenvolvimento. Nenhuma integração é ativada sem a sua confirmação.');
     } else if(active==='voz'){
       content=unavailable('Voz','Entrada e saída de voz ainda estão em desenvolvimento no Klipza.IA.');
     } else if(active==='faturamento'){
@@ -1357,7 +1376,7 @@ body.prime-modal-open{overflow:hidden}
     window.__klipzaSettingsMobileDetail=false;
     renderSettingsPage();
   }
-  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,toggleAnonymous,toggleAttach,pick,
+  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
     upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack};
   $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
   document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
