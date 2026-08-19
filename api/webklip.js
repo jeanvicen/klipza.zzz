@@ -213,6 +213,13 @@ function mapNewsSearchResults(xml, query) {
   })).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 50);
 }
 
+function mapGitHubSearchResults(data, query) {
+  return mapRepositories(data, 'search').map((item) => ({
+    ...item,
+    relevance: searchRelevance(`${item.title} ${item.summary} ${item.meta}`, query)
+  })).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 50);
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
     response.status(405).json({ error: 'Método não permitido' });
@@ -229,13 +236,22 @@ export default async function handler(request, response) {
       const html = await getText(searchUrl, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' } });
       results = mapDuckDuckGoResults(html, query);
     } catch {}
+    let fallback = results.length ? 'duckduckgo' : null;
     if (!results.length) {
       try {
         const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:7d`)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`;
         results = mapNewsSearchResults(await getText(rssUrl), query);
+        if (results.length) fallback = 'google-news-rss';
       } catch {}
     }
-    response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length, fallback: results.length ? 'google-news-rss' : null });
+    if (!results.length) {
+      try {
+        const githubUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=50`;
+        results = mapGitHubSearchResults(await getJSON(githubUrl, { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'KlipzaWebKlip/1.0' } }), query);
+        if (results.length) fallback = 'github';
+      } catch {}
+    }
+    response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length, fallback });
     return;
   }
 

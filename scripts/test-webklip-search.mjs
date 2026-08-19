@@ -33,9 +33,18 @@ if (search.statusCode === 200) {
   }
 }
 
+const codeSearch = await invoke({ q: 'python game', country: 'BR', language: 'pt-BR' });
+assert.equal(codeSearch.statusCode, 200);
+assert.ok(Array.isArray(codeSearch.payload.items));
+assert.ok(codeSearch.payload.items.length <= 50);
+for (const item of codeSearch.payload.items) {
+  const text = `${item.title} ${item.summary}`.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
+  assert.ok(text.includes('python') || text.includes('game'), `Resultado de código sem correspondência: ${item.title}`);
+}
+
 const noMatch = await invoke({ q: 'klipzaqzxv-resultado-impossivel-92741', country: 'BR', language: 'pt-BR' });
 assert.equal(noMatch.statusCode, 200);
 assert.ok(Array.isArray(noMatch.payload.items));
 assert.equal(noMatch.payload.items.length, 0, 'Consulta sem correspondência não deve receber resultados aleatórios');
 
-console.log(`webklip search OK — feed=${feed.payload.items.length}, search=${search.payload.items.length}, noMatch=${noMatch.payload.items.length}, status=${search.statusCode}`);
+console.log(`webklip search OK — feed=${feed.payload.items.length}, search=${search.payload.items.length}, code=${codeSearch.payload.items.length}, noMatch=${noMatch.payload.items.length}, status=${search.statusCode}`);
