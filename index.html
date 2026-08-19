@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Klipza.IA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{background:#fff;color:#000;height:100vh;overflow:hidden}
+button{cursor:pointer;border:none;background:none;color:inherit;font:inherit}
+input,textarea{font:inherit;outline:none;border:none;background:none;color:inherit}
+
+/* LOGIN */
+#login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:100}
+.login-box{width:380px;text-align:center;padding:40px}
+.logo{font-size:36px;font-weight:700;letter-spacing:-1.5px;margin-bottom:12px}
+.logo span{color:#555}
+.sub{color:#666;font-size:14px;margin-bottom:40px;line-height:1.5}
+.btn-google{width:100%;padding:14px 20px;border:1px solid #000;border-radius:8px;font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:12px;transition:.2s;background:#fff}
+.btn-google:hover{background:#000;color:#fff}
+.btn-google:hover svg path{fill:#fff}
+.btn-google svg{width:20px;height:20px}
+.login-foot{margin-top:32px;font-size:11px;color:#999;line-height:1.6}
+
+/* APP */
+#app{display:none;height:100vh;grid-template-columns:280px 1fr;transition:grid-template-columns .2s}
+#app.sidebar-closed{grid-template-columns:0 1fr}
+#app.sidebar-closed .sidebar{transform:translateX(-100%);opacity:0}
+
+/* SIDEBAR */
+.sidebar{background:#fafafa;border-right:1px solid #e5e5e5;display:flex;flex-direction:column;height:100vh;transition:transform .2s,opacity .2s;overflow:hidden}
+.side-top{padding:14px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side-logo{font-weight:700;font-size:17px;letter-spacing:-.5px;flex:1}
+.icon-btn{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.icon-btn:hover{background:#eee}
+.icon-btn svg{width:16px;height:16px}
+
+.side-tabs{display:flex;border-bottom:1px solid #e5e5e5}
+.side-tab{flex:1;padding:10px;font-size:12px;font-weight:500;color:#666;border-bottom:2px solid transparent;transition:.15s}
+.side-tab.active{color:#000;border-bottom-color:#000}
+.side-tab:hover{background:#f0f0f0}
+
+.side-content{flex:1;overflow-y:auto;padding:8px}
+.chat-item{padding:10px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;margin-bottom:2px;color:#333;transition:.1s;position:relative}
+.chat-item:hover{background:#eee}
+.chat-item.active{background:#000;color:#fff}
+.chat-item .title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-item .actions{display:none;gap:2px;align-items:center}
+.chat-item:hover .actions,.chat-item.active .actions{display:flex}
+.chat-item .act{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;transition:.1s}
+.chat-item .act:hover{background:rgba(255,255,255,.2)}
+.chat-item.active .act:hover{background:rgba(255,255,255,.3)}
+.chat-item:not(.active) .act:hover{background:rgba(0,0,0,.1)}
+
+.rename-input{background:#fff;color:#000;border:1px solid #000;border-radius:4px;padding:2px 6px;font-size:13px;width:100%}
+
+.artifact-item{padding:10px 12px;border-radius:6px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:10px;margin-bottom:4px;color:#333;transition:.1s;border:1px solid #eee}
+.artifact-item:hover{border-color:#000;background:#fff}
+.artifact-item .a-icon{width:28px;height:28px;background:#000;color:#fff;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0}
+.artifact-item .a-info{flex:1;overflow:hidden}
+.artifact-item .a-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.artifact-item .a-meta{font-size:11px;color:#888;margin-top:2px}
+
+.empty-state{padding:30px 20px;text-align:center;color:#999;font-size:12px;line-height:1.6}
+
+.side-bottom{padding:12px;border-top:1px solid #e5e5e5}
+.user-row{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;cursor:pointer;transition:.1s}
+.user-row:hover{background:#eee}
+.avatar{width:34px;height:34px;border-radius:50%;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:13px;flex-shrink:0}
+.user-info{flex:1;overflow:hidden}
+.user-name{font-size:13px;font-weight:500}
+.user-mail{font-size:11px;color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* MAIN */
+.main{display:flex;flex-direction:column;height:100vh;background:#fff;min-width:0}
+.topbar{padding:12px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.topbar-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.topbar h2{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar .hint{font-size:11px;color:#888;flex-shrink:0}
+
+.messages{flex:1;overflow-y:auto;padding:30px 0}
+.msg-wrap{max-width:760px;margin:0 auto;padding:0 24px}
+.msg{display:flex;gap:14px;margin-bottom:28px}
+.msg .av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.msg.user .av{background:#000;color:#fff}
+.msg.ai .av{background:#fff;color:#000;border:1px solid #000}
+.msg-body{flex:1;padding-top:4px;font-size:15px;line-height:1.65;color:#111;min-width:0}
+.msg-body p{margin-bottom:10px}
+.msg-body p:last-child{margin-bottom:0}
+.msg-body code{background:#f0f0f0;padding:2px 5px;border-radius:3px;font-size:13px}
+.msg-body pre{background:#f5f5f5;padding:12px;border-radius:6px;overflow-x:auto;margin:10px 0;border:1px solid #e0e0e0}
+.msg-body pre code{background:none;padding:0}
+.typing{display:inline-flex;gap:4px}
+.typing span{width:6px;height:6px;background:#000;border-radius:50%;animation:b 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-6px);opacity:1}}
+
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;padding:40px}
+.welcome h1{font-size:34px;font-weight:600;letter-spacing:-1px;margin-bottom:10px}
+.welcome p{color:#666;font-size:14px;margin-bottom:30px}
+.suggestions{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:600px;width:100%}
+.sug{padding:14px;border:1px solid #e0e0e0;border-radius:8px;text-align:left;font-size:13px;color:#333;transition:.15s;cursor:pointer}
+.sug:hover{border-color:#000;background:#fafafa}
+
+.input-area{padding:16px 24px 22px;border-top:1px solid #eee;background:#fff}
+.input-box{max-width:760px;margin:0 auto}
+
+/* INPUT COM + EXPANSÍVEL */
+.input-container{border:1px solid #000;border-radius:14px;background:#fff;transition:box-shadow .15s}
+.input-container:focus-within{box-shadow:0 0 0 2px rgba(0,0,0,.1)}
+.input-container.has-attach{border-color:#000}
+
+.attach-panel{display:none;padding:10px 12px;border-bottom:1px solid #eee;animation:slideDown .2s ease}
+.attach-panel.open{display:block}
+@keyframes slideDown{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.attach-grid{display:flex;gap:8px;flex-wrap:wrap}
+.attach-option{flex:1;min-width:120px;padding:12px;border:1px solid #eee;border-radius:10px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:.15s;background:#fff}
+.attach-option:hover{border-color:#000;background:#fafafa}
+.attach-option .ao-icon{width:34px;height:34px;border-radius:8px;background:#000;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.attach-option .ao-icon svg{width:16px;height:16px}
+.attach-option .ao-text{flex:1}
+.attach-option .ao-title{font-size:13px;font-weight:500}
+.attach-option .ao-desc{font-size:11px;color:#888;margin-top:1px}
+
+.attached-list{display:none;padding:8px 12px;border-bottom:1px solid #eee;gap:6px;flex-wrap:wrap}
+.attached-list.has-items{display:flex}
+.attached-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:#f0f0f0;border-radius:6px;font-size:12px}
+.attached-chip .chip-x{cursor:pointer;opacity:.6;font-size:14px}
+.attached-chip .chip-x:hover{opacity:1}
+
+.input-row{display:flex;align-items:flex-end;gap:4px;padding:6px}
+.plus-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;color:#000}
+.plus-btn:hover{background:#f0f0f0}
+.plus-btn.active{background:#000;color:#fff;transform:rotate(45deg)}
+.plus-btn svg{width:18px;height:18px;transition:transform .2s}
+.input-row textarea{flex:1;padding:8px 10px;resize:none;font-size:14px;line-height:1.5;min-height:36px;max-height:200px}
+.send{width:36px;height:36px;background:#000;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
+.send:hover{background:#333}
+.send:disabled{background:#ccc;cursor:not-allowed}
+.footer-note{text-align:center;font-size:11px;color:#999;margin-top:10px}
+
+/* SETTINGS PAGE */
+.settings-page{padding:40px;max-width:680px;margin:0 auto;overflow-y:auto;height:100%}
+.settings-page h1{font-size:24px;font-weight:600;margin-bottom:6px}
+.settings-page .sub{color:#666;font-size:13px;margin-bottom:32px}
+.settings-section{margin-bottom:32px}
+.settings-section h3{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #eee}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid #f5f5f5}
+.setting-row:last-child{border-bottom:none}
+.setting-label{font-size:14px;font-weight:500}
+.setting-desc{font-size:12px;color:#888;margin-top:2px}
+.setting-control input[type=text]{padding:8px 12px;border:1px solid #ddd;border-radius:6px;font-size:13px;width:220px}
+.setting-control input[type=text]:focus{border-color:#000}
+.btn-danger{padding:8px 16px;background:#fff;color:#000;border:1px solid #000;border-radius:6px;font-size:13px;font-weight:500;transition:.15s}
+.btn-danger:hover{background:#000;color:#fff}
+.btn-save{padding:8px 16px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;transition:.15s}
+.btn-save:hover{background:#333}
+.toggle{width:40px;height:22px;background:#ccc;border-radius:11px;position:relative;cursor:pointer;transition:.2s}
+.toggle.on{background:#000}
+.toggle::after{content:"";position:absolute;width:18px;height:18px;background:#fff;border-radius:50%;top:2px;left:2px;transition:.2s}
+.toggle.on::after{left:20px}
+
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#ccc;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#999}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-box">
+    <div class="logo">Klipza<span>.IA</span></div>
+    <div class="sub">Sua inteligência artificial<br>em preto e branco.</div>
+    <button class="btn-google" onclick="oauth()">
+      <svg viewBox="0 0 24 24"><path fill="#000" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#333" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#666" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#999" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continuar com Google
+    </button>
+    <div class="login-foot">Ao continuar, você concorda com os Termos de Uso<br>e a Política de Privacidade do Klipza.IA</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <aside class="sidebar">
+    <div class="side-top">
+      <button class="icon-btn" onclick="toggleSidebar()" title="Fechar menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="side-logo">Klipza.IA</div>
+      <button class="icon-btn" onclick="newChat()" title="Novo chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div class="side-tabs">
+      <button class="side-tab active" data-tab="chats" onclick="switchTab('chats')">Conversas</button>
+      <button class="side-tab" data-tab="artifacts" onclick="switchTab('artifacts')">Artefatos</button>
+    </div>
+    <div class="side-content" id="sideContent"></div>
+    <div class="side-bottom">
+      <div class="user-row" onclick="openSettings()">
+        <div class="avatar" id="avatar">U</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">Usuário</div>
+          <div class="user-mail" id="userMail">user@exemplo.com</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+let user=null, chats={}, artifacts={}, currentId=null, currentTab='chats', currentView='chat', settings={}, attachedFiles=[];
+const $=id=>document.getElementById(id);
+
+function oauth(){
+  user={name:'Usuário Google',email:'usuario@gmail.com'};
+  localStorage.setItem('klipza_user',JSON.stringify(user));
+  enterApp();
+}
+
+function enterApp(){
+  $('login').style.display='none';
+  $('app').style.display='grid';
+  $('userName').textContent=user.name;
+  $('userMail').textContent=user.email;
+  $('avatar').textContent=user.name[0].toUpperCase();
+  chats=JSON.parse(localStorage.getItem('klipza_chats_'+user.email)||'{}');
+  artifacts=JSON.parse(localStorage.getItem('klipza_artifacts_'+user.email)||'{}');
+  settings=JSON.parse(localStorage.getItem('klipza_settings_'+user.email)||'{"darkSidebar":true,"sounds":false}');
+  renderSide();
+  openChatView();
+  if(!Object.keys(chats).length)newChat();
+  else loadChat(Object.keys(chats).sort((a,b)=>chats[b].updated-chats[a].updated)[0]);
+}
+
+function logout(){localStorage.clear();location.reload()}
+
+function toggleSidebar(){$('app').classList.toggle('sidebar-closed')}
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.side-tab').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  renderSide();
+}
+
+function renderSide(){
+  const c=$('sideContent');
+  if(currentTab==='chats'){
+    const ids=Object.keys(chats).sort((a,b)=>chats[b].updated-chats[a].updated);
+    if(!ids.length){c.innerHTML='<div class="empty-state">Nenhuma conversa ainda.<br>Clique em + para começar.</div>';return}
+    c.innerHTML='';
+    ids.forEach(id=>{
+      const ch=chats[id];
+      const d=document.createElement('div');
+      d.className='chat-item'+(id===currentId?' active':'');
+      d.dataset.id=id;
+      d.innerHTML=`<span class="title">${escapeHtml(ch.title)}</span>
+        <div class="actions">
+          <span class="act" onclick="event.stopPropagation();renameChat('${id}')" title="Renomear">✎</span>
+          <span class="act" onclick="event.stopPropagation();delChat('${id}')" title="Apagar">×</span>
+        </div>`;
+      d.onclick=()=>loadChat(id);
+      c.appendChild(d);
+    });
+  }else{
+    const ids=Object.keys(artifacts).sort((a,b)=>artifacts[b].created-artifacts[a].created);
+    if(!ids.length){c.innerHTML='<div class="empty-state">Nenhum artefato criado.<br>Peça ao Klipza para gerar código, textos ou imagens.</div>';return}
+    c.innerHTML='';
+    ids.forEach(id=>{
+      const a=artifacts[id];
+      const d=document.createElement('div');
+      d.className='artifact-item';
+      d.innerHTML=`<div class="a-icon">${a.type==='code'?'{ }':a.type==='image'?'◻':'Aa'}</div>
+        <div class="a-info">
+          <div class="a-name">${escapeHtml(a.name)}</div>
+          <div class="a-meta">${a.type} • ${new Date(a.created).toLocaleDateString('pt-BR')}</div>
+        </div>`;
+      c.appendChild(d);
+    });
+  }
+}
+
+function newChat(){
+  const id='c'+Date.now();
+  chats[id]={title:'Nova conversa',messages:[],updated:Date.now()};
+  currentId=id;currentView='chat';
+  save();renderSide();renderChat();
+}
+
+function loadChat(id){currentId=id;currentView='chat';switchTab('chats');renderSide();renderChat()}
+
+function renameChat(id){
+  const item=document.querySelector(`.chat-item[data-id="${id}"]`);
+  if(!item)return;
+  const title=item.querySelector('.title');
+  const old=chats[id].title;
+  title.innerHTML=`<input class="rename-input" value="${escapeHtml(old)}">`;
+  const inp=title.querySelector('input');
+  inp.focus();inp.select();
+  const finish=()=>{
+    const v=inp.value.trim()||old;
+    chats[id].title=v;save();renderSide();
+  };
+  inp.onblur=finish;
+  inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();finish()}if(e.key==='Escape'){inp.value=old;finish()}};
+  inp.onclick=e=>e.stopPropagation();
+}
+
+function delChat(id){
+  if(!confirm('Apagar esta conversa?'))return;
+  delete chats[id];
+  if(currentId===id){const ids=Object.keys(chats);currentId=ids[0]||null}
+  save();renderSide();
+  if(currentId)renderChat();else newChat();
+}
+
+function save(){
+  localStorage.setItem('klipza_chats_'+user.email,JSON.stringify(chats));
+  localStorage.setItem('klipza_artifacts_'+user.email,JSON.stringify(artifacts));
+  localStorage.setItem('klipza_settings_'+user.email,JSON.stringify(settings));
+}
+
+function openChatView(){
+  currentView='chat';
+  attachedFiles=[];
+  const m=$('main');
+  m.innerHTML=`
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <h2 id="chatTitle">Nova conversa</h2>
+      </div>
+      <span class="hint">Klipza.IA • P&B</span>
+    </div>
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+      <div class="input-box">
+        <div class="input-container" id="inputContainer">
+          <div class="attach-panel" id="attachPanel">
+            <div class="attach-grid">
+              <div class="attach-option" onclick="attach('camera')">
+                <div class="ao-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
+                <div class="ao-text">
+                  <div class="ao-title">Câmera</div>
+                  <div class="ao-desc">Tirar uma foto</div>
+                </div>
+              </div>
+              <div class="attach-option" onclick="attach('photo')">
+                <div class="ao-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                </div>
+                <div class="ao-text">
+                  <div class="ao-title">Fotos</div>
+                  <div class="ao-desc">Escolher da galeria</div>
+                </div>
+              </div>
+              <div class="attach-option" onclick="attach('file')">
+                <div class="ao-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
+                </div>
+                <div class="ao-text">
+                  <div class="ao-title">Arquivo</div>
+                  <div class="ao-desc">PDF, DOC, TXT...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="attached-list" id="attachedList"></div>
+          <div class="input-row">
+            <button class="plus-btn" id="plusBtn" onclick="toggleAttach()" title="Anexar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <textarea id="input" placeholder="Envie uma mensagem..." rows="1"></textarea>
+            <button class="send" id="sendBtn" onclick="send()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="footer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
+      </div>
+    </div>`;
+  $('input').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,200)+'px'});
+  $('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  renderChat();
+}
+
+function toggleAttach(){
+  const panel=$('attachPanel');
+  const btn=$('plusBtn');
+  panel.classList.toggle('open');
+  btn.classList.toggle('active');
+}
+
+function closeAttach(){
+  $('attachPanel').classList.remove('open');
+  $('plusBtn').classList.remove('active');
+}
+
+function renderAttached(){
+  const list=$('attachedList');
+  if(!attachedFiles.length){
+    list.classList.remove('has-items');
+    list.innerHTML='';
+    return;
+  }
+  list.classList.add('has-items');
+  list.innerHTML=attachedFiles.map((f,i)=>`
+    <div class="attached-chip">
+      <span>${f.icon} ${escapeHtml(f.name)}</span>
+      <span class="chip-x" onclick="removeAttached(${i})">×</span>
+    </div>
+  `).join('');
+}
+
+function removeAttached(i){
+  attachedFiles.splice(i,1);
+  renderAttached();
+}
+
+function attach(type){
+  const names={camera:'câmera',photo:'fotos',file:'arquivos'};
+  const icons={camera:'📷',photo:'🖼️',file:'📎'};
+  const inp=document.createElement('input');
+  inp.type='file';
+  if(type==='camera')inp.capture='environment';
+  if(type==='photo')inp.accept='image/*';
+  inp.multiple=type!=='file';
+  inp.onchange=e=>{
+    const files=[...e.target.files];
+    if(!files.length)return;
+    files.forEach(f=>attachedFiles.push({icon:icons[type],name:f.name,type}));
+    renderAttached();
+    closeAttach();
+  };
+  inp.click();
+}
+
+function renderChat(){
+  const m=$('messages');
+  const ch=chats[currentId];
+  if(!ch||!ch.messages.length){
+    $('chatTitle').textContent='Nova conversa';
+    m.innerHTML=`<div class="welcome">
+      <h1>Como posso ajudar?</h1>
+      <p>Converse, pergunte, crie. Tudo em preto e branco.</p>
+      <div class="suggestions">
+        <button class="sug" onclick="useSug(this)">Explique computação quântica de forma simples</button>
+        <button class="sug" onclick="useSug(this)">Escreva um e-mail profissional pedindo aumento</button>
+        <button class="sug" onclick="useSug(this)">Me dê ideias para um projeto de fim de semana</button>
+        <button class="sug" onclick="useSug(this)">Resuma os princípios do estoicismo</button>
+      </div></div>`;
+    return;
+  }
+  $('chatTitle').textContent=ch.title;
+  m.innerHTML='<div class="msg-wrap" id="msgWrap"></div>';
+  const w=$('msgWrap');
+  ch.messages.forEach(msg=>{
+    const d=document.createElement('div');
+    d.className='msg '+msg.role;
+    d.innerHTML=`<div class="av">${msg.role==='user'?user.name[0].toUpperCase():'K'}</div>
+      <div class="msg-body">${formatMsg(msg.content)}</div>`;
+    w.appendChild(d);
+  });
+  m.scrollTop=m.scrollHeight;
+}
+
+function formatMsg(t){
+  t=escapeHtml(t);
+  t=t.replace(/
