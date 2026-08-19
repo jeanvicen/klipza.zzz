@@ -1,0 +1,13 @@
+{
+  "appId": "ia.klipza.app",
+  "appName": "Klipza",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "android": {
+    "backgroundColor": "#ffffff",
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

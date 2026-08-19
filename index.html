@@ -4,12 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
+<meta name="description" content="Klipza.IA: converse, crie e trabalhe com seus arquivos.">
+<meta name="application-name" content="Klipza.IA">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Klipza">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/assets/klipza-mark.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/icon-192.png">
 <title>Klipza.IA</title>
 <style>
 :root{
   --bg:#fff;--panel:#fafafa;--panel2:#f4f4f4;--line:#e5e5e5;--line2:#d8d8d8;
   --text:#111;--muted:#747474;--black:#000;--hover:#f0f0f0;--radius:14px;
   --sidebar:300px;--content:820px;--danger:#b00020;
+  --install-shadow:0 18px 60px rgba(0,0,0,.20);
 }
 body.dark{
   --bg:#0b0b0b;--panel:#111;--panel2:#171717;--line:#262626;--line2:#333;
@@ -21,7 +31,30 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Ar
 button,input,textarea{font:inherit;color:inherit}
 button{border:0;background:transparent;cursor:pointer}
 svg{display:block}
+img{max-width:100%}
 .hidden{display:none!important}
+.brand-lockup{display:flex;align-items:center;gap:8px;min-width:0}
+.brand-symbol{width:28px;height:28px;display:block;flex:0 0 auto}
+.login-brand-lockup{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px}
+.login-brand-lockup .brand-symbol{width:48px;height:48px}
+.login-brand{margin:0}
+.welcome-mark{overflow:hidden}
+.welcome-mark img{width:100%;height:100%;object-fit:cover}
+.install-prompt{position:fixed;left:50%;bottom:max(86px,calc(env(safe-area-inset-bottom) + 76px));z-index:160;width:min(440px,calc(100vw - 28px));transform:translate(-50%,0);padding:13px 14px;border:1px solid var(--black);border-radius:16px;background:var(--bg);color:var(--text);box-shadow:var(--install-shadow);display:flex;align-items:center;gap:11px;animation:installIn .22s cubic-bezier(.23,1,.32,1)}
+.install-prompt.hidden{display:none!important}
+.install-prompt-icon{width:42px;height:42px;border-radius:12px;flex:0 0 auto}
+.install-prompt-copy{min-width:0;flex:1}
+.install-prompt-title{font-size:13px;font-weight:750}
+.install-prompt-sub{font-size:10px;line-height:1.4;color:var(--muted);margin-top:3px}
+.install-prompt-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}
+.install-prompt-button,.install-prompt-dismiss{height:32px;border-radius:9px;font-size:10px;font-weight:700;padding:0 10px;white-space:nowrap}
+.install-prompt-button{background:var(--black);color:var(--bg)}
+.install-prompt-dismiss{border:1px solid var(--line2);background:var(--bg);color:var(--text)}
+.install-prompt-button:active,.install-prompt-dismiss:active{transform:scale(.97)}
+.install-prompt-ios{display:none;margin-top:4px;font-size:10px;color:var(--muted);line-height:1.45}
+.install-prompt.ios .install-prompt-ios{display:block}
+@keyframes installIn{from{opacity:0;transform:translate(-50%,10px) scale(.97)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@media(max-width:720px){.install-prompt{width:min(440px,calc(100vw - 20px));padding:11px;gap:8px}.install-prompt-icon{width:36px;height:36px;border-radius:10px}.install-prompt-title{font-size:12px}.install-prompt-sub{font-size:9px}.install-prompt-button,.install-prompt-dismiss{padding:0 8px;font-size:9px;height:30px}}
 #app.settings-mode{grid-template-columns:0 minmax(0,1fr)}
 #app.settings-mode>.sidebar{transform:translateX(-100%);opacity:0;pointer-events:none}
 
@@ -109,11 +142,63 @@ svg{display:block}
 .welcome-mark{width:54px;height:54px;border:1px solid #111;border-radius:16px;margin:0 auto 18px;display:grid;place-items:center;font-size:20px;font-weight:700}
 .welcome h1{font-size:28px;letter-spacing:-.9px;margin-bottom:8px}
 .welcome p{font-size:13px;color:#777;margin-bottom:24px}
-.suggestions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.suggestion{min-height:72px;border:1px solid var(--line);border-radius:12px;text-align:left;padding:13px;background:var(--bg);transition:.15s}
-.suggestion:hover{border-color:#000;background:#fafafa}
-.suggestion strong{display:block;font-size:12px;margin-bottom:4px}
-.suggestion span{font-size:11px;line-height:1.5;color:#777}
+.welcome-kicker{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:10px}
+.welcome-prompt-wrap{width:min(690px,100%);margin:0 auto}
+.welcome-prompt{width:100%;min-height:84px;border:1px solid var(--line);border-radius:15px;text-align:left;padding:16px 17px;background:var(--bg);transition:border-color .18s,background .18s,transform .18s;display:flex;align-items:center;gap:14px}
+.welcome-prompt:hover{border-color:#000;background:#fafafa;transform:translateY(-1px)}
+.welcome-prompt:active{transform:scale(.99)}
+.welcome-prompt-icon{width:34px;height:34px;border-radius:10px;background:var(--black);color:var(--bg);display:grid;place-items:center;flex:0 0 auto;font-size:14px;font-weight:800}
+.welcome-prompt-copy{min-width:0;flex:1}
+.welcome-prompt-label{font-size:11px;font-weight:750;margin-bottom:5px}
+.welcome-prompt-text{font-size:13px;line-height:1.45;color:var(--muted);display:block}
+.welcome-prompt-meta{font-size:9px;color:#999;margin-top:5px}
+.nav-expand{padding:0 9px 8px}
+.nav-more{height:36px!important;color:var(--muted)!important}
+.nav-more:hover{color:var(--text)!important}
+.nav-more .nav-chevron{font-size:16px;line-height:1;margin-left:auto;transition:transform .18s}
+.nav-more.open .nav-chevron{transform:rotate(180deg)}
+.nav-subnav{display:grid;gap:2px;padding:0 0 0 10px}
+.nav-subnav.hidden{display:none!important}
+.nav-subbtn{height:36px!important;font-size:12px!important}
+.nav-subbtn.active{background:var(--black);color:var(--bg)}
+.webklip-view{height:100%;overflow:auto;padding:28px 20px 60px;background:var(--bg)}
+.webklip-inner{width:min(1120px,100%);margin:0 auto}
+.webklip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
+.webklip-eyebrow{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:750}
+.webklip-title{font-size:28px;letter-spacing:-.8px;margin-top:5px}
+.webklip-subtitle{font-size:12px;line-height:1.55;color:var(--muted);max-width:680px;margin-top:6px}
+.webklip-refresh{height:36px;padding:0 12px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);font-size:11px;font-weight:700;white-space:nowrap}
+.webklip-refresh:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.webklip-meta{font-size:10px;color:var(--muted);margin:0 0 12px}
+.webklip-tabs{display:flex;gap:6px;overflow:auto;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;scrollbar-width:none}
+.webklip-tabs::-webkit-scrollbar{display:none}
+.webklip-tab{height:32px;padding:0 12px;border-radius:8px;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
+.webklip-tab:hover{background:var(--hover);color:var(--text)}
+.webklip-tab.active{background:var(--black);color:var(--bg)}
+.webklip-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.webklip-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:10px;min-height:184px;cursor:pointer;transition:border-color .18s,transform .18s,box-shadow .18s}
+.webklip-card:hover{border-color:#000;transform:translateY(-2px);box-shadow:0 10px 24px rgba(0,0,0,.06)}
+.webklip-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.webklip-tag{font-size:9px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:var(--muted)}
+.webklip-rank{font-size:10px;color:#999}
+.webklip-card-title{font-size:14px;line-height:1.35;font-weight:700;letter-spacing:-.15px}
+.webklip-card-summary{font-size:11px;line-height:1.5;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.webklip-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;font-size:9px;color:#999}
+.webklip-source{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.webklip-arrow{font-size:14px;color:var(--text)}
+.webklip-empty{padding:48px 20px;border:1px dashed var(--line2);border-radius:14px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
+.webklip-loading{display:grid;place-items:center;min-height:220px;color:var(--muted);font-size:12px}
+.webklip-detail{margin-bottom:14px;border:1px solid var(--black);border-radius:16px;padding:18px;background:var(--panel)}
+.webklip-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.webklip-back{height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:10px;font-weight:700}
+.webklip-back:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+.webklip-detail-title{font-size:22px;line-height:1.25;letter-spacing:-.5px}
+.webklip-detail-summary{font-size:13px;line-height:1.65;color:var(--muted);margin-top:10px;white-space:pre-line}
+.webklip-detail-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:17px}
+.webklip-action{height:36px;padding:0 12px;border-radius:9px;background:var(--black);color:var(--bg);font-size:11px;font-weight:700}
+.webklip-action.secondary{background:var(--bg);color:var(--text);border:1px solid var(--line2)}
+.webklip-action.secondary:hover{background:var(--hover)}
+@media(max-width:980px){.webklip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .composer-wrap{padding:12px 16px 16px;flex:0 0 auto}
 .composer{width:min(var(--content),100%);margin:0 auto}
@@ -201,7 +286,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   .topbar{position:relative;z-index:5;padding:0 12px;height:54px}.topbar-right .desktop-only{display:none}
   .messages{padding-top:20px;padding-bottom:18px;min-height:0}.msg-width{width:calc(100% - 24px)}
   .msg{gap:9px;margin-bottom:24px}.msg-content{font-size:14px}.msg-avatar{width:27px;height:27px}
-  .welcome{padding:28px 14px}.welcome h1{font-size:24px}.suggestions{grid-template-columns:1fr}
+  .welcome{padding:28px 14px}.welcome h1{font-size:24px}.welcome-prompt{min-height:78px;padding:13px}.welcome-prompt-text{font-size:12px}.webklip-view{padding:24px 14px 50px}.webklip-head{display:block}.webklip-refresh{margin-top:12px}.webklip-grid{grid-template-columns:1fr}.webklip-detail-title{font-size:19px}
   .composer-wrap{position:relative;z-index:4;padding:10px 9px max(12px,env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line)}
   .composer-box{z-index:6}
   .composer-note{font-size:9px}
@@ -580,7 +665,7 @@ body.prime-modal-open{overflow:hidden}
 
 <div id="login">
   <div class="login-card">
-    <div class="login-brand">Klipza<span>.IA</span></div>
+    <div class="login-brand-lockup"><img class="brand-symbol" src="/assets/klipza-mark.png" alt="" aria-hidden="true"><div class="login-brand">Klipza<span>.IA</span></div></div>
     <div class="login-copy">Entre na sua conta para continuar.</div>
     <button class="google-btn" id="googleBtn">
       <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -601,7 +686,7 @@ body.prime-modal-open{overflow:hidden}
       <button class="icon-btn" id="closeSidebar" title="Fechar histórico" aria-label="Fechar histórico">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
-      <div class="brand">Klipza.IA</div>
+      <div class="brand-lockup"><img class="brand-symbol" src="/assets/klipza-mark.png" alt="" aria-hidden="true"><div class="brand">Klipza.IA</div></div>
       <button class="icon-btn" id="headNew" title="Nova conversa">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       </button>
@@ -614,6 +699,15 @@ body.prime-modal-open{overflow:hidden}
       <button class="nav-btn active" data-view="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.7 8.7 0 0 1-3.8-.87L4 20l.87-3.7A8.7 8.7 0 0 1 4 12a8.5 8.5 0 1 1 16 0v-.5Z"/></svg><span class="nav-label">Conversas</span></button>
       <button class="nav-btn" data-view="artifacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 16h8M8 12h8M8 8h5"/></svg><span class="nav-label">Artefatos</span><span class="nav-count" id="artifactCount">0</span></button>
     </nav>
+    <div class="nav-expand">
+      <button class="nav-btn nav-more" id="webKlipToggle" type="button" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="nav-label">Mais</span><span class="nav-chevron">⌄</span>
+      </button>
+      <div class="nav-subnav hidden" id="webKlipSubnav">
+        <button class="nav-btn nav-subbtn" data-view="webklip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="nav-label">web.klip</span></button>
+      </div>
+    </div>
     <div class="history-head">Histórico</div>
     <div class="history" id="history"></div>
     <div id="sideQuota"></div><div class="side-bottom">
@@ -631,6 +725,18 @@ body.prime-modal-open{overflow:hidden}
 <input class="hidden" id="imageInput" type="file" accept="image/*">
 <input class="hidden" id="cameraInput" type="file" accept="image/*" capture="environment">
 
+<div class="install-prompt hidden" id="installPrompt" role="status" aria-live="polite">
+  <img class="install-prompt-icon" src="/assets/icon-192.png" alt="" aria-hidden="true">
+  <div class="install-prompt-copy">
+    <div class="install-prompt-title">Instalar Klipza</div>
+    <div class="install-prompt-sub">Tenha o Klipza.IA na tela inicial e abra mais rápido.</div>
+    <div class="install-prompt-ios">No iPhone: toque em Compartilhar e depois em “Adicionar à Tela de Início”.</div>
+  </div>
+  <div class="install-prompt-actions">
+    <button class="install-prompt-button" type="button" id="installPromptAction">Instalar</button>
+    <button class="install-prompt-dismiss" type="button" id="installPromptDismiss" aria-label="Fechar aviso de instalação">Agora não</button>
+  </div>
+</div>
 
 <div class="prime-modal" id="primeModal" aria-hidden="true">
   <div class="prime-dialog" role="dialog" aria-modal="true" aria-labelledby="primeModalTitle">
@@ -703,6 +809,60 @@ body.prime-modal-open{overflow:hidden}
   let anonymousMode = false;
   let previousChatId = null;
   let anonymousChat = null;
+  let deferredInstallPrompt = null;
+
+  function isStandalone(){
+    return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  }
+  function isIOS(){
+    return /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !isStandalone();
+  }
+  function hideInstallPrompt(){
+    const prompt=$('installPrompt');
+    if(prompt) prompt.classList.add('hidden');
+  }
+  function showInstallPrompt(force=false){
+    const prompt=$('installPrompt');
+    if(!prompt || isStandalone()) return;
+    if(!force && localStorage.getItem('klipza_install_dismissed_v1')) return;
+    if(!deferredInstallPrompt && !isIOS()) return;
+    prompt.classList.toggle('ios',isIOS());
+    prompt.classList.remove('hidden');
+  }
+  function dismissInstallPrompt(){
+    localStorage.setItem('klipza_install_dismissed_v1','1');
+    hideInstallPrompt();
+  }
+  async function installApp(){
+    if(deferredInstallPrompt){
+      const promptEvent=deferredInstallPrompt;
+      deferredInstallPrompt=null;
+      promptEvent.prompt();
+      try{ await promptEvent.userChoice; }catch(e){}
+      hideInstallPrompt();
+      return;
+    }
+    if(isIOS()){
+      showInstallPrompt(true);
+      return;
+    }
+    alert('A instalação aparecerá quando este navegador reconhecer o Klipza como instalável. Use HTTPS e um navegador atualizado.');
+  }
+  function registerAppShell(){
+    if(!('serviceWorker' in navigator)) return;
+    if(!['https:','http:'].includes(location.protocol)) return;
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+  window.addEventListener('beforeinstallprompt',(event)=>{
+    event.preventDefault();
+    deferredInstallPrompt=event;
+    showInstallPrompt();
+  });
+  window.addEventListener('appinstalled',()=>{
+    deferredInstallPrompt=null;
+    localStorage.removeItem('klipza_install_dismissed_v1');
+    hideInstallPrompt();
+  });
 
   function currentChat(){ return anonymousMode ? anonymousChat : state.chats[activeChatId]; }
   function persistIfNeeded(){ if(!anonymousMode) save(); }
@@ -853,6 +1013,7 @@ body.prime-modal-open{overflow:hidden}
     $('app').classList.toggle('settings-mode',view==='settings');
     if(view==='chat') renderChat();
     if(view==='artifacts') renderArtifactsPage();
+    if(view==='webklip') renderWebKlipPage();
     if(view==='settings'){ window.__klipzaSettingsMobileDetail=false; renderSettingsPage(); }
     if(window.innerWidth<=720) $('app').classList.add('sidebar-collapsed');
   }
@@ -1058,12 +1219,7 @@ body.prime-modal-open{overflow:hidden}
   function renderMessages(){
     const chat=currentChat(), box=$('messages');
     if(!chat.messages.length){
-      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark">K</div><h1>Como posso ajudar?</h1><p>Converse, crie e trabalhe com seus arquivos.</p><div class="suggestions">
-      <button class="suggestion" onclick="window.K.useSuggestion(this.dataset.t)" data-t="Crie uma ideia de projeto para meu fim de semana"><strong>Ideias</strong><span>Crie uma ideia de projeto para meu fim de semana</span></button>
-      <button class="suggestion" onclick="window.K.useSuggestion(this.dataset.t)" data-t="Explique um assunto difícil de forma simples"><strong>Explique</strong><span>Explique um assunto difícil de forma simples</span></button>
-      <button class="suggestion" onclick="window.K.useSuggestion(this.dataset.t)" data-t="Escreva um texto profissional curto"><strong>Escreva</strong><span>Escreva um texto profissional curto</span></button>
-      <button class="suggestion" onclick="window.K.useSuggestion(this.dataset.t)" data-t="Analise este problema e me dê opções"><strong>Analise</strong><span>Analise este problema e me dê opções</span></button>
-      </div></div></div>`; return;
+      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta">Atualiza a cada 25 segundos</span></span><span aria-hidden="true">→</span></button></div></div></div>`; startWelcomeRotator(); return;
     }
     const wrap=document.createElement('div');wrap.className='msg-width';
     chat.messages.forEach(m=>{
@@ -1085,6 +1241,165 @@ body.prime-modal-open{overflow:hidden}
     return s;
   }
   function useSuggestion(t){$('prompt').value=t;$('prompt').dispatchEvent(new Event('input'));$('prompt').focus()}
+
+  const WEBKLIP_CACHE_KEY='klipza_webklip_daily_v2';
+  const WEBKLIP_ROTATION_MS=25000;
+  let welcomeRotatorTimer=null;
+  let welcomePromptIndex=0;
+  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null};
+  const WELCOME_PROMPTS=[
+    'O que está mudando no mundo da tecnologia hoje?',
+    'Quais projetos de código aberto estão ganhando atenção?',
+    'Que jogos e experiências interativas estão surgindo?',
+    'Quais ideias de design estão aparecendo na web?',
+    'Mostre as principais notícias globais sem fofoca de celebridades.'
+  ];
+  const BLOCKED_NEWS_TERMS=['celebridade','celebridades','famoso','famosa','famosos','influencer','influenciador','influenciadora','hollywood','reality show','red carpet','namoro de','casamento de','separação de','rapper','cantor','cantora','ator','atriz','youtuber','tiktoker','celebrity','influencer','hollywood','gossip','entertainment','executor','activator','activation','without subscription','no subscription','crack','keygen','piracy','pirated','torrent','cheat','aimbot','stealer','malware','ransomware','phishing','credential','token grabber','password dump','bypass','no more refusals','auto claim points','nsfw','porn'];
+
+  function localDayKey(date=new Date()){
+    const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
+    return local.toISOString().slice(0,10);
+  }
+  function greetingCopy(){
+    const hour=new Date().getHours();
+    if(hour<12)return {kicker:'Bom dia',title:'O que vamos fazer hoje?',sub:'Descubra as novidades do mundo e transforme uma referência em conversa.'};
+    if(hour<18)return {kicker:'Boa tarde',title:'O que vamos construir hoje?',sub:'Encontre novidades, referências e ideias no web.klip.'};
+    return {kicker:'Boa noite',title:'O que vamos explorar hoje?',sub:'Veja o que movimentou o mundo e continue a conversa no Klipza.'};
+  }
+  function setWelcomeCopy(){
+    const copy=greetingCopy();
+    if($('welcomeKicker'))$('welcomeKicker').textContent=copy.kicker;
+    if($('welcomeTitle'))$('welcomeTitle').textContent=copy.title;
+    if($('welcomeSub'))$('welcomeSub').textContent=copy.sub;
+  }
+  function paintWelcomePrompt(){
+    const text=WELCOME_PROMPTS[welcomePromptIndex%WELCOME_PROMPTS.length];
+    if($('welcomePromptText'))$('welcomePromptText').textContent=text;
+    if($('welcomePromptMeta'))$('welcomePromptMeta').textContent=`Troca a cada 25 segundos · ${welcomePromptIndex+1}/${WELCOME_PROMPTS.length}`;
+  }
+  function startWelcomeRotator(){
+    clearInterval(welcomeRotatorTimer);
+    setWelcomeCopy();
+    paintWelcomePrompt();
+    welcomeRotatorTimer=setInterval(()=>{
+      if(currentView!=='chat' || !$('welcomePrompt')){clearInterval(welcomeRotatorTimer);return;}
+      welcomePromptIndex=(welcomePromptIndex+1)%WELCOME_PROMPTS.length;
+      paintWelcomePrompt();
+    },WEBKLIP_ROTATION_MS);
+  }
+  function useWelcomePrompt(){
+    const prompt=$('welcomePromptText')?.textContent||WELCOME_PROMPTS[0];
+    useSuggestion(`Pesquise no web.klip: ${prompt}`);
+  }
+  function toggleWebKlipMenu(){
+    const button=$('webKlipToggle'), submenu=$('webKlipSubnav');
+    if(!button||!submenu)return;
+    const open=submenu.classList.toggle('hidden')===false;
+    button.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));
+  }
+  function webKlipCacheRead(){
+    try{const raw=localStorage.getItem(WEBKLIP_CACHE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
+  }
+  function webKlipCacheWrite(payload){try{localStorage.setItem(WEBKLIP_CACHE_KEY,JSON.stringify(payload));}catch(e){}}
+  function cleanText(value){return String(value||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();}
+  function blockedNews(title){const normalized=cleanText(title).toLowerCase();return BLOCKED_NEWS_TERMS.some(term=>normalized.includes(term));}
+  function webKlipId(prefix,value){return `${prefix}_${btoa(unescape(encodeURIComponent(String(value)))).replace(/[^a-z0-9]/gi,'').slice(0,18)}`;}
+  function webKlipDateLabel(value){
+    if(!value)return 'Hoje';
+    const date=new Date(value);
+    if(Number.isNaN(date.getTime()))return 'Hoje';
+    return date.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric'});
+  }
+  function fallbackWebKlipItems(){
+    return [
+      {id:'fallback_news',category:'news',title:'O web.klip está preparando o pacote público do dia',summary:'As fontes públicas ainda não responderam. Atualize novamente para buscar novidades globais sem inventar manchetes.',source:'Klipza · fallback',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_code',category:'code',title:'Projetos abertos para explorar',summary:'Quando a API do GitHub estiver disponível, esta categoria mostrará projetos públicos recentes, descrição, linguagem e sinais de interesse.',source:'GitHub · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_games',category:'games',title:'Novos jogos e experiências interativas',summary:'A categoria de jogos usa projetos públicos e referências técnicas; não inclui fofoca ou notícias de pessoas famosas.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_design',category:'design',title:'Referências de design para criar melhor',summary:'A categoria de design reunirá ferramentas, sistemas visuais e projetos publicados na web.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true}
+    ];
+  }
+  async function fetchJSON(url,options={}){
+    const response=await fetch(url,{...options,headers:{Accept:'application/json',...(options.headers||{})}});
+    if(!response.ok)throw new Error(`Fonte respondeu ${response.status}`);
+    return response.json();
+  }
+  function normalizeGdelt(data){
+    const articles=Array.isArray(data?.articles)?data.articles:[];
+    return articles.filter(article=>article?.title&&!blockedNews(article.title)).map((article,index)=>({
+      id:webKlipId('news',article.url||article.title+index),category:'news',title:cleanText(article.title),summary:`Cobertura recente em ${cleanText(article.domain||'fonte pública')}. Abra para ver o contexto e continuar a pesquisa no chat.`,source:cleanText(article.domain||article.language||'GDELT'),url:article.url||'',date:article.seendate||new Date().toISOString(),image:article.socialimage||''
+    }));
+  }
+  function normalizeGithub(data,category){
+    const repos=Array.isArray(data?.items)?data.items:[];
+    return repos.filter(repo=>repo?.name&&repo?.html_url&&!blockedNews(`${repo.full_name||repo.name} ${repo.description||''}`)).map(repo=>({
+      id:webKlipId(category,repo.html_url),category,title:repo.full_name||repo.name,summary:cleanText(repo.description)||'Projeto público sem descrição informada.',source:`GitHub · ${repo.language||'open source'}`,url:repo.html_url,date:repo.created_at||repo.updated_at||new Date().toISOString(),meta:`${repo.stargazers_count||0} estrelas · ${repo.language||'código aberto'}`
+    }));
+  }
+  async function fetchWebKlipItems(){
+    const today=localDayKey();
+    const cached=webKlipCacheRead();
+    if(cached?.dayKey===today&&Array.isArray(cached.items)&&cached.items.length){webKlipState={...webKlipState,dayKey:today,items:cached.items,loading:false,error:null};if(currentView==='webklip')renderWebKlipPage();return;}
+    webKlipState={...webKlipState,dayKey:today,loading:true,error:null,selected:null};
+    if(currentView==='webklip')renderWebKlipPage();
+    try{
+      const data=await fetchJSON(`/api/webklip?date=${encodeURIComponent(today)}`);
+      const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>!blockedNews(`${item.title||''} ${item.summary||''} ${item.source||''}`)).slice(0,50);
+      const safeItems=items.length?items:fallbackWebKlipItems();
+      const error=items.length?'': 'O endpoint diário não encontrou itens públicos agora; mostrando estado de fallback.';
+      webKlipState={...webKlipState,dayKey:today,items:safeItems,loading:false,error};
+      webKlipCacheWrite({dayKey:today,items:safeItems,savedAt:Date.now()});
+    }catch(apiError){
+      const day=new Date();day.setDate(day.getDate()-1);const yyyyMMdd=day.toISOString().slice(0,10);
+      const githubBase='https://api.github.com/search/repositories?sort=stars&order=desc&per_page=16&';
+      const queries={code:`q=created%3A%3E%3D${yyyyMMdd}+language%3AJavaScript`,games:`q=created%3A%3E%3D${yyyyMMdd}+topic%3Agame-development`,design:`q=created%3A%3E%3D${yyyyMMdd}+topic%3Adesign`};
+      const results=await Promise.allSettled([fetchJSON(githubBase+queries.code),fetchJSON(githubBase+queries.games),fetchJSON(githubBase+queries.design)]);
+      const code=results[0].status==='fulfilled'?normalizeGithub(results[0].value,'code'):[];
+      const games=results[1].status==='fulfilled'?normalizeGithub(results[1].value,'games'):[];
+      const design=results[2].status==='fulfilled'?normalizeGithub(results[2].value,'design'):[];
+      const unique=[];const seen=new Set();
+      [...games,...code,...design].forEach(item=>{if(!seen.has(item.url||item.id)&&unique.length<50){seen.add(item.url||item.id);unique.push(item);}});
+      const items=unique.length?unique:fallbackWebKlipItems();
+      const error=unique.length?'Notícias diárias exigem endpoint server-side; mostrando fontes públicas de projetos enquanto ele não estiver publicado.':'As fontes públicas não responderam agora; mostrando estado de fallback.';
+      webKlipState={...webKlipState,dayKey:today,items,loading:false,error};
+      webKlipCacheWrite({dayKey:today,items,savedAt:Date.now()});
+    }
+    if(currentView==='webklip')renderWebKlipPage();
+  }
+  function webKlipCategoryLabel(category){return ({all:'Tudo',news:'Notícias',games:'Jogos',code:'Código',design:'Design'})[category]||category;}
+  function webKlipFilteredItems(){return webKlipState.category==='all'?webKlipState.items:webKlipState.items.filter(item=>item.category===webKlipState.category);}
+  function webKlipItemHTML(item,index){return `<article class="webklip-card" data-webklip-id="${esc(item.id)}"><div class="webklip-card-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))}</span><span class="webklip-rank">#${index+1}</span></div><div class="webklip-card-title">${esc(item.title)}</div><div class="webklip-card-summary">${esc(item.summary)}</div><div class="webklip-card-foot"><span class="webklip-source">${esc(item.source||'Fonte pública')}</span><span class="webklip-arrow">→</span></div></article>`;}
+  function renderWebKlipPage(){
+    const items=webKlipFilteredItems();
+    $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()" title="Abrir histórico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">web.klip</div></div></header><section class="webklip-view"><div class="webklip-inner"><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · pesquisa diária</div><h1 class="webklip-title">web.klip</h1><p class="webklip-subtitle">As novidades públicas mais relevantes do dia em notícias globais, jogos, código e design. Celebridades e fofoca ficam fora do filtro.</p></div><button class="webklip-refresh" id="webKlipRefresh" type="button">Atualizar agora</button></div><div class="webklip-meta">${webKlipState.loading?'Buscando fontes públicas…':`${items.length} item(ns) disponíveis · pacote de ${webKlipState.dayKey||localDayKey()}`}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div><div class="webklip-tabs">${['all','news','games','code','design'].map(category=>`<button class="webklip-tab ${webKlipState.category===category?'active':''}" type="button" data-webklip-category="${category}">${webKlipCategoryLabel(category)}</button>`).join('')}</div>${webKlipState.loading?'<div class="webklip-loading">Consultando o web.klip…</div>':items.length?`<div class="webklip-grid">${items.map(webKlipItemHTML).join('')}</div>`:'<div class="webklip-empty">Nenhum item disponível ainda. Tente atualizar novamente.</div>'}</div></section>`;
+    $('webKlipRefresh')?.addEventListener('click',refreshWebKlip);
+    document.querySelectorAll('[data-webklip-category]').forEach(button=>button.addEventListener('click',()=>{webKlipState.category=button.dataset.webklipCategory;renderWebKlipPage();}));
+    document.querySelectorAll('[data-webklip-id]').forEach(card=>card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId)));
+    if(!webKlipState.items.length&&!webKlipState.loading)fetchWebKlipItems();
+  }
+  function openWebKlipItem(id){
+    const item=webKlipState.items.find(entry=>entry.id===id);if(!item)return;
+    webKlipState.selected=item;
+    const card=document.querySelector(`[data-webklip-id="${CSS.escape(id)}"]`);if(card)card.scrollIntoView({block:'center',behavior:'smooth'});
+    const summary=`${item.summary}${item.meta?`\n\n${item.meta}`:''}`;
+    const detail=document.createElement('section');detail.className='webklip-detail';detail.innerHTML=`<div class="webklip-detail-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))} · ${esc(item.source||'Fonte pública')}</span><button class="webklip-back" type="button">Fechar</button></div><h2 class="webklip-detail-title">${esc(item.title)}</h2><p class="webklip-detail-summary">${esc(summary)}</p><div class="webklip-detail-actions"><button class="webklip-action" type="button" id="webKlipSendReference">Codar com referência</button>${item.url?`<a class="webklip-action secondary" href="${esc(item.url)}" target="_blank" rel="noopener noreferrer">Abrir fonte</a>`:''}</div>`;
+    const view=document.querySelector('.webklip-view .webklip-inner');if(!view)return;view.prepend(detail);detail.querySelector('.webklip-back').addEventListener('click',()=>detail.remove());detail.querySelector('#webKlipSendReference')?.addEventListener('click',()=>sendWebKlipToChat(item));detail.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function sendWebKlipToChat(item){
+    setView('chat');
+    const input=$('prompt');if(!input)return;
+    input.value=`Quero continuar esta referência do web.klip no chat.\n\nTítulo: ${item.title}\nCategoria: ${webKlipCategoryLabel(item.category)}\nResumo: ${item.summary}\nFonte: ${item.url||item.source||'fonte pública'}`;
+    input.dispatchEvent(new Event('input'));input.focus();
+  }
+  function refreshWebKlip(){
+    const today=localDayKey();
+    webKlipState={...webKlipState,dayKey:null,items:[],selected:null,loading:false,error:null};
+    try{localStorage.removeItem(WEBKLIP_CACHE_KEY);}catch(e){}
+    renderWebKlipPage();
+    fetchWebKlipItems();
+  }
+  setInterval(()=>{
+    if(currentView==='webklip'&&webKlipState.dayKey&&webKlipState.dayKey!==localDayKey())fetchWebKlipItems();
+  },60000);
 
   function send(){
     ensureQuota();
@@ -1212,6 +1527,7 @@ body.prime-modal-open{overflow:hidden}
     const ini=initials(state.user?.name||'K');
     const items=[
       ['geral','Geral','M0 0'],
+      ['instalacao','Instalação','M12 16V4M7 9l5-5 5 5M5 20h14'],
       ['energia','Energia','M12 3a9 9 0 1 0 9 9h-9z'],
       ['notificacoes','Notificações','M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'],
       ['personalizacao','Personalização','M12 3v18M3 12h18'],
@@ -1229,7 +1545,7 @@ body.prime-modal-open{overflow:hidden}
     ];
     const active=window.__klipzaSettingsSection||'geral';
     function icon(path){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path==='M0 0'?'':''}<path d="${path}"/></svg>`}
-    const menu=items.map(([id,label,path])=>`<button type="button" class="settings-item ${active===id?'active':''}" data-setting="${id}">${icon(path)}<span>${label}</span>${id!=='geral'&&id!=='energia'&&id!=='conta'&&id!=='dados'&&id!=='armazenamento'&&id!=='seguranca'&&id!=='login'&&id!=='personalizacao'&&id!=='notificacoes'&&id!=='teclado'?'<span class="soon">Em breve</span>':''}</button>`).join('');
+    const menu=items.map(([id,label,path])=>`<button type="button" class="settings-item ${active===id?'active':''}" data-setting="${id}">${icon(path)}<span>${label}</span>${id!=='geral'&&id!=='instalacao'&&id!=='energia'&&id!=='conta'&&id!=='dados'&&id!=='armazenamento'&&id!=='seguranca'&&id!=='login'&&id!=='personalizacao'&&id!=='notificacoes'&&id!=='teclado'?'<span class="soon">Em breve</span>':''}</button>`).join('');
     const unavailable=(title,desc='Este recurso ainda não está disponível no Klipza.IA.')=>`
       <div class="settings-titlebar"><h1>${title}</h1></div>
       <div class="settings-panel">
@@ -1257,6 +1573,14 @@ body.prime-modal-open{overflow:hidden}
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Inteligência avançada</div><div class="settings-line-desc">Recurso ainda em desenvolvimento.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em desenvolvimento</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Ativar ditado</div><div class="settings-line-desc">Entrada por voz ainda não disponível.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em breve</span></div></div>
         </div>`;
+    } else if(active==='instalacao'){
+      const installed=isStandalone();
+      const ios=isIOS();
+      content=`<div class="settings-titlebar"><h1>Instalação</h1></div><div class="settings-panel"><div class="settings-group-title">Klipza no seu dispositivo</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Status</div><div class="settings-line-desc">${installed?'O Klipza já está instalado como aplicativo.':'Instale o Klipza.IA na tela inicial para abrir com mais rapidez e ocupar a tela inteira.'}</div></div><div class="settings-line-value"><span class="settings-badge">${installed?'Instalado':'Disponível'}</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Instalar Klipza</div><div class="settings-line-desc">${ios?'No iPhone ou iPad, use o menu Compartilhar e escolha “Adicionar à Tela de Início”.':'Use o botão abaixo quando o navegador oferecer a instalação.'}</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.showInstallPrompt(true)">${installed?'Abrir instruções':'Instalar agora'}</button></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Segurança do pacote</div><div class="settings-line-desc">O PWA usa HTTPS, manifesto próprio e service worker com escopo limitado ao domínio.</div></div><div class="settings-line-value"><span class="settings-badge">Ativo</span></div></div>
+      </div>`;
     } else if(active==='personalizacao'){
       content=`
         <div class="settings-titlebar"><h1>Personalização</h1></div>
@@ -1377,16 +1701,20 @@ body.prime-modal-open{overflow:hidden}
     renderSettingsPage();
   }
   window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
-    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack};
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat};
   $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
+  $('installPromptAction').addEventListener('click',installApp);$('installPromptDismiss').addEventListener('click',dismissInstallPrompt);
   document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
   const primeModal=$('primeModal');
   if(primeModal){ primeModal.addEventListener('click',e=>{if(e.target===primeModal)closePrimeModal();}); }
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();});
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+  $('webKlipToggle')?.addEventListener('click',toggleWebKlipMenu);
   setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 1000);
   applyTheme();
+  registerAppShell();
   if(state.user) enter();
+  if(isIOS()) showInstallPrompt();
 })();
 </script>
 </body>

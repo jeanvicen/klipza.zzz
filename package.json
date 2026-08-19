@@ -1,0 +1,25 @@
+{
+  "name": "klipza-ia",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Klipza.IA — aplicativo web instalável e pacote Android.",
+  "type": "module",
+  "scripts": {
+    "build:web": "node scripts/build-web.mjs",
+    "cap:sync": "pnpm build:web && cap sync android",
+    "android:debug": "pnpm cap:sync && cd android && ./gradlew assembleDebug",
+    "android:release": "pnpm cap:sync && cd android && ./gradlew assembleRelease",
+    "check:html": "node scripts/check-html.mjs"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3",
+    "typescript": "^7.0.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
