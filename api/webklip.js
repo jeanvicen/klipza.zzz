@@ -173,6 +173,15 @@ function mapDuckDuckGoResults(html) {
   }).slice(0, 50);
 }
 
+function mapNewsSearchResults(xml) {
+  return mapGoogleNews(xml).map((item) => ({
+    ...item,
+    id: idFor('search', item.url || item.title),
+    category: 'search',
+    summary: `${item.summary} Abra a fonte original para continuar a leitura.`
+  })).slice(0, 50);
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
     response.status(405).json({ error: 'Método não permitido' });
@@ -183,14 +192,19 @@ export default async function handler(request, response) {
   const locale = resolveLocale(request.query?.country, request.query?.language);
   response.setHeader('Cache-Control', query ? 's-maxage=300, stale-while-revalidate=900' : 's-maxage=900, stale-while-revalidate=3600');
   if (query) {
+    let results=[];
     try {
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(locale.gl.toLowerCase())}`;
       const html = await getText(searchUrl, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' } });
-      const results = mapDuckDuckGoResults(html);
-      response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length });
-    } catch (error) {
-      response.status(502).json({ error: 'A pesquisa pública está indisponível no momento.', query, items: [], count: 0 });
+      results = mapDuckDuckGoResults(html);
+    } catch {}
+    if (!results.length) {
+      try {
+        const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:7d`)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`;
+        results = mapNewsSearchResults(await getText(rssUrl));
+      } catch {}
     }
+    response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length, fallback: results.length ? 'google-news-rss' : null });
     return;
   }
 

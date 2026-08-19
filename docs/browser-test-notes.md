@@ -31,3 +31,7 @@ A leitura computada confirmou fundo `rgb(42, 42, 42)` para o tema escuro, coeren
 ## Microfone
 
 No Chromium de sandbox, o clique no microfone não exibiu texto de transcrição nem painel de escuta, provavelmente porque o ambiente de teste não disponibiliza o reconhecimento de voz. A home permaneceu estável, sem erros visuais. A lógica implementada mantém o painel e a sessão protegida para navegadores que expõem `SpeechRecognition`; a disponibilidade real de áudio deve ser confirmada em um celular com permissão de microfone.
+
+## Verificação pública pós-push
+
+A página pública `https://klipza-zzz.vercel.app/` carregou. A chamada pública `/api/webklip?q=open%20source%20javascript&country=BR&language=pt-BR` respondeu HTTP 200, mas o payload observado ainda tinha o formato antigo de feed (`dayKey`, itens de categorias e sem `query`), indicando que o deploy automático ainda não havia propagado o commit `05eff3e` ou que a resposta estava em cache. O endpoint local do commit novo foi validado separadamente com pesquisa real e retornou resultados de categoria `search`; é necessário confirmar a propagação antes de afirmar que a busca já está ativa em produção.
