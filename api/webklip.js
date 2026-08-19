@@ -8,7 +8,11 @@ const BLOCKED_TERMS = [
   'password dump', 'bypass', 'no more refusals', 'auto claim points', 'nsfw', 'porn'
 ];
 
-const NEWS_TERMS = ['celebrity', 'celebrities', 'gossip', 'entertainment', 'hollywood', 'celebridade', 'famosos', 'fofoca'];
+const NEWS_TERMS = [
+  'celebrity', 'celebrities', 'gossip', 'entertainment', 'hollywood', 'celebridade', 'famosos', 'fofoca',
+  'reality show', 'trailer', 'actor', 'actress', 'singer', 'album', 'film', 'movie', 'music', 'television',
+  'netflix', 'oscar', 'grammy', 'red carpet', 'award season', 'showbiz', 'celebrity drama', 'star-studded'
+];
 
 function cleanText(value) {
   return String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
@@ -122,7 +126,7 @@ export default async function handler(request, response) {
   const yesterday = new Date(`${today}T00:00:00`);
   yesterday.setDate(yesterday.getDate() - 1);
   const since = yesterday.toISOString().slice(0, 10);
-  const gdeltQuery = encodeURIComponent('(technology OR science OR climate OR global OR business) NOT celebrity');
+  const gdeltQuery = encodeURIComponent('(technology OR science OR climate OR global OR business) NOT celebrity NOT entertainment NOT hollywood');
   const githubBase = 'https://api.github.com/search/repositories?sort=stars&order=desc&per_page=20&';
   const sources = {
     news: `https://news.google.com/rss/search?q=${encodeURIComponent('world OR science OR technology OR climate OR business when:1d')}&hl=en-US&gl=US&ceid=US:en`,
