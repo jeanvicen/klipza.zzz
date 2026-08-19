@@ -25,8 +25,10 @@ if (manifest.name !== 'Klipza.IA' || manifest.icons.length < 2 || manifest.displ
 
 for (const marker of [
   'id="webKlipToggle"',
-  'id="webKlipModal"',
   'webKlipSearchInput',
+  'id="webKlipBack"',
+  'webklip-iframe',
+  'WEBKLIP_PAGE_SIZE=18',
   'WEBKLIP_ROTATION_MS=25000',
   'WEBKLIP_CACHE_KEY=\'klipza_webklip_daily_v2\'',
   '/api/webklip?date=',

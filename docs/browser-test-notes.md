@@ -35,3 +35,15 @@ No Chromium de sandbox, o clique no microfone não exibiu texto de transcrição
 ## Verificação pública pós-push
 
 A página pública `https://klipza-zzz.vercel.app/` carregou. A chamada pública `/api/webklip?q=open%20source%20javascript&country=BR&language=pt-BR` respondeu HTTP 200, mas o payload observado ainda tinha o formato antigo de feed (`dayKey`, itens de categorias e sem `query`), indicando que o deploy automático ainda não havia propagado o commit `05eff3e` ou que a resposta estava em cache. O endpoint local do commit novo foi validado separadamente com pesquisa real e retornou resultados de categoria `search`; é necessário confirmar a propagação antes de afirmar que a busca já está ativa em produção.
+
+## Correção da aba interna — teste inicial
+
+Após recuperar o repositório completo, o app local carregou e o login demo abriu a home normalmente. O botão Mais está presente na barra lateral e a conversa inicial continua intacta. A nova versão removeu o bloco HTML do modal web.klip legado; o próximo teste é clicar em Mais e depois em web.klip para validar a navegação interna.
+
+## Aba interna funcionando
+
+O submenu Mais abriu corretamente e exibiu web.klip. O clique agora mudou imediatamente o `main` para uma aba interna com barra superior, botão `Voltar ao chat`, região/idioma, campo de pesquisa, atalhos de IA, categorias e estado de carregamento. Não apareceu o modal antigo nem o botão X conflitante; a conversa continua preservada na lateral.
+
+O feed agora renderiza 18 cards inicialmente e mostra `Carregar mais 18`, reduzindo o custo de DOM. O card abriu detalhe compacto com `Abrir dentro do Klipza`; o clique mudou para a tela `Navegação interna` com Voltar/Início e iframe, sem nova aba. A fonte GitHub exibiu o estado de bloqueio de incorporação do próprio site, enquanto o app permaneceu aberto e navegável.
+
+O botão Voltar da página interna retornou ao feed na mesma aba. A pesquisa também permaneceu dentro de web.klip e mostrou o estado vazio sem travar; no servidor estático local, a rota API não existe, então o teste visual exibiu indisponibilidade. O endpoint server-side do projeto continua sendo a fonte usada no deploy e no APK.
