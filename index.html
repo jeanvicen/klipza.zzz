@@ -837,9 +837,14 @@ body.prime-modal-open{overflow:hidden}
     if(deferredInstallPrompt){
       const promptEvent=deferredInstallPrompt;
       deferredInstallPrompt=null;
-      promptEvent.prompt();
-      try{ await promptEvent.userChoice; }catch(e){}
-      hideInstallPrompt();
+      try{
+        await promptEvent.prompt();
+        await promptEvent.userChoice;
+      }catch(e){
+        console.warn('O prompt nativo de instalação não pôde ser concluído.',e);
+      }finally{
+        hideInstallPrompt();
+      }
       return;
     }
     if(isIOS()){
@@ -1318,6 +1323,11 @@ body.prime-modal-open{overflow:hidden}
       {id:'fallback_design',category:'design',title:'Referências de design para criar melhor',summary:'A categoria de design reunirá ferramentas, sistemas visuais e projetos publicados na web.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true}
     ];
   }
+  function ensureNewsItem(items,error=''){
+    if(items.some(item=>item.category==='news'))return {items,error};
+    const unavailable={id:'news_source_unavailable',category:'news',title:'Notícias globais aguardando fonte',summary:'A fonte jornalística pública não respondeu neste momento. Atualize novamente quando o endpoint server-side estiver disponível; nenhuma manchete foi inventada.',source:'Klipza · fonte indisponível',url:'',date:new Date().toISOString(),fallback:true};
+    return {items:[...items,unavailable],error:error||'A fonte de notícias está indisponível neste momento; mostrando estado transparente.'};
+  }
   async function fetchJSON(url,options={}){
     const response=await fetch(url,{...options,headers:{Accept:'application/json',...(options.headers||{})}});
     if(!response.ok)throw new Error(`Fonte respondeu ${response.status}`);
@@ -1338,16 +1348,16 @@ body.prime-modal-open{overflow:hidden}
   async function fetchWebKlipItems(){
     const today=localDayKey();
     const cached=webKlipCacheRead();
-    if(cached?.dayKey===today&&Array.isArray(cached.items)&&cached.items.length){webKlipState={...webKlipState,dayKey:today,items:cached.items,loading:false,error:null};if(currentView==='webklip')renderWebKlipPage();return;}
+    if(cached?.dayKey===today&&Array.isArray(cached.items)&&cached.items.length){const cachedReady=ensureNewsItem(cached.items);webKlipState={...webKlipState,dayKey:today,items:cachedReady.items,loading:false,error:cachedReady.error};if(currentView==='webklip')renderWebKlipPage();return;}
     webKlipState={...webKlipState,dayKey:today,loading:true,error:null,selected:null};
     if(currentView==='webklip')renderWebKlipPage();
     try{
       const data=await fetchJSON(`/api/webklip?date=${encodeURIComponent(today)}`);
       const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>!blockedNews(`${item.title||''} ${item.summary||''} ${item.source||''}`)).slice(0,50);
-      const safeItems=items.length?items:fallbackWebKlipItems();
-      const error=items.length?'': 'O endpoint diário não encontrou itens públicos agora; mostrando estado de fallback.';
-      webKlipState={...webKlipState,dayKey:today,items:safeItems,loading:false,error};
-      webKlipCacheWrite({dayKey:today,items:safeItems,savedAt:Date.now()});
+      const baseItems=items.length?items:fallbackWebKlipItems();
+      const ready=ensureNewsItem(baseItems,items.length?'':'O endpoint diário não encontrou itens públicos agora; mostrando estado de fallback.');
+      webKlipState={...webKlipState,dayKey:today,items:ready.items,loading:false,error:ready.error};
+      webKlipCacheWrite({dayKey:today,items:ready.items,savedAt:Date.now()});
     }catch(apiError){
       const day=new Date();day.setDate(day.getDate()-1);const yyyyMMdd=day.toISOString().slice(0,10);
       const githubBase='https://api.github.com/search/repositories?sort=stars&order=desc&per_page=16&';
@@ -1358,10 +1368,10 @@ body.prime-modal-open{overflow:hidden}
       const design=results[2].status==='fulfilled'?normalizeGithub(results[2].value,'design'):[];
       const unique=[];const seen=new Set();
       [...games,...code,...design].forEach(item=>{if(!seen.has(item.url||item.id)&&unique.length<50){seen.add(item.url||item.id);unique.push(item);}});
-      const items=unique.length?unique:fallbackWebKlipItems();
-      const error=unique.length?'Notícias diárias exigem endpoint server-side; mostrando fontes públicas de projetos enquanto ele não estiver publicado.':'As fontes públicas não responderam agora; mostrando estado de fallback.';
-      webKlipState={...webKlipState,dayKey:today,items,loading:false,error};
-      webKlipCacheWrite({dayKey:today,items,savedAt:Date.now()});
+      const baseItems=unique.length?unique:fallbackWebKlipItems();
+      const ready=ensureNewsItem(baseItems,unique.length?'Notícias diárias exigem endpoint server-side; mostrando fontes públicas de projetos enquanto ele não estiver publicado.':'As fontes públicas não responderam agora; mostrando estado de fallback.');
+      webKlipState={...webKlipState,dayKey:today,items:ready.items,loading:false,error:ready.error};
+      webKlipCacheWrite({dayKey:today,items:ready.items,savedAt:Date.now()});
     }
     if(currentView==='webklip')renderWebKlipPage();
   }

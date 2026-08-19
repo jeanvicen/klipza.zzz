@@ -9,6 +9,7 @@ new Function(match[1]);
 
 for (const file of [
   'manifest.webmanifest',
+  'vercel.json',
   'sw.js',
   'assets/klipza-mark.png',
   'assets/icon-192.png',
