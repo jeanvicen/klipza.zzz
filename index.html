@@ -503,6 +503,39 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 @media (min-width:721px){
   .settings-mobile-back{display:none !important;}
 }
+
+/* PRIME / TOKENS MODAL */
+body.prime-modal-open{overflow:hidden}
+.prime-modal{position:fixed;inset:0;z-index:250;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.42);backdrop-filter:blur(6px)}
+.prime-modal.open{display:flex;animation:primeFadeIn .18s ease}
+.prime-dialog{width:min(860px,calc(100vw - 32px));max-height:min(760px,calc(100dvh - 32px));overflow:auto;background:var(--panel);color:var(--text);border:1px solid var(--line2);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.24)}
+.prime-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 18px;border-bottom:1px solid var(--line)}
+.prime-eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.prime-title{font-size:25px;font-weight:760;letter-spacing:-.5px;margin-top:4px}
+.prime-sub{font-size:12px;line-height:1.5;color:var(--muted);margin-top:5px;max-width:640px}
+.prime-close{width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);display:grid;place-items:center;color:var(--text);background:var(--bg);flex:0 0 auto}
+.prime-close:hover{background:var(--hover)}
+.prime-close svg{width:18px;height:18px}
+.prime-tabs{display:flex;gap:4px;padding:12px 24px 0}
+.prime-tab{border:1px solid transparent;padding:9px 12px;border-radius:9px;color:var(--muted);font-size:11px;font-weight:700;background:transparent}
+.prime-tab.active{background:var(--black);color:var(--bg)}
+.prime-tab:hover{background:var(--hover);color:var(--text)}
+.prime-body{padding:18px 24px 24px}
+.prime-panel{display:none}.prime-panel.active{display:block}
+.prime-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prime-card{border:1px solid var(--line);border-radius:15px;background:var(--bg);padding:17px;position:relative;overflow:hidden}
+.prime-card.featured{border-color:var(--black);box-shadow:0 12px 30px rgba(0,0,0,.08)}
+.prime-card-badge{position:absolute;right:14px;top:14px;font-size:9px;padding:4px 7px;border-radius:999px;background:var(--black);color:var(--bg);font-weight:800}
+.prime-card h3{font-size:16px;font-weight:760}.prime-card p{font-size:11px;color:var(--muted);line-height:1.5;margin-top:5px}
+.prime-price{font-size:25px;font-weight:800;margin-top:16px;letter-spacing:-.5px}.prime-price small{font-size:10px;font-weight:600;color:var(--muted)}
+.prime-list{display:grid;gap:8px;margin:15px 0 17px}.prime-list div{font-size:11px;display:flex;gap:8px;align-items:flex-start}.prime-list span:first-child{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;background:var(--black);color:var(--bg);font-size:9px;flex:0 0 16px}
+.prime-action{width:100%;height:40px;border-radius:10px;background:var(--black);color:var(--bg);font-size:11px;font-weight:750}.prime-action:hover{background:#222}.prime-action.secondary{background:var(--bg);color:var(--text);border:1px solid var(--line2)}.prime-action.secondary:hover{background:var(--hover)}
+.token-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.token-card{border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:16px}.token-amount{font-size:20px;font-weight:800}.token-label{font-size:11px;color:var(--muted);margin-top:2px}.token-note{font-size:10px;line-height:1.45;color:var(--muted);margin:12px 0 15px;min-height:30px}
+.prime-footnote{font-size:10px;line-height:1.5;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+.energy-settings-box{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:15px}.energy-settings-box-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.energy-settings-box-title{font-size:13px;font-weight:760}.energy-settings-box-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-top:4px}.energy-settings-box-value{font-size:19px;font-weight:800}.energy-settings-box-track{height:7px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:12px}.energy-settings-box-track span{display:block;height:100%;background:var(--black);border-radius:999px;transition:width .3s}.energy-settings-box-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:11px;flex-wrap:wrap}.energy-settings-box-meta{font-size:10px;color:var(--muted)}.energy-more-btn{height:34px;padding:0 11px;border-radius:9px;background:var(--black);color:var(--bg);font-size:10px;font-weight:750}.energy-more-btn:hover{background:#222}
+@keyframes primeFadeIn{from{opacity:0}to{opacity:1}}
+@media(max-width:720px){.prime-modal{padding:10px;align-items:flex-end}.prime-dialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px 18px 10px 10px}.prime-head{padding:18px 17px 15px}.prime-title{font-size:21px}.prime-tabs{padding:10px 17px 0;overflow:auto}.prime-body{padding:15px 17px 20px}.prime-grid,.token-grid{grid-template-columns:1fr}.prime-card{padding:15px}.prime-card-badge{position:static;display:inline-block;margin-bottom:7px}.prime-footnote{margin-bottom:4px}}
+
 </style>
 </head>
 <body>
@@ -559,6 +592,64 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 <input class="hidden" id="fileInput" type="file">
 <input class="hidden" id="imageInput" type="file" accept="image/*">
 <input class="hidden" id="cameraInput" type="file" accept="image/*" capture="environment">
+
+
+<div class="prime-modal" id="primeModal" aria-hidden="true">
+  <div class="prime-dialog" role="dialog" aria-modal="true" aria-labelledby="primeModalTitle">
+    <div class="prime-head">
+      <div>
+        <div class="prime-eyebrow">Klipza</div>
+        <div class="prime-title" id="primeModalTitle">Mais do Klipza</div>
+        <div class="prime-sub">Escolha o Klipza.Prime ou veja opções para obter mais energia. O pagamento real ainda está em desenvolvimento.</div>
+      </div>
+      <button class="prime-close" type="button" onclick="window.K.closePrimeModal()" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="prime-tabs" role="tablist">
+      <button class="prime-tab active" type="button" data-prime-tab="prime">Klipza.Prime</button>
+      <button class="prime-tab" type="button" data-prime-tab="tokens">Mais tokens</button>
+    </div>
+    <div class="prime-body">
+      <section class="prime-panel active" data-prime-panel="prime">
+        <div class="prime-grid">
+          <article class="prime-card featured">
+            <span class="prime-card-badge">PRINCIPAL</span>
+            <h3>Klipza.Prime Mensal</h3>
+            <p>Mais energia e benefícios do Klipza em um ciclo mensal.</p>
+            <div class="prime-price">Preço em breve <small>/mês</small></div>
+            <div class="prime-list">
+              <div><span>✓</span><div>Mais energia disponível por ciclo</div></div>
+              <div><span>✓</span><div>Limites maiores para uso</div></div>
+              <div><span>✓</span><div>Recursos premium conforme forem liberados</div></div>
+            </div>
+            <button class="prime-action" type="button" onclick="window.K.primeComingSoon('Klipza.Prime Mensal')">Assinar · em breve</button>
+          </article>
+          <article class="prime-card">
+            <h3>Klipza.Prime Anual</h3>
+            <p>Uma opção anual do Prime para quem usa o Klipza com frequência.</p>
+            <div class="prime-price">Preço em breve <small>/ano</small></div>
+            <div class="prime-list">
+              <div><span>✓</span><div>Mais energia disponível por ciclo</div></div>
+              <div><span>✓</span><div>Limites maiores para uso</div></div>
+              <div><span>✓</span><div>Recursos premium conforme forem liberados</div></div>
+            </div>
+            <button class="prime-action secondary" type="button" onclick="window.K.primeComingSoon('Klipza.Prime Anual')">Escolher · em breve</button>
+          </article>
+        </div>
+        <div class="prime-footnote">As opções de compra aparecem aqui, mas cobrança, pagamento e ativação automática ainda não estão conectados.</div>
+      </section>
+      <section class="prime-panel" data-prime-panel="tokens">
+        <div class="token-grid">
+          <article class="token-card"><div class="token-amount">100</div><div class="token-label">tokens extras</div><div class="token-note">Pacote pequeno para completar seu ciclo de uso.</div><button class="prime-action" type="button" onclick="window.K.primeComingSoon('100 tokens')">Obter · em breve</button></article>
+          <article class="token-card"><div class="token-amount">500</div><div class="token-label">tokens extras</div><div class="token-note">Mais espaço para continuar conversando quando a energia acabar.</div><button class="prime-action" type="button" onclick="window.K.primeComingSoon('500 tokens')">Obter · em breve</button></article>
+          <article class="token-card"><div class="token-amount">1.000</div><div class="token-label">tokens extras</div><div class="token-note">Pacote maior para uso intenso do Klipza.IA.</div><button class="prime-action" type="button" onclick="window.K.primeComingSoon('1.000 tokens')">Obter · em breve</button></article>
+        </div>
+        <div class="prime-footnote">Os pacotes acima são apenas a interface de compra por enquanto. O sistema de pagamento e a entrega real dos tokens ainda estão em desenvolvimento.</div>
+      </section>
+    </div>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -896,8 +987,24 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     },450);
   }
 
+  function openPrimeModal(tab='prime') {
+    const modal=$('primeModal'); if(!modal)return;
+    modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
+    document.querySelectorAll('.prime-tab').forEach(b=>b.classList.toggle('active',b.dataset.primeTab===tab));
+    document.querySelectorAll('.prime-panel').forEach(p=>p.classList.toggle('active',p.dataset.primePanel===tab));
+    document.body.classList.add('prime-modal-open');
+  }
+  function closePrimeModal(){
+    const modal=$('primeModal'); if(!modal)return;
+    modal.classList.remove('open'); modal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('prime-modal-open');
+  }
+  function primeComingSoon(label){
+    alert(label+' ainda está em desenvolvimento. O pagamento e a ativação serão conectados aqui quando estiverem disponíveis.');
+  }
   function upcoming(label){
-    alert(label+' está em desenvolvimento. Em breve estará disponível no Klipza.IA.');
+    if(label==='Klipza.Prime') openPrimeModal('prime');
+    else alert(label+' está em desenvolvimento. Em breve estará disponível no Klipza.IA.');
   }
 
   function toggleAttach(){
@@ -964,6 +1071,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     const ini=initials(state.user?.name||'K');
     const items=[
       ['geral','Geral','M0 0'],
+      ['energia','Energia','M12 3a9 9 0 1 0 9 9h-9z'],
       ['notificacoes','Notificações','M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'],
       ['personalizacao','Personalização','M12 3v18M3 12h18'],
       ['plugins','Plugins','M7 3h10v18H7z'],
@@ -980,7 +1088,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     ];
     const active=window.__klipzaSettingsSection||'geral';
     function icon(path){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path==='M0 0'?'':''}<path d="${path}"/></svg>`}
-    const menu=items.map(([id,label,path])=>`<button type="button" class="settings-item ${active===id?'active':''}" data-setting="${id}">${icon(path)}<span>${label}</span>${id!=='geral'&&id!=='conta'&&id!=='dados'&&id!=='armazenamento'&&id!=='seguranca'&&id!=='login'&&id!=='personalizacao'&&id!=='notificacoes'&&id!=='teclado'?'<span class="soon">Em breve</span>':''}</button>`).join('');
+    const menu=items.map(([id,label,path])=>`<button type="button" class="settings-item ${active===id?'active':''}" data-setting="${id}">${icon(path)}<span>${label}</span>${id!=='geral'&&id!=='energia'&&id!=='conta'&&id!=='dados'&&id!=='armazenamento'&&id!=='seguranca'&&id!=='login'&&id!=='personalizacao'&&id!=='notificacoes'&&id!=='teclado'?'<span class="soon">Em breve</span>':''}</button>`).join('');
     const unavailable=(title,desc='Este recurso ainda não está disponível no Klipza.IA.')=>`
       <div class="settings-titlebar"><h1>${title}</h1></div>
       <div class="settings-panel">
@@ -1043,6 +1151,21 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">A conta foi conectada usando Google.</div></div><div class="settings-line-value"><span class="settings-badge">Google conectado</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Gerenciamento da conta</div><div class="settings-line-desc">Ferramentas de conta ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
         </div>`;
+    } else if(active==='energia'){
+      ensureQuota();
+      const pct=energyPercent();
+      const left=ATTACH_LIMIT-state.quota.attachUsed;
+      content=`<div class="settings-titlebar"><h1>Energia</h1></div><div class="settings-panel">
+        <div class="settings-group-title">Uso atual</div>
+        <div class="energy-settings-box">
+          <div class="energy-settings-box-head"><div><div class="energy-settings-box-title">Energia disponível</div><div class="energy-settings-box-desc">Seu ciclo renova automaticamente a cada 24 horas.</div></div><div class="energy-settings-box-value">${Math.round(state.quota.energy)}</div></div>
+          <div class="energy-settings-box-track"><span style="width:${pct}%"></span></div>
+          <div class="energy-settings-box-actions"><div class="energy-settings-box-meta">Recarrega em ${timeLeft(state.quota.resetAt-Date.now())} · ${left} anexos disponíveis</div><button class="energy-more-btn" type="button" onclick="window.K.openPrimeModal('tokens')">Obter mais do Klipza</button></div>
+        </div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Consumo por mensagem</div><div class="settings-line-desc">Cada mensagem enviada consome ${MSG_COST} pontos de energia.</div></div><div class="settings-line-value">Até 50 mensagens por ciclo</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Anexos</div><div class="settings-line-desc">Câmera, fotos e arquivos usam o mesmo limite de 3 anexos por ciclo.</div></div><div class="settings-line-value">${ATTACH_LIMIT-state.quota.attachUsed} restantes</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Klipza.Prime</div><div class="settings-line-desc">Veja planos e benefícios premium em uma área própria.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.openPrimeModal('prime')">Ver planos</button></div></div>
+      </div>`;
     } else if(active==='notificacoes'){
       content=`<div class="settings-titlebar"><h1>Notificações</h1></div><div class="settings-panel"><div class="settings-group-title">Preferências</div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Notificações do navegador</div><div class="settings-line-desc">Receba um aviso quando uma resposta do Klipza.IA terminar.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.toggleNotifications()">${state.settings.notifications?'Ativas':'Ativar'}</button></div></div>
@@ -1113,8 +1236,12 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     renderSettingsPage();
   }
   window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,toggleAttach,pick,
-    upcoming,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack};
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack};
   $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
+  document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
+  const primeModal=$('primeModal');
+  if(primeModal){ primeModal.addEventListener('click',e=>{if(e.target===primeModal)closePrimeModal();}); }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();});
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 1000);
   applyTheme();
