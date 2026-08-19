@@ -22,6 +22,8 @@ button,input,textarea{font:inherit;color:inherit}
 button{border:0;background:transparent;cursor:pointer}
 svg{display:block}
 .hidden{display:none!important}
+#app.settings-mode{grid-template-columns:0 minmax(0,1fr)}
+#app.settings-mode>.sidebar{transform:translateX(-100%);opacity:0;pointer-events:none}
 
 /* LOGIN */
 #login{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:50;padding:24px}
@@ -218,6 +220,163 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .limit-note{margin-top:8px;font-size:10px;color:#8a8a8a}
 .settings-kicker{font-size:11px;color:#888;margin-top:4px}
 
+
+/* SETTINGS — workspace style */
+.settings-view{position:fixed;inset:0;z-index:40;background:var(--bg);padding:0;overflow:hidden}
+.settings-workspace{height:100%;display:grid;grid-template-columns:252px minmax(0,1fr);min-width:0}
+.settings-sidebar{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.settings-sidebar-top{padding:18px 14px 14px;display:flex;align-items:center;gap:10px}
+.settings-close{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--bg);display:grid;place-items:center;flex:0 0 auto}
+.settings-close:hover{background:var(--hover)}
+.settings-close svg{width:20px;height:20px}
+.settings-search{margin:0 12px 12px;position:relative}
+.settings-search input{width:100%;height:44px;padding:0 12px 0 38px;border:1px solid var(--line2);border-radius:22px;background:var(--bg);color:var(--text);font-size:13px}
+.settings-search svg{position:absolute;left:13px;top:13px;width:18px;height:18px;color:var(--muted)}
+.settings-menu{padding:0 8px 14px;overflow:auto}
+.settings-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:8px;color:var(--text);text-align:left;font-size:14px;line-height:1.1}
+.settings-item:hover{background:var(--hover)}
+.settings-item.active{background:var(--hover);font-weight:600}
+.settings-item svg{width:19px;height:19px;flex:0 0 auto;color:var(--text)}
+.settings-item .soon{margin-left:auto;font-size:9px;color:var(--muted);border:1px solid var(--line2);padding:3px 6px;border-radius:999px;white-space:nowrap}
+.settings-main{min-width:0;overflow:auto;background:var(--bg);display:block;position:relative;color:var(--text);z-index:1}
+.settings-workspace{display:grid;grid-template-columns:262px minmax(0,1fr);width:min(1080px,100%);height:calc(100dvh - 28px);margin:14px auto;border:1px solid var(--line2);border-radius:16px;overflow:hidden;background:var(--panel);box-shadow:0 18px 60px rgba(0,0,0,.12)}
+.settings-sidebar{min-width:0;border-right:1px solid var(--line);display:flex;flex-direction:column;background:var(--panel)}
+.settings-main{background:var(--bg);min-width:0;min-height:0;overflow:auto}
+.settings-content{min-height:100%;width:100%;max-width:none;margin:0;padding:28px 36px 80px;display:block;visibility:visible;opacity:1}
+@media(max-width:760px){.settings-workspace{width:100%;height:100dvh;margin:0;border-radius:0;border:0;grid-template-columns:1fr}.settings-sidebar{position:absolute;inset:0 auto 0 0;width:min(88vw,320px);z-index:5}.settings-main{grid-column:1}.settings-sidebar.is-hidden{display:none}.settings-content{padding:22px 18px 60px}}
+
+.settings-content{width:min(900px,100%);margin:0 auto;padding:20px 28px 70px;color:var(--text);display:block;visibility:visible;opacity:1}
+.settings-titlebar{height:48px;display:flex;align-items:center;margin-bottom:16px;color:var(--text)}
+.settings-titlebar h1{font-size:22px;font-weight:500;letter-spacing:-.4px;color:var(--text)}
+.settings-panel{border-top:1px solid var(--line);display:block;color:var(--text)}
+.settings-promo{display:none}
+.settings-group-title{font-size:14px;color:var(--text);padding:22px 0 12px}
+.settings-line{min-height:74px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0}
+.settings-line:first-of-type{border-top:0}
+.settings-line-copy{min-width:0}
+.settings-line-name{font-size:15px;line-height:1.25}
+.settings-line-desc{font-size:13px;line-height:1.45;color:var(--muted);margin-top:5px;max-width:650px}
+.settings-line-value{font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;white-space:nowrap}
+.settings-line-value .muted{color:var(--muted)}
+.settings-chevron{width:18px;height:18px;color:var(--muted)}
+.settings-toggle{width:42px;height:24px;border-radius:999px;background:var(--line2);position:relative;flex:0 0 auto}
+.settings-toggle::after{content:'';position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:2px;left:2px;transition:.18s}
+.settings-toggle.on{background:var(--black)}
+.settings-toggle.on::after{left:20px}
+.settings-select{min-width:132px;display:flex;align-items:center;justify-content:flex-end;gap:7px}
+.settings-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block}
+.settings-dot.dark{background:#000;border:1px solid #111}
+.settings-badge{font-size:11px;color:var(--muted);border:1px solid var(--line2);padding:4px 8px;border-radius:999px}
+.settings-account-card{padding:14px 0 4px}
+.settings-account-row{display:flex;align-items:center;gap:12px;padding:10px 0 18px}
+.settings-account-avatar{width:46px;height:46px;border-radius:50%;background:var(--black);color:var(--bg);display:grid;place-items:center;font-weight:700}
+.settings-account-meta strong{font-size:14px;font-weight:600}
+.settings-account-meta div{font-size:12px;color:var(--muted);margin-top:3px}
+.settings-note{font-size:12px;color:var(--muted);line-height:1.5;padding:16px 0 0}
+.settings-divider{height:1px;background:var(--line)}
+.settings-hidden{display:none!important}
+@media(max-width:800px){
+  .settings-workspace{grid-template-columns:220px minmax(0,1fr)}
+  .settings-content{padding:18px 20px 60px}
+  .settings-item{font-size:13px}
+}
+@media(max-width:640px){
+  .settings-workspace{grid-template-columns:1fr}
+  .settings-sidebar{position:absolute;inset:0 auto 0 0;width:min(88vw,300px);z-index:3;box-shadow:18px 0 40px rgba(0,0,0,.18)}
+  .settings-main{grid-column:1}
+  .settings-content{padding:18px 16px 50px}
+  .settings-line{align-items:flex-start;flex-direction:column;gap:9px}
+  .settings-line-value{width:100%;justify-content:flex-start;white-space:normal}
+  .settings-select{justify-content:flex-start}
+}
+
+
+/* CONFIGURAÇÕES — painel lateral sobre o aplicativo */
+.settings-view{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:120 !important;
+  width:100vw !important;
+  height:100dvh !important;
+  padding:0 !important;
+  overflow:hidden !important;
+  background:rgba(0,0,0,.46) !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  backdrop-filter:blur(3px);
+}
+.settings-workspace{
+  position:relative !important;
+  width:min(1080px,calc(100vw - 36px)) !important;
+  height:min(760px,calc(100dvh - 36px)) !important;
+  margin:0 !important;
+  display:grid !important;
+  grid-template-columns:262px minmax(0,1fr) !important;
+  overflow:hidden !important;
+  border:1px solid var(--line2) !important;
+  border-radius:18px !important;
+  background:var(--panel) !important;
+  box-shadow:0 30px 90px rgba(0,0,0,.34) !important;
+}
+.settings-sidebar{
+  min-width:0 !important;
+  position:relative !important;
+  inset:auto !important;
+  width:auto !important;
+  height:100% !important;
+  border-right:1px solid var(--line) !important;
+  background:var(--panel) !important;
+  overflow:hidden !important;
+}
+.settings-main{
+  min-width:0 !important;
+  min-height:0 !important;
+  height:100% !important;
+  overflow:auto !important;
+  background:var(--bg) !important;
+  display:block !important;
+}
+.settings-content{
+  width:min(760px,100%) !important;
+  min-height:100% !important;
+  margin:0 auto !important;
+  padding:32px 44px 64px !important;
+  color:var(--text) !important;
+  display:block !important;
+}
+.settings-titlebar{
+  height:auto !important;
+  min-height:54px !important;
+  display:flex !important;
+  align-items:center !important;
+  margin-bottom:18px !important;
+  border-bottom:1px solid var(--line) !important;
+  padding-bottom:16px !important;
+}
+.settings-titlebar h1{font-size:24px !important;font-weight:650 !important;letter-spacing:-.5px !important}
+.settings-panel{border-top:0 !important}
+.settings-group-title{padding:10px 0 12px !important;font-size:14px !important;font-weight:600 !important}
+.settings-line{min-height:74px !important}
+.settings-menu{padding:0 10px 14px !important}
+.settings-sidebar-top{padding:18px 12px 12px !important}
+.settings-search{margin:0 12px 14px !important}
+.settings-item{padding:11px 12px !important}
+@media (max-width:760px){
+  .settings-view{align-items:stretch !important;justify-content:stretch !important}
+  .settings-workspace{
+    width:100vw !important;height:100dvh !important;margin:0 !important;border-radius:0 !important;border:0 !important;box-shadow:none !important;
+    grid-template-columns:1fr !important;
+  }
+  .settings-sidebar{
+    position:absolute !important;left:0 !important;top:0 !important;bottom:0 !important;width:min(88vw,320px) !important;z-index:6 !important;
+    box-shadow:16px 0 40px rgba(0,0,0,.2) !important;
+  }
+  .settings-sidebar.is-hidden{display:none !important}
+  .settings-main{grid-column:1 !important}
+  .settings-content{padding:22px 18px 50px !important;width:100% !important}
+}
+
 </style>
 </head>
 <body>
@@ -281,6 +440,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   const KEY = 'klipza_pro_v1';
   let state = loadState();
   state.theme = state.theme || 'light';
+  state.settings = state.settings || {notifications:false,sounds:false};
   const ENERGY_MAX=100, MSG_COST=2, ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000;
   let currentView = 'chat';
   let activeChatId = state.activeChatId || null;
@@ -291,7 +451,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
       const raw = localStorage.getItem(KEY);
       if(raw) return JSON.parse(raw);
     }catch(e){}
-    return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light'};
+    return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false}};
   }
 
   function ensureQuota(){
@@ -343,6 +503,30 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
     save(); applyTheme();
     if(currentView==='settings') renderSettingsPage();
   }
+  async function toggleNotifications(){
+    if(!('Notification' in window)){ alert('Seu navegador não oferece notificações.'); return; }
+    if(!state.settings.notifications){
+      if(Notification.permission==='default'){
+        const permission=await Notification.requestPermission();
+        if(permission!=='granted'){ state.settings.notifications=false; save(); renderSettingsPage(); return; }
+      }
+      if(Notification.permission!=='granted'){ alert('Permissão de notificações não concedida.'); return; }
+      state.settings.notifications=true;
+    }else{ state.settings.notifications=false; }
+    save(); renderSettingsPage();
+  }
+  function toggleSounds(){
+    state.settings.sounds=!state.settings.sounds; save(); renderSettingsPage();
+  }
+  function clearAllLocalData(){
+    if(!confirm('Apagar todas as conversas, artefatos e configurações salvas neste navegador?')) return;
+    const user=state.user; localStorage.removeItem(KEY);
+    state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false}};
+    applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter();
+  }
+  function browserNotification(title,body){
+    if(state.settings.notifications && 'Notification' in window && Notification.permission==='granted'){ try{new Notification(title,{body});}catch(e){} }
+  }
   function save(){localStorage.setItem(KEY,JSON.stringify(state));}
   function uid(prefix){return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)}
   function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
@@ -376,6 +560,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   function setView(view){
     currentView=view;
     document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+    $('app').classList.toggle('settings-mode',view==='settings');
     if(view==='chat') renderChat();
     if(view==='artifacts') renderArtifactsPage();
     if(view==='settings') renderSettingsPage();
@@ -548,54 +733,149 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 
   function renderSettingsPage(){
     const ini=initials(state.user?.name||'K');
-    $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()" title="Abrir histórico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Configurações</div></div></header>
-      <section class="settings-view"><div class="settings-inner">
-        <div class="settings-top">
-          <div class="settings-top-main"><div class="settings-avatar">${esc(ini)}</div><div class="settings-head"><div class="settings-title">Configurações</div><div class="settings-subtitle">${esc(state.user.name)} · ${esc(state.user.email)}</div></div></div>
-          <button class="settings-back" onclick="window.K.setView('chat')">Voltar ao chat</button>
+    const items=[
+      ['geral','Geral','M0 0'],
+      ['notificacoes','Notificações','M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'],
+      ['personalizacao','Personalização','M12 3v18M3 12h18'],
+      ['plugins','Plugins','M7 3h10v18H7z'],
+      ['voz','Voz','M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3M5 11a7 7 0 0 0 14 0M12 18v4'],
+      ['faturamento','Faturamento','M4 7h16v10H4zM4 11h16'],
+      ['dados','Controles de dados','M6 4h12v16H6zM9 8h6M9 12h6M9 16h4'],
+      ['armazenamento','Armazenamento','M4 6h16v12H4zM8 10h8'],
+      ['seguranca','Segurança','M12 3l7 4v5c0 4.5-3 7-7 9-4-2-7-4.5-7-9V7l7-4z'],
+      ['login','Segurança e login','M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5z'],
+      ['parental','Controles parentais','M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M3 21a5 5 0 0 1 10 0'],
+      ['contato','Contato confiável','M4 4h16v16H4zM8 12h8M12 8v8'],
+      ['conta','Conta','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0'],
+      ['teclado','Teclado','M3 6h18v12H3zM7 10h.01M11 10h.01M15 10h.01M19 10h.01M7 14h10']
+    ];
+    const active=window.__klipzaSettingsSection||'geral';
+    function icon(path){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${path==='M0 0'?'':''}<path d="${path}"/></svg>`}
+    const menu=items.map(([id,label,path])=>`<button type="button" class="settings-item ${active===id?'active':''}" data-setting="${id}">${icon(path)}<span>${label}</span>${id!=='geral'&&id!=='conta'&&id!=='dados'&&id!=='armazenamento'&&id!=='seguranca'&&id!=='login'&&id!=='personalizacao'&&id!=='notificacoes'&&id!=='teclado'?'<span class="soon">Em breve</span>':''}</button>`).join('');
+    const unavailable=(title,desc='Este recurso ainda não está disponível no Klipza.IA.')=>`
+      <div class="settings-titlebar"><h1>${title}</h1></div>
+      <div class="settings-panel">
+        <div class="settings-group-title">${title}</div>
+        <div class="settings-line">
+          <div class="settings-line-copy"><div class="settings-line-name">Recurso ainda não disponível</div><div class="settings-line-desc">${desc}</div></div>
+          <div class="settings-line-value"><span class="settings-badge">Em breve</span></div>
         </div>
-        <nav class="settings-nav">
-          <a class="active" href="#conta">Conta</a><a href="#dados">Dados</a><a href="#energia">Energia</a><a href="#aparencia">Aparência</a><a href="#sessao">Sessão</a>
-        </nav>
-        <div class="settings-sections">
-          <section class="settings-card" id="conta"><div class="settings-card-header"><div class="settings-card-title">Conta</div><div class="settings-card-desc">Informações da conta conectada ao Klipza.IA.</div></div><div class="settings-rows">
-            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Nome</div><div class="settings-detail">Nome usado no seu perfil.</div></div><div class="settings-control"><div class="settings-value">${esc(state.user.name)}</div></div></div>
-            <div class="settings-row"><div class="settings-copy"><div class="settings-name">E-mail</div><div class="settings-detail">Conta usada para entrar no Klipza.IA.</div></div><div class="settings-control"><div class="settings-value">${esc(state.user.email)}</div></div></div>
-            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Acesso</div><div class="settings-detail">Sua conta está conectada pelo Google.</div></div><div class="settings-control"><span class="settings-value">Google conectado</span></div></div>
-          </div></section>
-
-          <section class="settings-card" id="dados"><div class="settings-card-header"><div class="settings-card-title">Dados</div><div class="settings-card-desc">Gerencie o conteúdo armazenado neste navegador.</div></div><div class="settings-rows">
-            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Conversas</div><div class="settings-detail">${Object.keys(state.chats).length} conversa(s) salva(s).</div></div><div class="settings-control"><button class="settings-action danger" onclick="window.K.clearHistory()">Apagar histórico</button></div></div>
-            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Artefatos</div><div class="settings-detail">${Object.keys(state.artifacts).length} artefato(s) salvo(s).</div></div><div class="settings-control"><button class="settings-action" onclick="window.K.setView('artifacts')">Abrir artefatos</button></div></div>
-          </div></section>
-
-          <section class="settings-card full" id="energia"><div class="settings-card-header"><div class="settings-card-title">Energia e anexos</div><div class="settings-card-desc">Os limites são renovados automaticamente a cada ciclo de 24 horas.</div></div><div class="settings-energy">
-            <div class="settings-meter"><div class="settings-meter-top"><div><div class="settings-meter-name">Energia</div><div class="settings-meter-desc">100 pontos por ciclo · ${MSG_COST} pontos por mensagem.</div></div><div class="settings-meter-value">${state.quota.energy}</div></div><div class="settings-track"><span style="width:${energyPercent()}%"></span></div><div class="settings-meter-foot"><span>Restante</span><span>Recarrega em ${timeLeft(state.quota.resetAt-Date.now())}</span></div></div>
-            <div class="settings-meter"><div class="settings-meter-top"><div><div class="settings-meter-name">Anexos</div><div class="settings-meter-desc">Câmera, fotos e arquivos.</div></div><div class="settings-meter-value">${ATTACH_LIMIT-state.quota.attachUsed}</div></div><div class="settings-track"><span style="width:${((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100}%"></span></div><div class="settings-meter-foot"><span>Disponíveis</span><span>Limite: ${ATTACH_LIMIT}</span></div></div>
-          </div></section>
-
-          <section class="settings-card" id="aparencia"><div class="settings-card-header"><div class="settings-card-title">Aparência</div><div class="settings-card-desc">Escolha o visual do Klipza.IA neste dispositivo.</div></div><div class="settings-themes">
-            <button class="theme-card ${state.theme==='light'?'active':''}" onclick="window.K.setTheme('light')"><div class="theme-swatch light">Klipza.IA</div><div class="theme-name">Claro</div><div class="theme-desc">Interface clara, limpa e neutra.</div></button>
-            <button class="theme-card ${state.theme==='dark'?'active':''}" onclick="window.K.setTheme('dark')"><div class="theme-swatch dark">Klipza.IA</div><div class="theme-name">Preto</div><div class="theme-desc">Interface escura para ambientes com pouca luz.</div></button>
-          </div></section>
-
-          <section class="settings-card" id="sessao"><div class="settings-card-header"><div class="settings-card-title">Sessão</div><div class="settings-card-desc">Ações da conta neste dispositivo.</div></div><div class="settings-rows">
-            <div class="settings-row"><div class="settings-copy"><div class="settings-name">Sair</div><div class="settings-detail">Voltar para a tela de entrada e encerrar a sessão atual.</div></div><div class="settings-control"><button class="settings-action" onclick="window.K.logout()">Sair da conta</button></div></div>
-          </div></section>
+        <div class="settings-line">
+          <div class="settings-line-copy"><div class="settings-line-name">Status</div><div class="settings-line-desc">Quando este recurso estiver disponível, as opções aparecerão aqui, no painel à direita.</div></div>
+          <div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div>
         </div>
-        <div class="settings-foot">Klipza.IA · Configurações</div>
-      </div></section>`;
-    refreshQuotaUI();
-    const links=[...document.querySelectorAll('.settings-nav a')];
-    const cards=links.map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
-    links.forEach(a=>a.addEventListener('click',()=>{links.forEach(x=>x.classList.remove('active'));a.classList.add('active')}));
-    if('IntersectionObserver' in window){
-      const obs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){links.forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+e.target.id));}})},{root:document.querySelector('.settings-view'),rootMargin:'-90px 0px -55% 0px',threshold:.01});
-      cards.forEach(card=>obs.observe(card));
+      </div>`;
+    let content='';
+    if(active==='geral'){
+      content=`
+        <div class="settings-titlebar"><h1>Geral</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Aparência</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Aparência</div><div class="settings-line-desc">Escolha o tema da interface.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('${state.theme==='dark'?'light':'dark'}')">${state.theme==='dark'?'Preto':'Claro'} · trocar</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Contraste</div></div><div class="settings-line-value"><span class="muted">Em breve</span><span class="settings-chevron">⌄</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Cor de ênfase</div></div><div class="settings-line-value"><span class="settings-dot"></span><span class="muted">Padrão · em breve</span><span class="settings-chevron">⌄</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Cor do ícone</div></div><div class="settings-line-value"><span class="settings-dot dark"></span><span class="muted">Preto · em breve</span><span class="settings-chevron">⌄</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Idioma</div><div class="settings-line-desc">Idioma atual da interface.</div></div><div class="settings-line-value">Português (Brasil)<span class="settings-badge">Autodetectar em breve</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Inteligência avançada</div><div class="settings-line-desc">Recurso ainda em desenvolvimento.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em desenvolvimento</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Ativar ditado</div><div class="settings-line-desc">Entrada por voz ainda não disponível.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='personalizacao'){
+      content=`
+        <div class="settings-titlebar"><h1>Personalização</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Tema</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema claro</div><div class="settings-line-desc">Interface clara do Klipza.IA.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('light')">${state.theme==='light'?'Ativo':'Usar'}</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema preto</div><div class="settings-line-desc">Interface escura em preto e branco.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('dark')">${state.theme==='dark'?'Ativo':'Usar'}</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Outras personalizações</div><div class="settings-line-desc">Cores, densidade e outros ajustes ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='dados'){
+      content=`
+        <div class="settings-titlebar"><h1>Controles de dados</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Seus dados neste navegador</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Conversas</div><div class="settings-line-desc">${Object.keys(state.chats).length} conversa(s) salva(s) localmente.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.clearHistory()">Apagar histórico</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Artefatos</div><div class="settings-line-desc">${Object.keys(state.artifacts).length} artefato(s) armazenado(s).</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setView('artifacts')">Abrir artefatos</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Exportação de dados</div><div class="settings-line-desc">Ainda não disponível.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='armazenamento'){
+      content=`
+        <div class="settings-titlebar"><h1>Armazenamento</h1></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Uso local</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Conversas</div><div class="settings-line-desc">Dados mantidos neste navegador.</div></div><div class="settings-line-value">${Object.keys(state.chats).length}</div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Artefatos</div><div class="settings-line-desc">Arquivos e resultados salvos localmente.</div></div><div class="settings-line-value">${Object.keys(state.artifacts).length}</div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Limpar todos os dados locais</div><div class="settings-line-desc">Remove conversas, artefatos, energia e preferências salvas neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.clearAllLocalData()">Limpar tudo</button></div></div>
+        </div>`;
+    } else if(active==='conta'){
+      content=`
+        <div class="settings-titlebar"><h1>Conta</h1></div>
+        <div class="settings-panel">
+          <div class="settings-account-card"><div class="settings-account-row"><div class="settings-account-avatar">${esc(ini)}</div><div class="settings-account-meta"><strong>${esc(state.user.name)}</strong><div>${esc(state.user.email)}</div></div></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">A conta foi conectada usando Google.</div></div><div class="settings-line-value"><span class="settings-badge">Google conectado</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Gerenciamento da conta</div><div class="settings-line-desc">Ferramentas de conta ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+        </div>`;
+    } else if(active==='notificacoes'){
+      content=`<div class="settings-titlebar"><h1>Notificações</h1></div><div class="settings-panel"><div class="settings-group-title">Preferências</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Notificações do navegador</div><div class="settings-line-desc">Receba um aviso quando uma resposta do Klipza.IA terminar.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.toggleNotifications()">${state.settings.notifications?'Ativas':'Ativar'}</button></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Sons da interface</div><div class="settings-line-desc">Sons ainda são opcionais; o estado é salvo neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.toggleSounds()">${state.settings.sounds?'Ativos':'Desativados'}</button></div></div>
+      </div>`;
+    } else if(active==='teclado'){
+      content=`<div class="settings-titlebar"><h1>Teclado</h1></div><div class="settings-panel"><div class="settings-group-title">Atalhos disponíveis</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Enter</div><div class="settings-line-desc">Enviar mensagem.</div></div><div class="settings-line-value">Ativo</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Shift + Enter</div><div class="settings-line-desc">Inserir uma nova linha.</div></div><div class="settings-line-value">Ativo</div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Atalhos personalizados</div><div class="settings-line-desc">Edição completa dos atalhos ainda está em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
+      </div>`;
+    } else if(active==='seguranca'||active==='login'){
+      content=`<div class="settings-titlebar"><h1>${active==='seguranca'?'Segurança':'Segurança e login'}</h1></div><div class="settings-panel"><div class="settings-group-title">Proteção da conta</div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão atual autenticada pelo fluxo Google demo.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação avançada</div><div class="settings-line-desc">2FA e gerenciamento avançado ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
+      </div>`;
+    } else if(active==='plugins'){
+      content=unavailable('Plugins','Integrações e plugins ainda estão em desenvolvimento. Nenhuma integração é ativada sem a sua confirmação.');
+    } else if(active==='voz'){
+      content=unavailable('Voz','Entrada e saída de voz ainda estão em desenvolvimento no Klipza.IA.');
+    } else if(active==='faturamento'){
+      content=unavailable('Faturamento','O sistema de planos e pagamentos ainda está em desenvolvimento.');
+    } else if(active==='parental'){
+      content=unavailable('Controles parentais','Controles parentais ainda estão em desenvolvimento e ainda não estão disponíveis.');
+    } else if(active==='contato'){
+      content=unavailable('Contato confiável','O recurso de contato confiável ainda está em desenvolvimento.');
+    } else {
+      content=unavailable('Configurações');
     }
+    $('main').innerHTML=`<section class="settings-view">
+      <div class="settings-workspace">
+        <aside class="settings-sidebar">
+          <div class="settings-sidebar-top"><button class="settings-close" onclick="window.K.setView('chat')" title="Fechar configurações"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="settings-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="settingsSearch" placeholder="Pesquisar configurações"></div>
+          <nav class="settings-menu" id="settingsMenu">${menu}</nav>
+        </aside>
+        <div class="settings-main" id="settingsMain">
+          <div class="settings-content" id="settingsContent">${content}</div>
+        </div>
+      </div>
+    </section>`;
+    const search=$('settingsSearch');
+    if(search) search.addEventListener('input',()=>{
+      const q=search.value.trim().toLowerCase();
+      document.querySelectorAll('.settings-item').forEach(btn=>{btn.classList.toggle('settings-hidden',!!q&&!btn.textContent.toLowerCase().includes(q));});
+    });
+    const settingsMenu=$('settingsMenu');
+    if(settingsMenu){
+      settingsMenu.addEventListener('click',(ev)=>{
+        const btn=ev.target.closest('.settings-item');
+        if(!btn || !settingsMenu.contains(btn)) return;
+        ev.preventDefault();
+        window.__klipzaSettingsSection=btn.dataset.setting;
+        renderSettingsPage();
+      });
+    }
+    const settingsMain=$('settingsMain');
+    if(settingsMain){settingsMain.scrollTop=0;}
   }
 
-  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,toggleAttach,pick,removeAttach,renderAttached,setTheme};
+  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,toggleAttach,pick,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData};
   $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 30000);
