@@ -42,7 +42,7 @@ function searchRelevance(value, query) {
   const tokens = searchTokens(query);
   if (!tokens.length) return -1;
   const matched = tokens.filter((token) => haystack.includes(token));
-  const required = tokens.length <= 3 ? tokens.length : Math.max(2, Math.ceil(tokens.length * 0.7));
+  const required = tokens.length === 1 ? 1 : Math.max(1, Math.ceil(tokens.length * 0.6));
   if (matched.length < required) return -1;
   return matched.length / tokens.length + (phrase && haystack.includes(phrase) ? 1 : 0);
 }
