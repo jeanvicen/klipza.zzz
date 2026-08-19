@@ -57,3 +57,7 @@ Depois de retornar ao web.klip, a categoria Código mostrou 14 itens exclusivame
 ## Deploy final após correção
 
 Após o push do commit `5e47376`, o domínio público continuou respondendo pela tela de autenticação e confirmou HTTPS, manifesto em `/manifest.webmanifest`, service worker `activated` e botão Instalar. O commit não é exposto no HTML, mas o deploy público respondeu corretamente após a publicação.
+
+## Filtro final em produção
+
+Depois do deploy do commit `509a783`, o endpoint público respondeu com 50 itens, distribuídos em Notícias 20, Código 10, Jogos 10 e Design 10. A verificação por limite de palavra retornou `badCount: 0`, portanto a pauta de entretenimento detectada anteriormente não está mais no pacote novo.
