@@ -65,3 +65,9 @@ O card de pesquisa abriu o detalhe com os botões `Codar com referência` e `Abr
 Após voltar da fonte, o estado da busca foi preservado. Ao limpar a pesquisa, o feed retornou com 48 itens disponíveis, mas apenas 18 exibidos inicialmente. O botão `Carregar mais 18` funcionou e aumentou a lista para 36 itens, deixando 12 restantes, confirmando o carregamento progressivo.
 
 Por fim, o botão Voltar ao chat restaurou a home da conversa pública com compositor, microfone, envio, prompt do momento e sidebar intactos. O fluxo completo terminou sem abrir nova aba do navegador e sem deixar o app preso na tela interna.
+
+## Correção da relevância — teste público
+
+Após o deploy `d105f05`, a busca pública `python game` passou a retornar 28 projetos relacionados do GitHub, exibindo 18 inicialmente e deixando 10 para carregamento progressivo. Os primeiros itens foram `grantjenks/free-python-games`, `kitao/pyxel` e `wangshub/wechat_jump_game`, todos contendo relação textual com Python/jogos. A resposta do endpoint indicou fallback `github` quando as fontes de pesquisa geral não retornaram itens.
+
+A consulta pública `klipzaqzxv-resultado-impossivel-92741` terminou com `0 resultado(s)` e exibiu `Nenhum resultado público encontrado para esta busca.` tanto no resumo quanto no card vazio. Nenhum item aleatório foi inserido.
