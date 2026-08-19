@@ -9,7 +9,6 @@ body{background:#fff;color:#000;height:100vh;overflow:hidden}
 button{cursor:pointer;border:none;background:none;color:inherit;font:inherit}
 input,textarea{font:inherit;outline:none;border:none;background:none;color:inherit}
 
-/* LOGIN */
 #login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#fff;z-index:100}
 .login-box{width:380px;text-align:center;padding:40px}
 .logo{font-size:36px;font-weight:700;letter-spacing:-1.5px;margin-bottom:12px}
@@ -21,12 +20,10 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
 .btn-google svg{width:20px;height:20px}
 .login-foot{margin-top:32px;font-size:11px;color:#999;line-height:1.6}
 
-/* APP */
 #app{display:none;height:100vh;grid-template-columns:280px 1fr;transition:grid-template-columns .2s}
 #app.sidebar-closed{grid-template-columns:0 1fr}
 #app.sidebar-closed .sidebar{transform:translateX(-100%);opacity:0}
 
-/* SIDEBAR */
 .sidebar{background:#fafafa;border-right:1px solid #e5e5e5;display:flex;flex-direction:column;height:100vh;transition:transform .2s,opacity .2s;overflow:hidden}
 .side-top{padding:14px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;justify-content:space-between;gap:8px}
 .side-logo{font-weight:700;font-size:17px;letter-spacing:-.5px;flex:1}
@@ -70,7 +67,6 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
 .user-name{font-size:13px;font-weight:500}
 .user-mail{font-size:11px;color:#666;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* MAIN */
 .main{display:flex;flex-direction:column;height:100vh;background:#fff;min-width:0}
 .topbar{padding:12px 20px;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .topbar-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
@@ -105,10 +101,8 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
 .input-area{padding:16px 24px 22px;border-top:1px solid #eee;background:#fff}
 .input-box{max-width:760px;margin:0 auto}
 
-/* INPUT COM + EXPANSÍVEL */
 .input-container{border:1px solid #000;border-radius:14px;background:#fff;transition:box-shadow .15s}
 .input-container:focus-within{box-shadow:0 0 0 2px rgba(0,0,0,.1)}
-.input-container.has-attach{border-color:#000}
 
 .attach-panel{display:none;padding:10px 12px;border-bottom:1px solid #eee;animation:slideDown .2s ease}
 .attach-panel.open{display:block}
@@ -131,15 +125,15 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
 .input-row{display:flex;align-items:flex-end;gap:4px;padding:6px}
 .plus-btn{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0;color:#000}
 .plus-btn:hover{background:#f0f0f0}
-.plus-btn.active{background:#000;color:#fff;transform:rotate(45deg)}
+.plus-btn.active{background:#000;color:#fff}
 .plus-btn svg{width:18px;height:18px;transition:transform .2s}
+.plus-btn.active svg{transform:rotate(45deg)}
 .input-row textarea{flex:1;padding:8px 10px;resize:none;font-size:14px;line-height:1.5;min-height:36px;max-height:200px}
 .send{width:36px;height:36px;background:#000;color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:.15s;flex-shrink:0}
 .send:hover{background:#333}
 .send:disabled{background:#ccc;cursor:not-allowed}
 .footer-note{text-align:center;font-size:11px;color:#999;margin-top:10px}
 
-/* SETTINGS PAGE */
 .settings-page{padding:40px;max-width:680px;margin:0 auto;overflow-y:auto;height:100%}
 .settings-page h1{font-size:24px;font-weight:600;margin-bottom:6px}
 .settings-page .sub{color:#666;font-size:13px;margin-bottom:32px}
@@ -168,12 +162,11 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
 </head>
 <body>
 
-<!-- LOGIN -->
 <div id="login">
   <div class="login-box">
     <div class="logo">Klipza<span>.IA</span></div>
     <div class="sub">Sua inteligência artificial<br>em preto e branco.</div>
-    <button class="btn-google" onclick="oauth()">
+    <button class="btn-google" id="googleBtn">
       <svg viewBox="0 0 24 24"><path fill="#000" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#333" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#666" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#999" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
       Continuar com Google
     </button>
@@ -181,25 +174,24 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
   </div>
 </div>
 
-<!-- APP -->
 <div id="app">
   <aside class="sidebar">
     <div class="side-top">
-      <button class="icon-btn" onclick="toggleSidebar()" title="Fechar menu">
+      <button class="icon-btn" id="toggleSidebarBtn" title="Fechar menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
       </button>
       <div class="side-logo">Klipza.IA</div>
-      <button class="icon-btn" onclick="newChat()" title="Novo chat">
+      <button class="icon-btn" id="newChatBtn" title="Novo chat">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
     <div class="side-tabs">
-      <button class="side-tab active" data-tab="chats" onclick="switchTab('chats')">Conversas</button>
-      <button class="side-tab" data-tab="artifacts" onclick="switchTab('artifacts')">Artefatos</button>
+      <button class="side-tab active" data-tab="chats">Conversas</button>
+      <button class="side-tab" data-tab="artifacts">Artefatos</button>
     </div>
     <div class="side-content" id="sideContent"></div>
     <div class="side-bottom">
-      <div class="user-row" onclick="openSettings()">
+      <div class="user-row" id="userRow">
         <div class="avatar" id="avatar">U</div>
         <div class="user-info">
           <div class="user-name" id="userName">Usuário</div>
@@ -214,7 +206,6 @@ input,textarea{font:inherit;outline:none;border:none;background:none;color:inher
 
 <script>
 let user=null, chats={}, artifacts={}, currentId=null, currentTab='chats', currentView='chat', settings={}, attachedFiles=[];
-const $=id=>document.getElementById(id);
 
 function oauth(){
   user={name:'Usuário Google',email:'usuario@gmail.com'};
@@ -223,11 +214,11 @@ function oauth(){
 }
 
 function enterApp(){
-  $('login').style.display='none';
-  $('app').style.display='grid';
-  $('userName').textContent=user.name;
-  $('userMail').textContent=user.email;
-  $('avatar').textContent=user.name[0].toUpperCase();
+  document.getElementById('login').style.display='none';
+  document.getElementById('app').style.display='grid';
+  document.getElementById('userName').textContent=user.name;
+  document.getElementById('userMail').textContent=user.email;
+  document.getElementById('avatar').textContent=user.name[0].toUpperCase();
   chats=JSON.parse(localStorage.getItem('klipza_chats_'+user.email)||'{}');
   artifacts=JSON.parse(localStorage.getItem('klipza_artifacts_'+user.email)||'{}');
   settings=JSON.parse(localStorage.getItem('klipza_settings_'+user.email)||'{"darkSidebar":true,"sounds":false}');
@@ -239,7 +230,7 @@ function enterApp(){
 
 function logout(){localStorage.clear();location.reload()}
 
-function toggleSidebar(){$('app').classList.toggle('sidebar-closed')}
+function toggleSidebar(){document.getElementById('app').classList.toggle('sidebar-closed')}
 
 function switchTab(tab){
   currentTab=tab;
@@ -248,7 +239,7 @@ function switchTab(tab){
 }
 
 function renderSide(){
-  const c=$('sideContent');
+  const c=document.getElementById('sideContent');
   if(currentTab==='chats'){
     const ids=Object.keys(chats).sort((a,b)=>chats[b].updated-chats[a].updated);
     if(!ids.length){c.innerHTML='<div class="empty-state">Nenhuma conversa ainda.<br>Clique em + para começar.</div>';return}
@@ -260,11 +251,17 @@ function renderSide(){
       d.dataset.id=id;
       d.innerHTML=`<span class="title">${escapeHtml(ch.title)}</span>
         <div class="actions">
-          <span class="act" onclick="event.stopPropagation();renameChat('${id}')" title="Renomear">✎</span>
-          <span class="act" onclick="event.stopPropagation();delChat('${id}')" title="Apagar">×</span>
+          <span class="act" data-action="rename" data-id="${id}" title="Renomear">✎</span>
+          <span class="act" data-action="delete" data-id="${id}" title="Apagar">×</span>
         </div>`;
-      d.onclick=()=>loadChat(id);
+      d.addEventListener('click',()=>loadChat(id));
       c.appendChild(d);
+    });
+    c.querySelectorAll('[data-action="rename"]').forEach(btn=>{
+      btn.addEventListener('click',e=>{e.stopPropagation();renameChat(btn.dataset.id)});
+    });
+    c.querySelectorAll('[data-action="delete"]').forEach(btn=>{
+      btn.addEventListener('click',e=>{e.stopPropagation();delChat(btn.dataset.id)});
     });
   }else{
     const ids=Object.keys(artifacts).sort((a,b)=>artifacts[b].created-artifacts[a].created);
@@ -327,11 +324,11 @@ function save(){
 function openChatView(){
   currentView='chat';
   attachedFiles=[];
-  const m=$('main');
+  const m=document.getElementById('main');
   m.innerHTML=`
     <div class="topbar">
       <div class="topbar-left">
-        <button class="icon-btn" onclick="toggleSidebar()" title="Menu">
+        <button class="icon-btn" id="topToggleBtn" title="Menu">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
         </button>
         <h2 id="chatTitle">Nova conversa</h2>
@@ -344,7 +341,7 @@ function openChatView(){
         <div class="input-container" id="inputContainer">
           <div class="attach-panel" id="attachPanel">
             <div class="attach-grid">
-              <div class="attach-option" onclick="attach('camera')">
+              <div class="attach-option" data-attach="camera">
                 <div class="ao-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                 </div>
@@ -353,7 +350,7 @@ function openChatView(){
                   <div class="ao-desc">Tirar uma foto</div>
                 </div>
               </div>
-              <div class="attach-option" onclick="attach('photo')">
+              <div class="attach-option" data-attach="photo">
                 <div class="ao-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                 </div>
@@ -362,7 +359,7 @@ function openChatView(){
                   <div class="ao-desc">Escolher da galeria</div>
                 </div>
               </div>
-              <div class="attach-option" onclick="attach('file')">
+              <div class="attach-option" data-attach="file">
                 <div class="ao-icon">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>
                 </div>
@@ -375,11 +372,11 @@ function openChatView(){
           </div>
           <div class="attached-list" id="attachedList"></div>
           <div class="input-row">
-            <button class="plus-btn" id="plusBtn" onclick="toggleAttach()" title="Anexar">
+            <button class="plus-btn" id="plusBtn" title="Anexar">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
             </button>
             <textarea id="input" placeholder="Envie uma mensagem..." rows="1"></textarea>
-            <button class="send" id="sendBtn" onclick="send()">
+            <button class="send" id="sendBtn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
             </button>
           </div>
@@ -387,25 +384,44 @@ function openChatView(){
         <div class="footer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
       </div>
     </div>`;
-  $('input').addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,200)+'px'});
-  $('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  
+  document.getElementById('googleBtn').addEventListener('click',oauth);
+  document.getElementById('toggleSidebarBtn').addEventListener('click',toggleSidebar);
+  document.getElementById('newChatBtn').addEventListener('click',newChat);
+  document.getElementById('topToggleBtn').addEventListener('click',toggleSidebar);
+  document.getElementById('userRow').addEventListener('click',openSettings);
+  document.getElementById('plusBtn').addEventListener('click',toggleAttach);
+  document.getElementById('sendBtn').addEventListener('click',send);
+  
+  document.querySelectorAll('.side-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>switchTab(tab.dataset.tab));
+  });
+  
+  document.querySelectorAll('[data-attach]').forEach(opt=>{
+    opt.addEventListener('click',()=>attach(opt.dataset.attach));
+  });
+  
+  const input=document.getElementById('input');
+  input.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,200)+'px'});
+  input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send()}});
+  
   renderChat();
 }
 
 function toggleAttach(){
-  const panel=$('attachPanel');
-  const btn=$('plusBtn');
+  const panel=document.getElementById('attachPanel');
+  const btn=document.getElementById('plusBtn');
   panel.classList.toggle('open');
   btn.classList.toggle('active');
 }
 
 function closeAttach(){
-  $('attachPanel').classList.remove('open');
-  $('plusBtn').classList.remove('active');
+  document.getElementById('attachPanel').classList.remove('open');
+  document.getElementById('plusBtn').classList.remove('active');
 }
 
 function renderAttached(){
-  const list=$('attachedList');
+  const list=document.getElementById('attachedList');
   if(!attachedFiles.length){
     list.classList.remove('has-items');
     list.innerHTML='';
@@ -415,14 +431,15 @@ function renderAttached(){
   list.innerHTML=attachedFiles.map((f,i)=>`
     <div class="attached-chip">
       <span>${f.icon} ${escapeHtml(f.name)}</span>
-      <span class="chip-x" onclick="removeAttached(${i})">×</span>
+      <span class="chip-x" data-remove="${i}">×</span>
     </div>
   `).join('');
-}
-
-function removeAttached(i){
-  attachedFiles.splice(i,1);
-  renderAttached();
+  list.querySelectorAll('[data-remove]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      attachedFiles.splice(parseInt(btn.dataset.remove),1);
+      renderAttached();
+    });
+  });
 }
 
 function attach(type){
@@ -444,24 +461,30 @@ function attach(type){
 }
 
 function renderChat(){
-  const m=$('messages');
+  const m=document.getElementById('messages');
   const ch=chats[currentId];
   if(!ch||!ch.messages.length){
-    $('chatTitle').textContent='Nova conversa';
+    document.getElementById('chatTitle').textContent='Nova conversa';
     m.innerHTML=`<div class="welcome">
       <h1>Como posso ajudar?</h1>
       <p>Converse, pergunte, crie. Tudo em preto e branco.</p>
       <div class="suggestions">
-        <button class="sug" onclick="useSug(this)">Explique computação quântica de forma simples</button>
-        <button class="sug" onclick="useSug(this)">Escreva um e-mail profissional pedindo aumento</button>
-        <button class="sug" onclick="useSug(this)">Me dê ideias para um projeto de fim de semana</button>
-        <button class="sug" onclick="useSug(this)">Resuma os princípios do estoicismo</button>
+        <button class="sug" data-sug="Explique computação quântica de forma simples">Explique computação quântica de forma simples</button>
+        <button class="sug" data-sug="Escreva um e-mail profissional pedindo aumento">Escreva um e-mail profissional pedindo aumento</button>
+        <button class="sug" data-sug="Me dê ideias para um projeto de fim de semana">Me dê ideias para um projeto de fim de semana</button>
+        <button class="sug" data-sug="Resuma os princípios do estoicismo">Resuma os princípios do estoicismo</button>
       </div></div>`;
+    m.querySelectorAll('.sug').forEach(btn=>{
+      btn.addEventListener('click',()=>{
+        document.getElementById('input').value=btn.dataset.sug;
+        send();
+      });
+    });
     return;
   }
-  $('chatTitle').textContent=ch.title;
+  document.getElementById('chatTitle').textContent=ch.title;
   m.innerHTML='<div class="msg-wrap" id="msgWrap"></div>';
-  const w=$('msgWrap');
+  const w=document.getElementById('msgWrap');
   ch.messages.forEach(msg=>{
     const d=document.createElement('div');
     d.className='msg '+msg.role;
