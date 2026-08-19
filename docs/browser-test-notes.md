@@ -47,3 +47,7 @@ O submenu Mais abriu corretamente e exibiu web.klip. O clique agora mudou imedia
 O feed agora renderiza 18 cards inicialmente e mostra `Carregar mais 18`, reduzindo o custo de DOM. O card abriu detalhe compacto com `Abrir dentro do Klipza`; o clique mudou para a tela `Navegação interna` com Voltar/Início e iframe, sem nova aba. A fonte GitHub exibiu o estado de bloqueio de incorporação do próprio site, enquanto o app permaneceu aberto e navegável.
 
 O botão Voltar da página interna retornou ao feed na mesma aba. A pesquisa também permaneceu dentro de web.klip e mostrou o estado vazio sem travar; no servidor estático local, a rota API não existe, então o teste visual exibiu indisponibilidade. O endpoint server-side do projeto continua sendo a fonte usada no deploy e no APK.
+
+## Deploy público
+
+Após o login no Vercel, o projeto `klipza-zzz` foi localizado. O deployment do commit `cb31433` falhou antes do build porque a validação do Vercel informou: ``vercel.json schema validation failed: `version` should be <= 2``. A correção necessária é trocar a versão do arquivo de configuração para 2 e reenviar o commit.
