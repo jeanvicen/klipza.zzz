@@ -18,6 +18,35 @@ function cleanText(value) {
   return String(value || '').replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
 }
 
+const SEARCH_STOP_WORDS = new Set([
+  'a', 'o', 'as', 'os', 'um', 'uma', 'uns', 'umas', 'de', 'do', 'da', 'dos', 'das', 'e', 'ou', 'em', 'no', 'na', 'nos', 'nas', 'por', 'para', 'com', 'sem', 'sobre', 'como', 'que', 'qual', 'quais', 'onde', 'quando', 'porque', 'the', 'a', 'an', 'and', 'or', 'in', 'on', 'of', 'for', 'to', 'with', 'without', 'what', 'which', 'where', 'when', 'why', 'how'
+]);
+
+function normalizeSearchText(value) {
+  return cleanText(value)
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function searchTokens(value) {
+  return [...new Set(normalizeSearchText(value).split(' ').filter((token) => token.length >= 2 && !SEARCH_STOP_WORDS.has(token)))];
+}
+
+function searchRelevance(value, query) {
+  const haystack = normalizeSearchText(value);
+  const phrase = normalizeSearchText(query);
+  const tokens = searchTokens(query);
+  if (!tokens.length) return -1;
+  const matched = tokens.filter((token) => haystack.includes(token));
+  const required = tokens.length <= 3 ? tokens.length : Math.max(2, Math.ceil(tokens.length * 0.7));
+  if (matched.length < required) return -1;
+  return matched.length / tokens.length + (phrase && haystack.includes(phrase) ? 1 : 0);
+}
+
 function hasBlockedTerm(value, terms = BLOCKED_TERMS) {
   const normalized = cleanText(value).toLowerCase();
   return terms.some((term) => {
@@ -158,28 +187,30 @@ function safeSearchUrl(value) {
   }
 }
 
-function mapDuckDuckGoResults(html) {
+function mapDuckDuckGoResults(html, query) {
   const titles = [...String(html || '').matchAll(/<a[^>]+class=["'][^"']*result__a[^"']*["'][^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)];
   const snippets = [...String(html || '').matchAll(/<(?:a|div)[^>]+class=["'][^"']*result__snippet[^"']*["'][^>]*>([\s\S]*?)<\/(?:a|div)>/gi)];
   const seen = new Set();
   return titles.map((match, index) => {
     const url = safeSearchUrl(match[1]);
     const title = decodeSearchHtml(match[2]);
-    const summary = decodeSearchHtml(snippets[index]?.[1] || 'Resultado público encontrado na web.');
-    return { url, title, summary, index };
-  }).filter((item) => item.url && item.title && !seen.has(item.url) && !hasBlockedTerm(`${item.title} ${item.summary}`)).map((item) => {
+    const summary = decodeSearchHtml(snippets[index]?.[1] || '');
+    const relevance = searchRelevance(`${title} ${summary}`, query);
+    return { url, title, summary: summary || 'Resultado público encontrado na web.', relevance, index };
+  }).filter((item) => item.url && item.title && item.relevance >= 0 && !seen.has(item.url) && !hasBlockedTerm(`${item.title} ${item.summary}`)).sort((a, b) => b.relevance - a.relevance).map((item) => {
     seen.add(item.url);
     return { id: idFor('search', item.url), category: 'search', title: item.title, summary: item.summary, source: new URL(item.url).hostname.replace(/^www\\./, ''), url: item.url, date: new Date().toISOString() };
   }).slice(0, 50);
 }
 
-function mapNewsSearchResults(xml) {
+function mapNewsSearchResults(xml, query) {
   return mapGoogleNews(xml).map((item) => ({
     ...item,
     id: idFor('search', item.url || item.title),
     category: 'search',
-    summary: `${item.summary} Abra a fonte original para continuar a leitura.`
-  })).slice(0, 50);
+    summary: `${item.summary} Abra a fonte original para continuar a leitura.`,
+    relevance: searchRelevance(`${item.title} ${item.summary} ${item.source}`, query)
+  })).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 50);
 }
 
 export default async function handler(request, response) {
@@ -196,12 +227,12 @@ export default async function handler(request, response) {
     try {
       const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(locale.gl.toLowerCase())}`;
       const html = await getText(searchUrl, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' } });
-      results = mapDuckDuckGoResults(html);
+      results = mapDuckDuckGoResults(html, query);
     } catch {}
     if (!results.length) {
       try {
         const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:7d`)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`;
-        results = mapNewsSearchResults(await getText(rssUrl));
+        results = mapNewsSearchResults(await getText(rssUrl), query);
       } catch {}
     }
     response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length, fallback: results.length ? 'google-news-rss' : null });

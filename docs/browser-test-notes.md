@@ -51,3 +51,17 @@ O botão Voltar da página interna retornou ao feed na mesma aba. A pesquisa tam
 ## Deploy público
 
 Após o login no Vercel, o projeto `klipza-zzz` foi localizado. O deployment do commit `cb31433` falhou antes do build porque a validação do Vercel informou: ``vercel.json schema validation failed: `version` should be <= 2``. A correção necessária é trocar a versão do arquivo de configuração para 2 e reenviar o commit.
+
+## Teste público — rodada atual
+
+A home pública `https://klipza-zzz.vercel.app/` carregou com o aviso de instalação PWA e o botão Continuar com Google. O modo demo abriu a conversa normalmente, mantendo o compositor, o prompt do momento e os controles principais. Houve um snapshot inicial obsoleto durante o carregamento, mas uma nova navegação e o modo demo resolveram o estado sem erro persistente.
+
+Na versão pública, a barra lateral abriu e o submenu Mais expandiu sem erro. O botão `web.klip` ficou visível como item interativo do menu, confirmando que o problema de abertura não ocorre mais nessa etapa.
+
+A busca pública por `open source javascript` completou dentro do web.klip e retornou 1 resultado de pesquisa em um card, com o limite de 50 indicado na interface. O loading desapareceu normalmente, a URL permaneceu na mesma página do Klipza e os atalhos de IA continuaram disponíveis.
+
+O card de pesquisa abriu o detalhe com os botões `Codar com referência` e `Abrir dentro do Klipza`. Ao abrir a fonte, a tela mudou para `Navegação interna`, exibindo Voltar/Início e mantendo a URL na mesma página pública. A área interna ficou em branco porque a fonte bloqueia incorporação, mas o app não abriu nova aba nem travou; o aviso de limitação aparece corretamente.
+
+Após voltar da fonte, o estado da busca foi preservado. Ao limpar a pesquisa, o feed retornou com 48 itens disponíveis, mas apenas 18 exibidos inicialmente. O botão `Carregar mais 18` funcionou e aumentou a lista para 36 itens, deixando 12 restantes, confirmando o carregamento progressivo.
+
+Por fim, o botão Voltar ao chat restaurou a home da conversa pública com compositor, microfone, envio, prompt do momento e sidebar intactos. O fluxo completo terminou sem abrir nova aba do navegador e sem deixar o app preso na tela interna.

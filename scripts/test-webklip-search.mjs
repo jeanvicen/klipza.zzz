@@ -28,7 +28,14 @@ if (search.statusCode === 200) {
   for (const item of search.payload.items) {
     assert.ok(/^https?:$/.test(new URL(item.url).protocol));
     assert.equal(item.category, 'search');
+    const text = `${item.title} ${item.summary} ${item.url}`.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
+    for (const token of ['open', 'source', 'javascript']) assert.ok(text.includes(token), `Resultado sem o termo ${token}: ${item.title}`);
   }
 }
 
-console.log(`webklip search OK — feed=${feed.payload.items.length}, search=${search.payload.items.length}, status=${search.statusCode}`);
+const noMatch = await invoke({ q: 'klipzaqzxv-resultado-impossivel-92741', country: 'BR', language: 'pt-BR' });
+assert.equal(noMatch.statusCode, 200);
+assert.ok(Array.isArray(noMatch.payload.items));
+assert.equal(noMatch.payload.items.length, 0, 'Consulta sem correspondência não deve receber resultados aleatórios');
+
+console.log(`webklip search OK — feed=${feed.payload.items.length}, search=${search.payload.items.length}, noMatch=${noMatch.payload.items.length}, status=${search.statusCode}`);
