@@ -25,10 +25,12 @@ if (manifest.name !== 'Klipza.IA' || manifest.icons.length < 2 || manifest.displ
 
 for (const marker of [
   'id="webKlipToggle"',
-  'data-view="webklip"',
+  'id="webKlipModal"',
+  'webKlipSearchInput',
   'WEBKLIP_ROTATION_MS=25000',
   'WEBKLIP_CACHE_KEY=\'klipza_webklip_daily_v2\'',
   '/api/webklip?date=',
+  '/api/webklip?q=',
   'Codar com referência'
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração web.klip ausente: ${marker}`);
@@ -37,6 +39,7 @@ for (const marker of [
 const api = await readFile(resolve(root, 'api/webklip.js'), 'utf8');
 for (const marker of [
   'news.google.com/rss/search',
+  'country',
   '.slice(0, 50)',
   'celebrity',
   'malware',

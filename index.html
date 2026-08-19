@@ -22,8 +22,8 @@
   --install-shadow:0 18px 60px rgba(0,0,0,.20);
 }
 body.dark{
-  --bg:#0b0b0b;--panel:#111;--panel2:#171717;--line:#262626;--line2:#333;
-  --text:#f3f3f3;--muted:#9a9a9a;--black:#fff;--hover:#1b1b1b;
+  --bg:#2a2a2a;--panel:#333;--panel2:#3d3d3d;--line:#505050;--line2:#666;
+  --text:#f5f5f5;--muted:#c4c4c4;--black:#f5f5f5;--hover:#454545;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
@@ -151,7 +151,7 @@ img{max-width:100%}
 .welcome-prompt-copy{min-width:0;flex:1}
 .welcome-prompt-label{font-size:11px;font-weight:750;margin-bottom:5px}
 .welcome-prompt-text{font-size:13px;line-height:1.45;color:var(--muted);display:block}
-.welcome-prompt-meta{font-size:9px;color:#999;margin-top:5px}
+.welcome-prompt-meta{font-size:9px;color:#999;margin-top:5px}.welcome-prompt-meta:empty{display:none}
 .nav-expand{padding:0 9px 8px}
 .nav-more{height:36px!important;color:var(--muted)!important}
 .nav-more:hover{color:var(--text)!important}
@@ -169,7 +169,7 @@ img{max-width:100%}
 .webklip-subtitle{font-size:12px;line-height:1.55;color:var(--muted);max-width:680px;margin-top:6px}
 .webklip-refresh{height:36px;padding:0 12px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);font-size:11px;font-weight:700;white-space:nowrap}
 .webklip-refresh:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
-.webklip-meta{font-size:10px;color:var(--muted);margin:0 0 12px}
+.webklip-meta{font-size:10px;color:var(--muted);margin:0 0 12px}.webklip-browser-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}.webklip-search-form{min-width:0;flex:1;height:42px;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);box-shadow:0 3px 12px rgba(0,0,0,.04)}.webklip-search-icon{font-size:19px;color:var(--muted);line-height:1}.webklip-search-form input{min-width:0;flex:1;height:34px;border:0;outline:0;background:transparent;color:var(--text);font-size:12px}.webklip-search-form button,.webklip-clear-search{height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-search-form button:hover,.webklip-clear-search:hover{background:var(--black);color:var(--bg);border-color:var(--black)}.webklip-ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 18px}.webklip-ai-label{font-size:10px;color:var(--muted);font-weight:750;margin-right:2px}.webklip-ai-link{height:28px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font-size:10px;text-decoration:none}.webklip-ai-link:hover{border-color:var(--black);background:var(--hover)}
 .webklip-tabs{display:flex;gap:6px;overflow:auto;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;scrollbar-width:none}
 .webklip-tabs::-webkit-scrollbar{display:none}
 .webklip-tab{height:32px;padding:0 12px;border-radius:8px;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
@@ -199,6 +199,16 @@ img{max-width:100%}
 .webklip-action.secondary{background:var(--bg);color:var(--text);border:1px solid var(--line2)}
 .webklip-action.secondary:hover{background:var(--hover)}
 @media(max-width:980px){.webklip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-index:240;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.42);backdrop-filter:blur(7px)}
+.webklip-modal.open{display:flex;animation:primeFadeIn .18s ease}
+.webklip-modal-dialog{width:min(1120px,calc(100vw - 28px));max-height:min(820px,calc(100dvh - 28px));overflow:hidden;background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:20px;box-shadow:0 28px 80px rgba(0,0,0,.26);display:flex;flex-direction:column}
+.webklip-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 22px;border-bottom:1px solid var(--line);flex:0 0 auto}
+.webklip-modal-title{font-size:20px;font-weight:780;letter-spacing:-.4px}.webklip-modal-sub{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.45}
+.webklip-modal-close{width:36px;height:36px;border-radius:10px;border:1px solid var(--line2);background:var(--panel);display:grid;place-items:center;font-size:18px}.webklip-modal-close:hover{background:var(--hover)}
+.webklip-modal-body{overflow:auto;padding:0}.webklip-modal-body .webklip-view{height:auto;min-height:0;padding:18px 22px 26px}.webklip-modal-body .webklip-head{display:none}.webklip-modal-body .webklip-inner{width:100%}.webklip-country-select{height:34px;min-width:170px;padding:0 10px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);color:var(--text);font-size:11px}.webklip-country-select:focus{outline:2px solid var(--line2);outline-offset:1px}
+.confirm-modal{position:fixed;inset:0;z-index:310;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.42);backdrop-filter:blur(6px)}
+.confirm-modal.open{display:flex;animation:primeFadeIn .18s ease}.confirm-dialog{width:min(430px,calc(100vw - 28px));background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:18px;padding:22px;box-shadow:0 28px 80px rgba(0,0,0,.3)}.confirm-title{font-size:18px;font-weight:780}.confirm-copy{font-size:12px;line-height:1.55;color:var(--muted);margin-top:8px}.confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.confirm-btn{height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);font-size:11px;font-weight:750}.confirm-btn:hover{background:var(--hover)}.confirm-btn.danger{background:var(--text);color:var(--bg);border-color:var(--text)}
+@media(max-width:720px){.webklip-modal{padding:8px;align-items:flex-end}.webklip-modal-dialog{width:100%;max-height:calc(100dvh - 16px);border-radius:18px 18px 10px 10px}.webklip-modal-head{padding:16px 17px}.webklip-modal-body .webklip-view{padding:15px 14px 22px}.webklip-browser-bar{align-items:stretch;flex-direction:column}.webklip-search-form{width:100%}.webklip-clear-search{width:100%}.webklip-grid{grid-template-columns:1fr}.confirm-modal{padding:10px;align-items:flex-end}.confirm-dialog{width:100%;border-radius:18px 18px 10px 10px;padding:19px}}
 
 .composer-wrap{padding:12px 16px 16px;flex:0 0 auto}
 .composer{width:min(var(--content),100%);margin:0 auto}
@@ -265,7 +275,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .settings-action{padding:8px 11px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:11px;font-weight:650;white-space:nowrap}.settings-action:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
 .settings-action.danger{border-color:var(--black)}
 .settings-energy{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.settings-meter{border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--bg)}.settings-meter-top{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.settings-meter-name{font-size:12px;font-weight:700}.settings-meter-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-top:3px}.settings-meter-value{font-size:19px;font-weight:750;white-space:nowrap}.settings-track{height:7px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:12px}.settings-track span{display:block;height:100%;background:var(--black);border-radius:999px;transition:width .25s}.settings-meter-foot{font-size:10px;color:var(--muted);margin-top:8px;display:flex;justify-content:space-between;gap:8px}
-.settings-themes{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.theme-card{border:1px solid var(--line);border-radius:13px;background:var(--bg);padding:10px;text-align:left;transition:.15s}.theme-card:hover{border-color:var(--black)}.theme-card.active{border:2px solid var(--black);padding:9px}.theme-swatch{height:92px;border-radius:9px;display:flex;align-items:flex-end;padding:12px;font-size:14px;font-weight:700;letter-spacing:-.2px}.theme-swatch.light{background:#fff;color:#111;border:1px solid #eee}.theme-swatch.dark{background:#0b0b0b;color:#fff;border:1px solid #222}.theme-name{font-size:12px;font-weight:700;margin-top:10px}.theme-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
+.settings-themes{padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.theme-card{border:1px solid var(--line);border-radius:13px;background:var(--bg);padding:10px;text-align:left;transition:.15s}.theme-card:hover{border-color:var(--black)}.theme-card.active{border:2px solid var(--black);padding:9px}.theme-swatch{height:92px;border-radius:9px;display:flex;align-items:flex-end;padding:12px;font-size:14px;font-weight:700;letter-spacing:-.2px}.theme-swatch.light{background:#fff;color:#111;border:1px solid #eee}.theme-swatch.dark{background:#2a2a2a;color:#fff;border:1px solid #666}.theme-name{font-size:12px;font-weight:700;margin-top:10px}.theme-desc{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.4}
 .settings-foot{font-size:10px;color:var(--muted);text-align:center;padding:18px 0 6px}
 @media(max-width:980px){.settings-sections{grid-template-columns:1fr}.settings-card.full{grid-column:auto}.settings-energy{grid-template-columns:1fr 1fr}}
 @media(max-width:720px){.settings-view{padding:16px 12px 42px}.settings-top{padding:8px 0 14px;align-items:flex-start}.settings-title{font-size:21px}.settings-subtitle{white-space:normal}.settings-back{padding:8px 10px}.settings-nav{margin-bottom:12px}.settings-nav a{padding:9px 12px;font-size:10px}.settings-sections{gap:10px}.settings-card{border-radius:13px}.settings-card-header{padding:15px}.settings-rows{padding:0 15px}.settings-row{align-items:flex-start;flex-direction:column;gap:10px;padding:14px 0}.settings-control{width:100%;justify-content:flex-start}.settings-value{max-width:none;text-align:left;white-space:normal}.settings-action{width:auto}.settings-energy,.settings-themes{padding:12px 15px;grid-template-columns:1fr}.theme-swatch{height:78px}.settings-avatar{width:44px;height:44px;border-radius:12px;font-size:14px}}
@@ -646,13 +656,27 @@ body.prime-modal-open{overflow:hidden}
 .stop-btn svg{width:15px;height:15px}
 .mic-btn{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#222;transition:.15s}
 .mic-btn:hover{background:#f0f0f0}
-.mic-btn.listening{background:#111;color:#fff;animation:micPulse 1.2s ease-in-out infinite}
-@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}50%{box-shadow:0 0 0 5px rgba(0,0,0,.08)}}
-.voice-hint{font-size:11px;color:#777;display:none;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
-.voice-hint.show{display:block}
+.mic-btn.listening{position:relative;background:var(--hover);color:var(--text);animation:micBreathe 2.2s ease-in-out infinite;box-shadow:0 0 0 1px var(--line2)}
+  .mic-btn.listening::before,.mic-btn.listening::after{content:'';position:absolute;inset:3px;border:1px solid currentColor;border-radius:50%;opacity:0;pointer-events:none}
+  .mic-btn.listening::before{animation:micWave 2.2s ease-out infinite}
+  .mic-btn.listening::after{animation:micWave 2.2s ease-out .75s infinite}
+  @keyframes micBreathe{0%,100%{transform:translateY(0);box-shadow:0 0 0 1px var(--line2),0 0 0 0 rgba(255,255,255,0)}50%{transform:translateY(-1px);box-shadow:0 0 0 1px var(--line2),0 0 0 6px rgba(255,255,255,.08)}}
+  @keyframes micWave{0%{transform:scale(.7);opacity:.55}70%,100%{transform:scale(1.8);opacity:0}}
+  .voice-hint{font-size:11px;color:var(--muted);display:none;align-items:center;gap:6px;white-space:nowrap;max-width:180px;overflow:hidden;text-overflow:ellipsis}
+  .voice-hint.show::before{content:'';width:6px;height:6px;border-radius:50%;background:#8fbf9a;box-shadow:0 0 0 4px rgba(143,191,154,.14);flex:0 0 auto}
+.voice-hint.show{display:flex}
 .voice-cancel{font-size:11px;color:#777;background:transparent;border:0;cursor:pointer;padding:3px 0}
 .voice-cancel:hover{color:#000}
-.msg-status{margin-top:8px;font-size:11px;color:#777}
+  .voice-panel{display:none;align-items:center;gap:11px;width:min(var(--content),100%);margin:0 auto 9px;padding:10px 13px;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);box-shadow:0 6px 22px rgba(0,0,0,.06)}
+  .voice-panel.show{display:flex;animation:voicePanelIn .22s ease}
+  .voice-orb{position:relative;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--text);color:var(--bg);flex:0 0 auto}
+  .voice-orb::before,.voice-orb::after{content:'';position:absolute;inset:-4px;border:1px solid var(--text);border-radius:50%;opacity:0;animation:voiceOrbWave 2.4s ease-out infinite}
+  .voice-orb::after{animation-delay:1.1s}.voice-orb svg{width:16px;height:16px;position:relative;z-index:1}
+  .voice-panel-copy{min-width:0;flex:1;display:grid;gap:2px}.voice-panel-copy strong{font-size:11px}.voice-panel-copy span{font-size:10px;color:var(--muted)}
+  .voice-panel-stop{height:30px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;font-size:10px;font-weight:700}.voice-panel-stop:hover{background:var(--hover)}
+  @keyframes voicePanelIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+  @keyframes voiceOrbWave{0%{transform:scale(.75);opacity:.5}70%,100%{transform:scale(1.7);opacity:0}}
+  .msg-status{margin-top:8px;font-size:11px;color:#777}
 .msg-status strong{color:#111;font-weight:600}
 @media(max-width:720px){
   .response-status{padding:0 12px}
@@ -795,15 +819,31 @@ body.prime-modal-open{overflow:hidden}
   </div>
 </div>
 
+<div class="confirm-modal" id="confirmModal" aria-hidden="true">
+  <div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalCopy">
+    <div class="confirm-title" id="confirmModalTitle">Tem certeza?</div>
+    <div class="confirm-copy" id="confirmModalCopy">Essa ação não poderá ser desfeita.</div>
+    <div class="confirm-actions"><button class="confirm-btn" type="button" id="confirmCancel">Cancelar</button><button class="confirm-btn danger" type="button" id="confirmAccept">Sim, apagar</button></div>
+  </div>
+</div>
+
+<div class="webklip-modal" id="webKlipModal" aria-hidden="true">
+  <div class="webklip-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="webKlipModalTitle">
+    <div class="webklip-modal-head"><div><div class="webklip-eyebrow">Klipza · pesquisa diária</div><div class="webklip-modal-title" id="webKlipModalTitle">web.klip</div><div class="webklip-modal-sub" id="webKlipModalSub">Novidades do mundo selecionadas para você.</div></div><button class="webklip-modal-close" type="button" id="webKlipModalClose" aria-label="Fechar web.klip">×</button></div>
+    <div class="webklip-modal-body" id="webKlipModalBody"></div>
+  </div>
+</div>
+
 <script>
 (() => {
   const $ = id => document.getElementById(id);
   const KEY = 'klipza_pro_v1';
   let state = loadState();
   state.theme = state.theme || 'light';
-  state.settings = state.settings || {notifications:false,sounds:false};
+  state.settings = {...{notifications:false,sounds:false,language:'pt-BR',country:'BR'},...(state.settings||{})};
   const ENERGY_MAX=100, MSG_COST=2, ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000;
   let currentView = 'chat';
+  let webKlipReturnView = 'chat';
   let activeChatId = state.activeChatId || null;
   let attached = [];
   let anonymousMode = false;
@@ -951,7 +991,7 @@ body.prime-modal-open{overflow:hidden}
   function applyTheme(){
     const dark=state.theme==='dark';
     document.body.classList.toggle('dark',dark);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#0b0b0b':'#ffffff');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#2a2a2a':'#ffffff');
   }
   function setTheme(theme){
     state.theme=theme==='dark'?'dark':'light';
@@ -974,10 +1014,11 @@ body.prime-modal-open{overflow:hidden}
     state.settings.sounds=!state.settings.sounds; save(); renderSettingsPage();
   }
   function clearAllLocalData(){
-    if(!confirm('Apagar todas as conversas, artefatos e configurações salvas neste navegador?')) return;
-    const user=state.user; localStorage.removeItem(KEY);
-    state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false}};
-    applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter();
+    openConfirmModal('Limpar dados locais?', 'Conversas, artefatos, energia e preferências salvas neste navegador serão removidos. Essa ação não pode ser desfeita.', ()=>{
+      const user=state.user; localStorage.removeItem(KEY);
+      state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR'}};
+      applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter();
+    });
   }
   function browserNotification(title,body){
     if(state.settings.notifications && 'Notification' in window && Notification.permission==='granted'){ try{new Notification(title,{body});}catch(e){} }
@@ -1013,15 +1054,25 @@ body.prime-modal-open{overflow:hidden}
   window.addEventListener('resize',adaptSidebar);
 
   function setView(view){
+    if(view==='webklip'){
+      webKlipReturnView=currentView==='webklip'?'chat':currentView;
+      currentView='webklip';
+      document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+      $('app').classList.remove('settings-mode');
+      openWebKlipModal();renderWebKlipPage();fetchWebKlipItems();
+      return;
+    }
+    if(currentView==='webklip')closeWebKlipModal(false);
     currentView=view;
     document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
     $('app').classList.toggle('settings-mode',view==='settings');
     if(view==='chat') renderChat();
     if(view==='artifacts') renderArtifactsPage();
-    if(view==='webklip') renderWebKlipPage();
     if(view==='settings'){ window.__klipzaSettingsMobileDetail=false; renderSettingsPage(); }
     if(window.innerWidth<=720) $('app').classList.add('sidebar-collapsed');
   }
+  function openWebKlipModal(){const modal=$('webKlipModal');if(!modal)return;modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.classList.add('webklip-modal-open');}
+  function closeWebKlipModal(restore=true){const modal=$('webKlipModal');if(modal){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}document.body.classList.remove('webklip-modal-open');if(restore&&currentView==='webklip'){const next=webKlipReturnView==='webklip'?'chat':webKlipReturnView;currentView=next;document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='chat')renderChat();if(next==='artifacts')renderArtifactsPage();if(next==='settings'){window.__klipzaSettingsMobileDetail=false;renderSettingsPage();}}}
   function toggleSidebar(){ $('app').classList.toggle('sidebar-collapsed'); }
 
   function createChat(){
@@ -1045,9 +1096,15 @@ body.prime-modal-open{overflow:hidden}
     input.addEventListener('blur',finish,{once:true});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finish()} if(e.key==='Escape'){input.value=old;input.blur()}});
   }
+  let confirmAction=null;
+  function openConfirmModal(title,copy,action){
+    const modal=$('confirmModal');if(!modal)return;
+    confirmAction=action;$('confirmModalTitle').textContent=title;$('confirmModalCopy').textContent=copy;modal.classList.add('open');modal.setAttribute('aria-hidden','false');$('confirmCancel')?.focus();
+  }
+  function closeConfirmModal(){const modal=$('confirmModal');if(!modal)return;confirmAction=null;modal.classList.remove('open');modal.setAttribute('aria-hidden','true');}
+  function acceptConfirmModal(){const action=confirmAction;closeConfirmModal();if(action)action();}
   function clearHistory(){
-    if(!confirm('Apagar todo o histórico de conversas?')) return;
-    state.chats={};activeChatId=null;state.activeChatId=null;save();renderHistory();createChat();
+    openConfirmModal('Apagar histórico?', 'Todas as conversas salvas neste navegador serão removidas. Essa ação não altera seus artefatos.', ()=>{state.chats={};activeChatId=null;state.activeChatId=null;save();renderHistory();createChat();});
   }
   function renderHistory(){
     const box=$('history'); const ids=Object.keys(state.chats).sort((a,b)=>state.chats[b].updated-state.chats[a].updated);
@@ -1092,6 +1149,11 @@ body.prime-modal-open{overflow:hidden}
             <div class="energy-banner-sub" id="energyEmptyText">Você pode continuar quando seu ciclo recarregar.</div>
           </div>
           <button class="energy-prime" type="button" onclick="window.K.upcoming('Klipza.Prime')">Mudar para Klipza.Prime</button>
+        </div>
+        <div class="voice-panel" id="voicePanel" aria-live="polite" aria-hidden="true">
+          <div class="voice-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></div>
+          <div class="voice-panel-copy"><strong id="voicePanelTitle">Estou ouvindo</strong><span id="voicePanelText">Fale no seu ritmo</span></div>
+          <button class="voice-panel-stop" type="button" onclick="window.K.toggleDictation()">Parar</button>
         </div>
         <div class="composer-box">
           <div class="attach-strip" id="attachStrip"></div>
@@ -1146,7 +1208,7 @@ body.prime-modal-open{overflow:hidden}
     bindComposer(); renderMessages();
   }
   let responseState={active:false,timer:null,stopped:false};
-  let recognition=null, dictating=false;
+  let recognition=null, dictating=false, dictationSession=0, dictationRestartTimer=null;
   function bindComposer(){
     const input=$('prompt'), send=$('sendBtn');
     input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';send.disabled=responseState.active || (!input.value.trim()&&!attached.length);});
@@ -1207,24 +1269,59 @@ body.prime-modal-open{overflow:hidden}
     if(responseState.active)return;
     const SpeechRecognition=window.SpeechRecognition||window.webkitSpeechRecognition;
     if(!SpeechRecognition){alert('O ditado por voz não está disponível neste navegador.');return;}
-    if(dictating){recognition?.stop();return;}
-    recognition=new SpeechRecognition(); recognition.lang='pt-BR'; recognition.interimResults=true; recognition.continuous=true;
-    dictating=true; const mic=$('micBtn'), hint=$('voiceHint'), input=$('prompt');
-    mic.classList.add('listening'); hint.classList.add('show'); input.placeholder='Ouvindo...';
+    if(dictating){endDictation();return;}
+    const session=++dictationSession;
+    const input=$('prompt'), mic=$('micBtn'), hint=$('voiceHint'), panel=$('voicePanel');
     let base=input.value.trim();
-    recognition.onresult=e=>{let interim=''; let finalText=''; for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript; if(e.results[i].isFinal)finalText+=t; else interim+=t;} if(finalText){base=(base?base+' ':'')+finalText.trim();} input.value=base+(interim?(base?' ':'')+interim:''); input.dispatchEvent(new Event('input'));};
-    recognition.onerror=()=>endDictation(); recognition.onend=()=>endDictation();
-    recognition.start();
+    let committedResults=0;
+    dictating=true;
+    mic?.classList.add('listening'); hint?.classList.add('show');
+    if(panel){panel.classList.add('show');panel.setAttribute('aria-hidden','false');}
+    input.placeholder='Fale no seu ritmo...';
+    const updateTranscript=(interim='')=>{input.value=base+(interim?(base?' ':'')+interim:'');input.dispatchEvent(new Event('input'));};
+    const startRecognition=()=>{
+      if(!dictating||session!==dictationSession)return;
+      committedResults=0;
+      recognition=new SpeechRecognition();
+      recognition.lang=state.settings?.language||navigator.language||'pt-BR';
+      recognition.interimResults=true; recognition.continuous=false; recognition.maxAlternatives=1;
+      recognition.onresult=e=>{
+        let interim='';
+        for(let i=e.resultIndex;i<e.results.length;i++){
+          const result=e.results[i], text=result?.[0]?.transcript?.trim()||'';
+          if(!text)continue;
+          if(result.isFinal){
+            if(i>=committedResults){base=(base?base+' ':'')+text;committedResults=i+1;}
+          } else interim+=(interim?' ':'')+text;
+        }
+        updateTranscript(interim);
+      };
+      recognition.onerror=e=>{
+        if(!dictating||session!==dictationSession)return;
+        if(e.error==='not-allowed'||e.error==='service-not-allowed'){if($('voicePanelText'))$('voicePanelText').textContent='Permita o microfone para continuar.';endDictation();return;}
+        if($('voicePanelText'))$('voicePanelText').textContent='Ajustando a escuta...';
+      };
+      recognition.onend=()=>{
+        recognition=null;
+        if(dictating&&session===dictationSession){clearTimeout(dictationRestartTimer);dictationRestartTimer=setTimeout(startRecognition,140);}
+      };
+      try{recognition.start();}catch(error){if(error?.name!=='InvalidStateError')endDictation();}
+    };
+    if($('voicePanelTitle'))$('voicePanelTitle').textContent='Estou ouvindo';
+    if($('voicePanelText'))$('voicePanelText').textContent='Fale com calma; eu acompanho sua frase.';
+    startRecognition();
   }
   function endDictation(){
-    dictating=false; if(recognition){try{recognition.stop()}catch(e){} recognition=null;}
+    dictating=false; dictationSession++; clearTimeout(dictationRestartTimer); dictationRestartTimer=null;
+    if(recognition){try{recognition.onend=null;recognition.stop()}catch(e){} recognition=null;}
     $('micBtn')?.classList.remove('listening'); $('voiceHint')?.classList.remove('show');
-    if($('prompt')){ $('prompt').placeholder='Envie uma mensagem para o Klipza.IA'; $('prompt').dispatchEvent(new Event('input')); }
+    const panel=$('voicePanel'); if(panel){panel.classList.remove('show');panel.setAttribute('aria-hidden','true');}
+    if($('prompt')){$('prompt').placeholder='Envie uma mensagem para o Klipza.IA';$('prompt').dispatchEvent(new Event('input'));}
   }
   function renderMessages(){
     const chat=currentChat(), box=$('messages');
     if(!chat.messages.length){
-      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta">Atualiza a cada 25 segundos</span></span><span aria-hidden="true">→</span></button></div></div></div>`; startWelcomeRotator(); return;
+      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta"></span></span><span aria-hidden="true">→</span></button></div></div></div>`; startWelcomeRotator(); return;
     }
     const wrap=document.createElement('div');wrap.className='msg-width';
     chat.messages.forEach(m=>{
@@ -1251,7 +1348,10 @@ body.prime-modal-open{overflow:hidden}
   const WEBKLIP_ROTATION_MS=25000;
   let welcomeRotatorTimer=null;
   let welcomePromptIndex=0;
-  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null};
+  const WEBKLIP_API_BASE=(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://klipza-zzz.vercel.app':'';
+  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false};
+  const WEBKLIP_LOCALES={BR:{label:'Brasil',language:'pt-BR',hl:'pt-BR',gl:'BR',ceid:'BR:pt'},PT:{label:'Portugal',language:'pt-PT',hl:'pt-PT',gl:'PT',ceid:'PT:pt'},US:{label:'Estados Unidos',language:'en-US',hl:'en-US',gl:'US',ceid:'US:en'},GB:{label:'Reino Unido',language:'en-GB',hl:'en-GB',gl:'GB',ceid:'GB:en'},ES:{label:'Espanha',language:'es-ES',hl:'es-ES',gl:'ES',ceid:'ES:es'},MX:{label:'México',language:'es-MX',hl:'es-419',gl:'MX',ceid:'MX:es'},FR:{label:'França',language:'fr-FR',hl:'fr-FR',gl:'FR',ceid:'FR:fr'},DE:{label:'Alemanha',language:'de-DE',hl:'de-DE',gl:'DE',ceid:'DE:de'},JP:{label:'Japão',language:'ja-JP',hl:'ja',gl:'JP',ceid:'JP:ja'},IN:{label:'Índia',language:'en-IN',hl:'en-IN',gl:'IN',ceid:'IN:en'}};
+  const WEBKLIP_AI_LINKS=[{name:'ChatGPT',url:'https://chatgpt.com/'},{name:'Claude',url:'https://claude.ai/'},{name:'Gemini',url:'https://gemini.google.com/'},{name:'Perplexity',url:'https://www.perplexity.ai/'},{name:'Microsoft Copilot',url:'https://copilot.microsoft.com/'}];
   const WELCOME_PROMPTS=[
     'O que está mudando no mundo da tecnologia hoje?',
     'Quais projetos de código aberto estão ganhando atenção?',
@@ -1261,6 +1361,9 @@ body.prime-modal-open{overflow:hidden}
   ];
   const BLOCKED_NEWS_TERMS=['celebridade','celebridades','famoso','famosa','famosos','influencer','influenciador','influenciadora','hollywood','reality show','red carpet','namoro de','casamento de','separação de','rapper','cantor','cantora','ator','atriz','youtuber','tiktoker','celebrity','influencer','hollywood','gossip','entertainment','executor','activator','activation','without subscription','no subscription','crack','keygen','piracy','pirated','torrent','cheat','aimbot','stealer','malware','ransomware','phishing','credential','token grabber','password dump','bypass','no more refusals','auto claim points','nsfw','porn'];
 
+  function currentWebKlipLocale(){return WEBKLIP_LOCALES[state.settings?.country]||WEBKLIP_LOCALES.BR;}
+  function webKlipCountryOptions(){const current=state.settings?.country||'BR';return Object.entries(WEBKLIP_LOCALES).map(([code,locale])=>`<option value="${code}" ${code===current?'selected':''}>${locale.label}</option>`).join('');}
+  function setWebKlipCountry(country){if(!WEBKLIP_LOCALES[country])return;state.settings.country=country;state.settings.language=WEBKLIP_LOCALES[country].language;save();webKlipState={...webKlipState,dayKey:null,items:[],searchResults:[],error:null};renderWebKlipPage();fetchWebKlipItems();}
   function localDayKey(date=new Date()){
     const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
     return local.toISOString().slice(0,10);
@@ -1280,7 +1383,7 @@ body.prime-modal-open{overflow:hidden}
   function paintWelcomePrompt(){
     const text=WELCOME_PROMPTS[welcomePromptIndex%WELCOME_PROMPTS.length];
     if($('welcomePromptText'))$('welcomePromptText').textContent=text;
-    if($('welcomePromptMeta'))$('welcomePromptMeta').textContent=`Troca a cada 25 segundos · ${welcomePromptIndex+1}/${WELCOME_PROMPTS.length}`;
+    if($('welcomePromptMeta'))$('welcomePromptMeta').textContent='';
   }
   function startWelcomeRotator(){
     clearInterval(welcomeRotatorTimer);
@@ -1294,7 +1397,8 @@ body.prime-modal-open{overflow:hidden}
   }
   function useWelcomePrompt(){
     const prompt=$('welcomePromptText')?.textContent||WELCOME_PROMPTS[0];
-    useSuggestion(`Pesquise no web.klip: ${prompt}`);
+    setView('webklip');
+    setTimeout(()=>searchWebKlip(prompt),0);
   }
   function toggleWebKlipMenu(){
     const button=$('webKlipToggle'), submenu=$('webKlipSubnav');
@@ -1352,7 +1456,8 @@ body.prime-modal-open{overflow:hidden}
     webKlipState={...webKlipState,dayKey:today,loading:true,error:null,selected:null};
     if(currentView==='webklip')renderWebKlipPage();
     try{
-      const data=await fetchJSON(`/api/webklip?date=${encodeURIComponent(today)}`);
+      const locale=currentWebKlipLocale();
+      const data=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?date=${encodeURIComponent(today)}&country=${encodeURIComponent(state.settings.country||'BR')}&language=${encodeURIComponent(locale.language)}`);
       const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>!blockedNews(`${item.title||''} ${item.summary||''} ${item.source||''}`)).slice(0,50);
       const baseItems=items.length?items:fallbackWebKlipItems();
       const ready=ensureNewsItem(baseItems,items.length?'':'O endpoint diário não encontrou itens públicos agora; mostrando estado de fallback.');
@@ -1375,19 +1480,41 @@ body.prime-modal-open{overflow:hidden}
     }
     if(currentView==='webklip')renderWebKlipPage();
   }
-  function webKlipCategoryLabel(category){return ({all:'Tudo',news:'Notícias',games:'Jogos',code:'Código',design:'Design'})[category]||category;}
+  function webKlipCategoryLabel(category){return ({all:'Tudo',news:'Notícias',games:'Jogos',code:'Código',design:'Design',search:'Pesquisa'})[category]||category;}
   function webKlipFilteredItems(){return webKlipState.category==='all'?webKlipState.items:webKlipState.items.filter(item=>item.category===webKlipState.category);}
   function webKlipItemHTML(item,index){return `<article class="webklip-card" data-webklip-id="${esc(item.id)}"><div class="webklip-card-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))}</span><span class="webklip-rank">#${index+1}</span></div><div class="webklip-card-title">${esc(item.title)}</div><div class="webklip-card-summary">${esc(item.summary)}</div><div class="webklip-card-foot"><span class="webklip-source">${esc(item.source||'Fonte pública')}</span><span class="webklip-arrow">→</span></div></article>`;}
+  async function searchWebKlip(query){
+    const clean=String(query||'').trim().slice(0,180);
+    webKlipState={...webKlipState,query:clean,searchResults:[],searchLoading:Boolean(clean),error:null};
+    renderWebKlipPage();
+    if(!clean)return;
+    try{
+      const locale=currentWebKlipLocale();
+      const data=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?q=${encodeURIComponent(clean)}&country=${encodeURIComponent(state.settings.country||'BR')}&language=${encodeURIComponent(locale.language)}`);
+      const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>item?.url&&!blockedNews(`${item.title||''} ${item.summary||''}`)).slice(0,50);
+      webKlipState={...webKlipState,query:clean,searchResults:items,searchLoading:false,error:items.length?'': 'Nenhum resultado público encontrado para esta busca.'};
+    }catch(error){webKlipState={...webKlipState,searchLoading:false,error:'A pesquisa pública está indisponível agora. Tente novamente em instantes.'};}
+    renderWebKlipPage();
+  }
   function renderWebKlipPage(){
-    const items=webKlipFilteredItems();
-    $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()" title="Abrir histórico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">web.klip</div></div></header><section class="webklip-view"><div class="webklip-inner"><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · pesquisa diária</div><h1 class="webklip-title">web.klip</h1><p class="webklip-subtitle">As novidades públicas mais relevantes do dia em notícias globais, jogos, código e design. Celebridades e fofoca ficam fora do filtro.</p></div><button class="webklip-refresh" id="webKlipRefresh" type="button">Atualizar agora</button></div><div class="webklip-meta">${webKlipState.loading?'Buscando fontes públicas…':`${items.length} item(ns) disponíveis · pacote de ${webKlipState.dayKey||localDayKey()}`}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div><div class="webklip-tabs">${['all','news','games','code','design'].map(category=>`<button class="webklip-tab ${webKlipState.category===category?'active':''}" type="button" data-webklip-category="${category}">${webKlipCategoryLabel(category)}</button>`).join('')}</div>${webKlipState.loading?'<div class="webklip-loading">Consultando o web.klip…</div>':items.length?`<div class="webklip-grid">${items.map(webKlipItemHTML).join('')}</div>`:'<div class="webklip-empty">Nenhum item disponível ainda. Tente atualizar novamente.</div>'}</div></section>`;
-    $('webKlipRefresh')?.addEventListener('click',refreshWebKlip);
-    document.querySelectorAll('[data-webklip-category]').forEach(button=>button.addEventListener('click',()=>{webKlipState.category=button.dataset.webklipCategory;renderWebKlipPage();}));
-    document.querySelectorAll('[data-webklip-id]').forEach(card=>card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId)));
-    if(!webKlipState.items.length&&!webKlipState.loading)fetchWebKlipItems();
+    const body=$('webKlipModalBody');if(!body)return;
+    const locale=currentWebKlipLocale();
+    const feedItems=webKlipFilteredItems();
+    const searching=Boolean(webKlipState.query);
+    const items=searching?webKlipState.searchResults:feedItems;
+    const aiLinks=WEBKLIP_AI_LINKS.map(link=>`<a class="webklip-ai-link" href="${link.url}" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">${esc(link.name)} <span aria-hidden="true">↗</span></a>`).join('');
+    $('webKlipModalSub').textContent=searching?`Pesquisa pública em ${locale.label} · até 50 resultados`:`Feed diário em ${locale.label} · idioma ${locale.language}`;
+    body.innerHTML=`<section class="webklip-view"><div class="webklip-inner"><div class="webklip-browser-bar"><form class="webklip-search-form" id="webKlipSearchForm" role="search"><span class="webklip-search-icon" aria-hidden="true">⌕</span><input id="webKlipSearchInput" value="${esc(webKlipState.query)}" maxlength="180" autocomplete="off" placeholder="Pesquisar na web…" aria-label="Pesquisar na web"><button type="submit">Pesquisar</button></form>${searching?'<button class="webklip-clear-search" type="button" id="webKlipClearSearch">Ver feed diário</button>':''}</div><div class="webklip-ai-row"><span class="webklip-ai-label">Abrir IA</span>${aiLinks}</div><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · pesquisa diária</div><h1 class="webklip-title">${searching?'Resultados da pesquisa':'web.klip'}</h1><p class="webklip-subtitle">${searching?'Resultados públicos filtrados com abertura segura em nova aba.':'Pesquise e explore notícias, jogos, código e design de fontes públicas. O feed evita celebridades, fofoca e conteúdo inseguro.'}</p></div><button class="webklip-refresh" id="webKlipRefresh" type="button">Atualizar</button></div><div class="webklip-meta">${searching?(webKlipState.searchLoading?'Pesquisando fontes públicas…':`${items.length} resultado(s) · limite de 50`):(webKlipState.loading?'Buscando fontes públicas…':`${items.length} item(ns) disponíveis · ${locale.label} · ${webKlipState.dayKey||localDayKey()}`)}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div>${searching?'':`<div class="webklip-tabs">${['all','news','games','code','design'].map(category=>`<button class="webklip-tab ${webKlipState.category===category?'active':''}" type="button" data-webklip-category="${category}">${webKlipCategoryLabel(category)}</button>`).join('')}</div>`}${(webKlipState.loading||webKlipState.searchLoading)?'<div class="webklip-loading">Consultando o web.klip…</div>':items.length?`<div class="webklip-grid">${items.map(webKlipItemHTML).join('')}</div>`:'<div class="webklip-empty">Nenhum item disponível ainda. Tente atualizar novamente.</div>'}</div></section>`;
+    const form=body.querySelector('#webKlipSearchForm');
+    form?.addEventListener('submit',event=>{event.preventDefault();searchWebKlip(body.querySelector('#webKlipSearchInput')?.value||'');});
+    body.querySelector('#webKlipClearSearch')?.addEventListener('click',()=>{webKlipState={...webKlipState,query:'',searchResults:[],searchLoading:false,error:null};renderWebKlipPage();});
+    body.querySelector('#webKlipRefresh')?.addEventListener('click',refreshWebKlip);
+    body.querySelectorAll('[data-webklip-category]').forEach(button=>button.addEventListener('click',()=>{webKlipState.category=button.dataset.webklipCategory;renderWebKlipPage();}));
+    body.querySelectorAll('[data-webklip-id]').forEach(card=>card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId)));
+    if(!webKlipState.items.length&&!webKlipState.loading&&!searching)fetchWebKlipItems();
   }
   function openWebKlipItem(id){
-    const item=webKlipState.items.find(entry=>entry.id===id);if(!item)return;
+    const item=[...webKlipState.items,...webKlipState.searchResults].find(entry=>entry.id===id);if(!item)return;
     webKlipState.selected=item;
     const card=document.querySelector(`[data-webklip-id="${CSS.escape(id)}"]`);if(card)card.scrollIntoView({block:'center',behavior:'smooth'});
     const summary=`${item.summary}${item.meta?`\n\n${item.meta}`:''}`;
@@ -1402,7 +1529,7 @@ body.prime-modal-open{overflow:hidden}
   }
   function refreshWebKlip(){
     const today=localDayKey();
-    webKlipState={...webKlipState,dayKey:null,items:[],selected:null,loading:false,error:null};
+    webKlipState={...webKlipState,dayKey:null,items:[],selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false};
     try{localStorage.removeItem(WEBKLIP_CACHE_KEY);}catch(e){}
     renderWebKlipPage();
     fetchWebKlipItems();
@@ -1575,11 +1702,11 @@ body.prime-modal-open{overflow:hidden}
         <div class="settings-titlebar"><h1>Geral</h1></div>
         <div class="settings-panel">
           <div class="settings-group-title">Aparência</div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Aparência</div><div class="settings-line-desc">Escolha o tema da interface.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('${state.theme==='dark'?'light':'dark'}')">${state.theme==='dark'?'Preto':'Claro'} · trocar</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Aparência</div><div class="settings-line-desc">Escolha o tema da interface.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('${state.theme==='dark'?'light':'dark'}')">${state.theme==='dark'?'Cinza':'Claro'} · trocar</button></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Contraste</div></div><div class="settings-line-value"><span class="muted">Em breve</span><span class="settings-chevron">⌄</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Cor de ênfase</div></div><div class="settings-line-value"><span class="settings-dot"></span><span class="muted">Padrão · em breve</span><span class="settings-chevron">⌄</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Cor do ícone</div></div><div class="settings-line-value"><span class="settings-dot dark"></span><span class="muted">Preto · em breve</span><span class="settings-chevron">⌄</span></div></div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Idioma</div><div class="settings-line-desc">Idioma atual da interface.</div></div><div class="settings-line-value">Português (Brasil)<span class="settings-badge">Autodetectar em breve</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">País e idioma do web.klip</div><div class="settings-line-desc">Escolha a região das notícias e o idioma das fontes públicas.</div></div><div class="settings-line-value"><select class="webklip-country-select" aria-label="País e idioma do web.klip" onchange="window.K.setWebKlipCountry(this.value)">${webKlipCountryOptions()}</select></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Inteligência avançada</div><div class="settings-line-desc">Recurso ainda em desenvolvimento.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em desenvolvimento</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Ativar ditado</div><div class="settings-line-desc">Entrada por voz ainda não disponível.</div></div><div class="settings-line-value"><div class="settings-toggle"></div><span class="settings-badge">Em breve</span></div></div>
         </div>`;
@@ -1597,7 +1724,7 @@ body.prime-modal-open{overflow:hidden}
         <div class="settings-panel">
           <div class="settings-group-title">Tema</div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema claro</div><div class="settings-line-desc">Interface clara do Klipza.IA.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('light')">${state.theme==='light'?'Ativo':'Usar'}</button></div></div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema preto</div><div class="settings-line-desc">Interface escura em preto e branco.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('dark')">${state.theme==='dark'?'Ativo':'Usar'}</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema cinza</div><div class="settings-line-desc">Interface escura em cinza confortável, com contraste suave.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('dark')">${state.theme==='dark'?'Ativo':'Usar'}</button></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Outras personalizações</div><div class="settings-line-desc">Cores, densidade e outros ajustes ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
         </div>`;
     } else if(active==='dados'){
@@ -1711,13 +1838,17 @@ body.prime-modal-open{overflow:hidden}
     renderSettingsPage();
   }
   window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
-    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat};
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal};
   $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
   $('installPromptAction').addEventListener('click',installApp);$('installPromptDismiss').addEventListener('click',dismissInstallPrompt);
   document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
   const primeModal=$('primeModal');
   if(primeModal){ primeModal.addEventListener('click',e=>{if(e.target===primeModal)closePrimeModal();}); }
-  document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();});
+  const confirmModal=$('confirmModal');
+  if(confirmModal){confirmModal.addEventListener('click',e=>{if(e.target===confirmModal)closeConfirmModal();});$('confirmCancel')?.addEventListener('click',closeConfirmModal);$('confirmAccept')?.addEventListener('click',acceptConfirmModal);}
+  const webKlipModal=$('webKlipModal');
+  if(webKlipModal){webKlipModal.addEventListener('click',e=>{if(e.target===webKlipModal)closeWebKlipModal();});$('webKlipModalClose')?.addEventListener('click',()=>closeWebKlipModal());}
+  document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();if(e.key==='Escape' && $('confirmModal')?.classList.contains('open')) closeConfirmModal();if(e.key==='Escape' && $('webKlipModal')?.classList.contains('open')) closeWebKlipModal();});
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   $('webKlipToggle')?.addEventListener('click',toggleWebKlipMenu);
   setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 1000);

@@ -119,9 +119,78 @@ function dateKey(value) {
   return local.toISOString().slice(0, 10);
 }
 
+const LOCALES = {
+  BR: { language: 'pt-BR', hl: 'pt-BR', gl: 'BR', ceid: 'BR:pt', query: 'mundo OR ciência OR tecnologia OR clima OR negócios when:1d' },
+  PT: { language: 'pt-PT', hl: 'pt-PT', gl: 'PT', ceid: 'PT:pt', query: 'mundo OR ciência OR tecnologia OR clima OR negócios when:1d' },
+  US: { language: 'en-US', hl: 'en-US', gl: 'US', ceid: 'US:en', query: 'world OR science OR technology OR climate OR business when:1d' },
+  GB: { language: 'en-GB', hl: 'en-GB', gl: 'GB', ceid: 'GB:en', query: 'world OR science OR technology OR climate OR business when:1d' },
+  ES: { language: 'es-ES', hl: 'es-ES', gl: 'ES', ceid: 'ES:es', query: 'mundo OR ciencia OR tecnología OR clima OR negocios when:1d' },
+  MX: { language: 'es-MX', hl: 'es-419', gl: 'MX', ceid: 'MX:es', query: 'mundo OR ciencia OR tecnología OR clima OR negocios when:1d' },
+  FR: { language: 'fr-FR', hl: 'fr-FR', gl: 'FR', ceid: 'FR:fr', query: 'monde OR science OR technologie OR climat OR économie when:1d' },
+  DE: { language: 'de-DE', hl: 'de-DE', gl: 'DE', ceid: 'DE:de', query: 'welt OR wissenschaft OR technologie OR klima OR wirtschaft when:1d' },
+  JP: { language: 'ja-JP', hl: 'ja', gl: 'JP', ceid: 'JP:ja', query: '世界 OR 科学 OR テクノロジー OR 気候 when:1d' },
+  IN: { language: 'en-IN', hl: 'en-IN', gl: 'IN', ceid: 'IN:en', query: 'world OR science OR technology OR climate OR business when:1d' }
+};
+
+function resolveLocale(country, language) {
+  const code = String(country || '').toUpperCase();
+  if (LOCALES[code]) return LOCALES[code];
+  const lang = String(language || '').toLowerCase();
+  return Object.values(LOCALES).find((locale) => locale.language.toLowerCase() === lang) || LOCALES.BR;
+}
+
+function decodeSearchHtml(value) {
+  return decodeXml(String(value || '').replace(/&#x([0-9a-f]+);/gi, (_, code) => String.fromCodePoint(parseInt(code, 16))));
+}
+
+function safeSearchUrl(value) {
+  const raw = decodeSearchHtml(value).trim();
+  if (!raw) return '';
+  const absolute = raw.startsWith('//') ? `https:${raw}` : raw;
+  try {
+    const parsed = new URL(absolute);
+    const redirected = parsed.searchParams.get('uddg');
+    const target = redirected ? decodeURIComponent(redirected) : parsed.toString();
+    const safe = new URL(target);
+    return ['http:', 'https:'].includes(safe.protocol) ? safe.toString() : '';
+  } catch {
+    return '';
+  }
+}
+
+function mapDuckDuckGoResults(html) {
+  const titles = [...String(html || '').matchAll(/<a[^>]+class=["'][^"']*result__a[^"']*["'][^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi)];
+  const snippets = [...String(html || '').matchAll(/<(?:a|div)[^>]+class=["'][^"']*result__snippet[^"']*["'][^>]*>([\s\S]*?)<\/(?:a|div)>/gi)];
+  const seen = new Set();
+  return titles.map((match, index) => {
+    const url = safeSearchUrl(match[1]);
+    const title = decodeSearchHtml(match[2]);
+    const summary = decodeSearchHtml(snippets[index]?.[1] || 'Resultado público encontrado na web.');
+    return { url, title, summary, index };
+  }).filter((item) => item.url && item.title && !seen.has(item.url) && !hasBlockedTerm(`${item.title} ${item.summary}`)).map((item) => {
+    seen.add(item.url);
+    return { id: idFor('search', item.url), category: 'search', title: item.title, summary: item.summary, source: new URL(item.url).hostname.replace(/^www\\./, ''), url: item.url, date: new Date().toISOString() };
+  }).slice(0, 50);
+}
+
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
     response.status(405).json({ error: 'Método não permitido' });
+    return;
+  }
+
+  const query = cleanText(request.query?.q || '').slice(0, 180);
+  const locale = resolveLocale(request.query?.country, request.query?.language);
+  response.setHeader('Cache-Control', query ? 's-maxage=300, stale-while-revalidate=900' : 's-maxage=900, stale-while-revalidate=3600');
+  if (query) {
+    try {
+      const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(locale.gl.toLowerCase())}`;
+      const html = await getText(searchUrl, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' } });
+      const results = mapDuckDuckGoResults(html);
+      response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length });
+    } catch (error) {
+      response.status(502).json({ error: 'A pesquisa pública está indisponível no momento.', query, items: [], count: 0 });
+    }
     return;
   }
 
@@ -132,7 +201,7 @@ export default async function handler(request, response) {
   const gdeltQuery = encodeURIComponent('(technology OR science OR climate OR global OR business) NOT celebrity NOT entertainment NOT hollywood');
   const githubBase = 'https://api.github.com/search/repositories?sort=stars&order=desc&per_page=20&';
   const sources = {
-    news: `https://news.google.com/rss/search?q=${encodeURIComponent('world OR science OR technology OR climate OR business when:1d')}&hl=en-US&gl=US&ceid=US:en`,
+    news: `https://news.google.com/rss/search?q=${encodeURIComponent(locale.query)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`,
     code: `${githubBase}q=created%3A%3E%3D${since}+language%3AJavaScript`,
     games: `${githubBase}q=created%3A%3E%3D${since}+(topic%3Agame+OR+game+in%3Aname%2Cdescription)`,
     design: `${githubBase}q=created%3A%3E%3D${since}+(topic%3Adesign+OR+design+in%3Aname%2Cdescription)`
@@ -153,6 +222,5 @@ export default async function handler(request, response) {
     ...(raw.design ? mapRepositories(raw.design, 'design').slice(0, 10) : [])
   ].slice(0, 50);
 
-  response.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=3600');
-  response.status(200).json({ dayKey: today, items, status, count: items.length });
+  response.status(200).json({ dayKey: today, country: request.query?.country || 'BR', language: locale.language, items, status, count: items.length });
 }
