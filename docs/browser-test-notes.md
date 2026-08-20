@@ -77,3 +77,7 @@ A consulta pública `klipzaqzxv-resultado-impossivel-92741` terminou com `0 resu
 O build local atualizado carregou o web.klip e abriu o detalhe de um projeto do GitHub. A fonte produziu uma área vazia no iframe, cenário reproduzido na imagem enviada. Após o timeout controlado, o web.klip mudou para o estado `Fonte aberta no navegador`, em vez de permanecer bloqueado, e exibiu as ações `Abrir novamente` e `Voltar ao web.klip`. O retorno restaurou o feed diário sem perder o contexto.
 
 Também foi validada a checagem server-side de políticas: `https://www.google.com/` foi identificado como não incorporável e `https://example.com/` como incorporável. No APK, o fallback usa o plugin InAppBrowser; no navegador web, usa a abertura externa compatível como último recurso.
+
+## Validação no deploy público b5a547d
+
+O deploy `https://klipza-zzz.vercel.app/` carregou a aba web.klip, exibiu `50 item(ns) disponíveis`, filtros e pesquisa. O primeiro card abriu o detalhe corretamente, com os botões `Codar com referência` e `Abrir dentro do Klipza`. A API pública confirmou `www.google.com` como `embeddable: false` por `x-frame-options` e `example.com` como `embeddable: true`.

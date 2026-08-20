@@ -11,7 +11,7 @@ const BLOCKED_TERMS = [
 const NEWS_TERMS = [
   'celebrity', 'celebrities', 'gossip', 'entertainment', 'hollywood', 'celebridade', 'famosos', 'fofoca',
   'reality show', 'trailer', 'actor', 'actress', 'singer', 'album', 'film', 'movie', 'music', 'television',
-  'netflix', 'oscar', 'grammy', 'red carpet', 'award season', 'showbiz', 'celebrity drama', 'star-studded'
+  'netflix', 'oscar', 'grammy', 'red carpet', 'award season', 'showbiz', 'celebrity drama', 'star-studded', 'filme', 'filmes', 'movie', 'movies', 'cinema', 'streaming', 'trailer', 'omelete', 'ingresso.com', 'futebol', 'football', 'soccer', 'copa do mundo', 'jogador', 'jogadora', 'convocado', 'convocada', 'convocados', 'convocadas', 'sport club', 'campeonato'
 ];
 
 function cleanText(value) {
