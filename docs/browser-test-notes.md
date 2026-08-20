@@ -95,3 +95,8 @@ A versão local final da autenticação foi validada visualmente. No modo de ent
 Os campos não sensíveis foram corrigidos para remetente `klipzastudio@gmail.com`, nome `Equipe Klipza`, host `smtp.gmail.com`, porta `587` e usuário SMTP completo. Após recarregar o painel, os campos de remetente, nome, host, porta e usuário permaneceram preenchidos, enquanto a senha ficou protegida e não visualizável. O botão de salvar ficou desabilitado, confirmando que o SMTP foi persistido pelo Supabase.
 
 O template `Confirm sign up` foi salvo com assunto `Confirme seu e-mail para entrar no Klipza.IA`, corpo em português, botão `{{ .ConfirmationURL }}`, aviso de segurança e assinatura `Equipe Klipza`. O template `Reset password` também foi salvo com assunto `Recupere sua senha com segurança no Klipza.IA`, botão de redefinição, aviso de expiração e assinatura `Equipe Klipza`. Em ambos os casos, o botão `Save changes` ficou desabilitado após a publicação, indicando ausência de alterações pendentes.
+
+O deploy público `f42f696` carregou a tela de entrada com apenas e-mail, senha, Entrar, Criar conta e Esqueci minha senha. O modo Criar conta exibiu somente Nome, E-mail, senha, confirmação de senha e os botões apropriados; Google e link mágico não aparecem.
+
+O deploy público também abriu o fluxo `Esqueci minha senha`: o app manteve a estrutura simples e exibiu a orientação `Digite seu e-mail para receber a recuperação.` sem revelar se o endereço existe. O teste não submeteu o formulário, portanto nenhum e-mail foi enviado durante a validação.
+
