@@ -21,3 +21,6 @@ A configuração foi salva no Supabase após confirmação explícita do usuári
 
 Após limpar o service worker desta sessão, a produção exibiu o formulário de e-mail e senha atualizado. Ao abrir `Criar conta`, apareceram nome, confirmação de senha, medidor e as cinco regras. Com a senha de teste `Abc1!xyz` (usada somente no navegador de teste e não enviada), o medidor mostrou `Forte` e todas as regras ficaram aprovadas. Ao clicar em `Mostrar`, o campo passou para `type=text`, exibiu `Ocultar` e manteve o valor; nenhuma conta foi criada durante o teste.
 
+
+A consulta pública `GET /auth/v1/settings` confirmou o estado live após a alteração: `disable_signup=false` e `mailer_autoconfirm=true`. Isso permite que `signUp()` entregue sessão e o app faça `finishSupabaseUser()` imediatamente; a política de senha forte continua sendo aplicada no cliente antes do envio.
+
