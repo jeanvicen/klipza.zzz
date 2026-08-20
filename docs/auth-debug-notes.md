@@ -16,3 +16,8 @@ A trigger live também está presente: `on_auth_user_created AFTER INSERT ON aut
 
 A configuração foi salva no Supabase após confirmação explícita do usuário. Estado acessível live: `signup=true`, `manualLinking=false`, `anonymous=false`, `confirmEmail=false`. Assim, novos cadastros por e-mail podem receber sessão imediatamente; nenhum provedor social ou login anônimo foi ativado.
 
+
+## Teste visual live
+
+Após limpar o service worker desta sessão, a produção exibiu o formulário de e-mail e senha atualizado. Ao abrir `Criar conta`, apareceram nome, confirmação de senha, medidor e as cinco regras. Com a senha de teste `Abc1!xyz` (usada somente no navegador de teste e não enviada), o medidor mostrou `Forte` e todas as regras ficaram aprovadas. Ao clicar em `Mostrar`, o campo passou para `type=text`, exibiu `Ocultar` e manteve o valor; nenhuma conta foi criada durante o teste.
+
