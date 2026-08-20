@@ -43,7 +43,14 @@ for (const marker of [
   '/api/webklip?q=',
   '/api/webklip?check=',
   'Codar com referência',
-  'touch_user_activity'
+  'touch_user_activity',
+  'data-password-toggle="authPassword"',
+  'data-password-toggle="authPasswordConfirm"',
+  'authPasswordStrength',
+  'authRecoveryPasswordStrength',
+  'passwordIsStrong',
+  'uppercase:/[A-Z]/',
+  'special:/[^A-Za-z0-9\\s]/'
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração web.klip ausente: ${marker}`);
 }
