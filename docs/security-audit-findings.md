@@ -151,3 +151,8 @@ No projeto `jeanvicens-projects/klipza-zzz`, foram cadastradas as variáveis sen
 
 Após a propagação do commit `77689e4`, `https://klipza-zzz.vercel.app/admin.html` respondeu `200` e `https://klipza-zzz.vercel.app/api/admin-users` respondeu `401 {"error":"Não autenticado."}`, confirmando que a função existe e permanece protegida sem token. O domínio de deployment recebeu redirecionamento `302`, enquanto o domínio de produção respondeu diretamente.
 
+
+## Administrador inicial
+
+A tela Auth Users do projeto confirmou que não há usuários cadastrados. Portanto, não foi executado nenhum `UPDATE public.profiles SET is_admin=true` sem um UUID real. Depois que o proprietário criar e confirmar a primeira conta no app, o UUID dessa conta deverá ser usado uma única vez no SQL Editor para marcar `is_admin=true`; até lá, o endpoint admin permanece corretamente sem uma conta administrativa ativa.
+
