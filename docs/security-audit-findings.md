@@ -146,3 +146,8 @@ A página correta do Vercel é o projeto `klipza-zzz` no time `jeanvicens-projec
 
 No projeto `jeanvicens-projects/klipza-zzz`, foram cadastradas as variáveis sensíveis `SUPABASE_SERVICE_ROLE_KEY` e `SUPABASE_URL`; o painel confirmou `Added just now` e `Production and Preview`. O redeploy solicitado foi criado e ficou `Ready` em produção, com domínio `https://klipza-zzz.vercel.app/`. Essa implantação ainda aponta para o commit `11581ee`; as alterações locais de hardening/admin precisam ser commitadas e enviadas ao `main` para o deploy automático final.
 
+
+## Validação pós-deploy
+
+Após a propagação do commit `77689e4`, `https://klipza-zzz.vercel.app/admin.html` respondeu `200` e `https://klipza-zzz.vercel.app/api/admin-users` respondeu `401 {"error":"Não autenticado."}`, confirmando que a função existe e permanece protegida sem token. O domínio de deployment recebeu redirecionamento `302`, enquanto o domínio de produção respondeu diretamente.
+
