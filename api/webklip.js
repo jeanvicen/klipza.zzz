@@ -1,3 +1,6 @@
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
+
 const BLOCKED_TERMS = [
   'celebrity', 'celebrities', 'famous', 'influencer', 'hollywood', 'reality show',
   'gossip', 'entertainment', 'red carpet', 'celebridade', 'famoso', 'famosa',
@@ -91,34 +94,71 @@ async function getText(url, options = {}) {
   }
 }
 
-async function inspectFramePolicy(value) {
+const MAX_FRAME_REDIRECTS = 3;
+const FRAME_REQUEST_HEADERS = { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' };
+
+function isPrivateAddress(address) {
+  const value = String(address || '').toLowerCase();
+  if (value.startsWith('::ffff:')) return isPrivateAddress(value.slice(7));
+  if (isIP(value) === 4) {
+    const octets = value.split('.').map(Number);
+    const [a, b] = octets;
+    return a === 0 || a === 10 || a === 127 || (a === 100 && b >= 64 && b <= 127) ||
+      (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 0) || (a === 192 && b === 168) ||
+      (a === 198 && (b === 18 || b === 19)) || (a === 198 && b === 51) ||
+      (a === 203 && b === 0) || a >= 224;
+  }
+  if (isIP(value) === 6) {
+    return value === '::' || value === '::1' || value.startsWith('fc') || value.startsWith('fd') ||
+      value.startsWith('fe8') || value.startsWith('fe9') || value.startsWith('fea') || value.startsWith('feb');
+  }
+  return true;
+}
+
+async function validateFrameTarget(value) {
   const target = new URL(String(value || ''));
-  if (!['http:', 'https:'].includes(target.protocol)) throw new Error('URL não permitida');
+  if (!['http:', 'https:'].includes(target.protocol) || target.username || target.password) throw new Error('URL não permitida');
+  if (target.port && !['80', '443'].includes(target.port)) throw new Error('Porta não permitida');
+  const hostname = target.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (!hostname || hostname === 'localhost' || hostname.endsWith('.localhost') || hostname.endsWith('.local') || hostname.endsWith('.internal')) {
+    throw new Error('Destino interno não permitido');
+  }
+  const addresses = isIP(hostname) ? [{ address: hostname }] : await lookup(hostname, { all: true, verbatim: true });
+  if (!addresses.length || addresses.some(({ address }) => isPrivateAddress(address))) throw new Error('Destino interno não permitido');
+  return target;
+}
+
+async function fetchFrameHeaders(value, method, signal) {
+  let target = await validateFrameTarget(value);
+  for (let redirects = 0; redirects <= MAX_FRAME_REDIRECTS; redirects += 1) {
+    const response = await fetch(target, { method, redirect: 'manual', signal, headers: FRAME_REQUEST_HEADERS });
+    if (response.status < 300 || response.status >= 400) return { response, target };
+    const location = response.headers.get('location');
+    if (!location || redirects === MAX_FRAME_REDIRECTS) throw new Error('Redirecionamento não permitido');
+    target = await validateFrameTarget(new URL(location, target).toString());
+  }
+  throw new Error('Redirecionamento não permitido');
+}
+
+async function inspectFramePolicy(value) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 7000);
   try {
-    let response;
+    let result;
     try {
-      response = await fetch(target, {
-        method: 'HEAD',
-        redirect: 'follow',
-        signal: controller.signal,
-        headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' }
-      });
+      result = await fetchFrameHeaders(value, 'HEAD', controller.signal);
     } catch {
-      response = await fetch(target, {
-        method: 'GET',
-        redirect: 'follow',
-        signal: controller.signal,
-        headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' }
-      });
+      result = await fetchFrameHeaders(value, 'GET', controller.signal);
     }
+    const { response, target } = result;
     const xFrame = (response.headers.get('x-frame-options') || '').toLowerCase();
     const csp = (response.headers.get('content-security-policy') || '').toLowerCase();
     const frameAncestors = csp.match(/frame-ancestors\s+([^;]+)/i)?.[1] || '';
     const blockedByXFrame = Boolean(xFrame && (xFrame.includes('deny') || xFrame.includes('sameorigin') || xFrame.includes('allow-from')));
     const allowedByCsp = frameAncestors.includes('*') || frameAncestors.includes('https://klipza-zzz.vercel.app') || frameAncestors.includes('http://localhost') || frameAncestors.includes('http://127.0.0.1');
     const blockedByCsp = Boolean(frameAncestors && !allowedByCsp);
+    response.body?.cancel?.();
     return {
       url: response.url || target.toString(),
       status: response.status,

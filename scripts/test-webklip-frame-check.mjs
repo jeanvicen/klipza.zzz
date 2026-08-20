@@ -23,4 +23,11 @@ const example = await invoke('https://example.com/');
 assert.equal(example.statusCode, 200);
 assert.equal(typeof example.payload.embeddable, 'boolean');
 
-console.log(`frame check OK — google=${google.payload.embeddable}, example=${example.payload.embeddable}`);
+for (const blocked of ['http://localhost/', 'http://127.0.0.1:3000/', 'http://169.254.169.254/latest/meta-data/', 'https://example.com:8080/']) {
+  const result = await invoke(blocked);
+  assert.equal(result.statusCode, 200);
+  assert.equal(result.payload.embeddable, null, `destino interno deveria ser rejeitado: ${blocked}`);
+  assert.equal(result.payload.reason, 'check-unavailable');
+}
+
+console.log(`frame check OK — google=${google.payload.embeddable}, example=${example.payload.embeddable}, private-targets=blocked`);

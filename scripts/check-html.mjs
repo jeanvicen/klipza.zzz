@@ -13,7 +13,12 @@ for (const file of [
   'sw.js',
   'assets/klipza-mark.png',
   'assets/icon-192.png',
-  'assets/icon-512.png'
+  'assets/icon-512.png',
+  'vendor/supabase.js',
+  'supabase/migrations/20260820000001_security_lifecycle.sql',
+  'supabase/migrations/20260820000002_cron.sql',
+  'admin.html',
+  'api/admin-users.js'
 ]) {
   await access(resolve(root, file));
 }
@@ -37,12 +42,18 @@ for (const marker of [
   '/api/webklip?date=',
   '/api/webklip?q=',
   '/api/webklip?check=',
-  'Codar com referência'
+  'Codar com referência',
+  'touch_user_activity'
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração web.klip ausente: ${marker}`);
 }
 
 const api = await readFile(resolve(root, 'api/webklip.js'), 'utf8');
+const adminApi = await readFile(resolve(root, 'api/admin-users.js'), 'utf8');
+for (const marker of ['SUPABASE_SERVICE_ROLE_KEY', 'auth.admin.listUsers', 'auth.admin.deleteUser', 'admin_audit_log', 'is_admin']) {
+  if (!adminApi.includes(marker)) throw new Error(`Painel administrativo inseguro ou incompleto: ${marker}`);
+}
+
 for (const marker of [
   'news.google.com/rss/search',
   'country',
@@ -51,9 +62,12 @@ for (const marker of [
   'frame-ancestors',
   'celebrity',
   'malware',
-  'piracy'
+  'piracy',
+  'isPrivateAddress',
+  'MAX_FRAME_REDIRECTS',
+  'node:dns/promises'
 ]) {
   if (!api.includes(marker)) throw new Error(`Proteção do endpoint ausente: ${marker}`);
 }
 
-console.log('check:html OK — PWA, web.klip, endpoint, filtros e ícones encontrados.');
+console.log('check:html OK — PWA, web.klip, Supabase Auth, ciclo de vida, endpoint seguro e ícones encontrados.');

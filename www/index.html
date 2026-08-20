@@ -1078,7 +1078,7 @@ body.prime-modal-open{overflow:hidden}
   }
   function authMessage(error){
     const message=String(error?.message||error||'').toLowerCase();
-    if(message.includes('invalid login credentials'))return 'E-mail ou senha incorretos. Você também pode pedir um link mágico.';
+    if(message.includes('invalid login credentials'))return 'E-mail ou senha incorretos. Você pode usar a recuperação de senha se precisar.';
     if(message.includes('email not confirmed'))return 'Confirme seu e-mail pelo link recebido antes de entrar.';
     if(message.includes('user already registered'))return 'Este e-mail já tem uma conta. Tente entrar ou recuperar a senha.';
     if(message.includes('password should be at least'))return 'A senha precisa ter pelo menos 8 caracteres.';
@@ -1108,11 +1108,20 @@ body.prime-modal-open{overflow:hidden}
     $('authPanelCopy').textContent=show?'Use o link recebido para proteger sua conta.':'Entre na sua conta para continuar.';
     if(show) $('authRecoveryPassword')?.focus();
   }
+  let lastActivitySync=0;
+  async function touchSupabaseActivity(force=false){
+    if(!supabaseClient||!state.user?.id)return;
+    const now=Date.now();
+    if(!force&&now-lastActivitySync<15*60*1000)return;
+    lastActivitySync=now;
+    try{await supabaseClient.rpc('touch_user_activity');}
+    catch(error){console.warn('Não foi possível atualizar a atividade da conta.',error);}
+  }
   async function finishSupabaseUser(user){
     if(!user)return;
     let profile=null;
     try{
-      const response=await supabaseClient.from('profiles').select('display_name,email,avatar_url,country,language,status,deletion_scheduled_for').eq('id',user.id).maybeSingle();
+      const response=await supabaseClient.from('profiles').select('display_name,email,avatar_url,country,language,status,deletion_scheduled_for,restricted,restriction_reason').eq('id',user.id).maybeSingle();
       profile=response.data||null;
     }catch(e){console.warn('Perfil ainda não disponível.',e);}
     if(profile?.status==='blocked'){
@@ -1120,10 +1129,12 @@ body.prime-modal-open{overflow:hidden}
       setAuthStatus('Esta conta está bloqueada. Entre em contato com o suporte do Klipza.','error');
       return;
     }
-    state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR'};
+    state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR',restricted:profile?.restricted===true,restrictionReason:profile?.restriction_reason||''};
     save();
     showRecoveryPanel(false);
     enter();
+    if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
+    await touchSupabaseActivity(true);
   }
   async function submitEmailAuth(event){
     event.preventDefault();
@@ -1773,6 +1784,7 @@ body.prime-modal-open{overflow:hidden}
 
   function send(){
     ensureQuota();
+    if(state.user?.restricted){showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');return;}
     const input=$('prompt'); const text=input.value.trim(); if(!text && !attached.length)return;
     if(state.quota.energy<MSG_COST){refreshQuotaUI();updateEnergyBanner();return;}
     if(anonymousMode && attached.length){attached=[];renderAttached();}
@@ -2014,7 +2026,7 @@ body.prime-modal-open{overflow:hidden}
       </div>`;
     } else if(active==='seguranca'||active==='login'){
       content=`<div class="settings-titlebar"><h1>${active==='seguranca'?'Segurança':'Segurança e login'}</h1></div><div class="settings-panel"><div class="settings-group-title">Proteção da conta</div>
-        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão atual autenticada pelo fluxo Google demo.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão protegida pelo Supabase Auth.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação avançada</div><div class="settings-line-desc">2FA e gerenciamento avançado ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
       </div>`;
@@ -2084,7 +2096,7 @@ body.prime-modal-open{overflow:hidden}
   document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();if(e.key==='Escape' && $('confirmModal')?.classList.contains('open')) closeConfirmModal();if(e.key==='Escape' && $('webKlipModal')?.classList.contains('open')) closeWebKlipModal();});
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   $('webKlipToggle')?.addEventListener('click',toggleWebKlipMenu);
-  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 1000);
+  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); touchSupabaseActivity(); } }, 1000);
   applyTheme();
   registerAppShell();
   setAuthMode('signin');

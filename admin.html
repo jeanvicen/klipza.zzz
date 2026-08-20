@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Klipza.IA — Administração</title>
+  <script src="/vendor/supabase.js"></script>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#272727;color:#f5f5f5}
+    *{box-sizing:border-box}body{margin:0;background:#272727;min-height:100vh}.wrap{max-width:1180px;margin:0 auto;padding:28px 18px 56px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:24px}.brand{font-weight:800;letter-spacing:.02em}.muted{color:#a8a8a8}.card{background:#323232;border:1px solid #484848;border-radius:18px;padding:20px;box-shadow:0 16px 40px #0002}.hidden{display:none!important}h1{font-size:24px;margin:0 0 5px}h2{font-size:18px;margin:0 0 16px}.auth{max-width:420px;margin:10vh auto}.field{display:grid;gap:7px;margin:12px 0}.field input,.field textarea{width:100%;background:#242424;border:1px solid #555;border-radius:10px;color:#fff;padding:12px;font:inherit}.btn{border:0;border-radius:10px;padding:10px 13px;font:inherit;font-weight:700;cursor:pointer;background:#f1f1f1;color:#202020}.btn.secondary{background:#4a4a4a;color:#fff}.btn.danger{background:#9f3f3f;color:#fff}.btn.warn{background:#aa7c35;color:#fff}.btn:disabled{opacity:.55;cursor:not-allowed}.status{min-height:22px;margin-top:12px;color:#f4c76e}.status.error{color:#ff9b9b}.status.ok{color:#94e3ae}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:15px}.toolbar input{flex:1;min-width:180px;background:#242424;border:1px solid #555;border-radius:10px;color:#fff;padding:11px}.table-wrap{overflow:auto;border:1px solid #484848;border-radius:13px}.users{width:100%;border-collapse:collapse;min-width:950px}.users th,.users td{padding:12px;border-bottom:1px solid #454545;text-align:left;vertical-align:top}.users th{font-size:12px;color:#bbb;text-transform:uppercase;letter-spacing:.05em}.users td{font-size:13px}.badge{display:inline-block;border-radius:999px;padding:4px 8px;background:#454545;color:#ddd;font-size:12px}.badge.blocked{background:#6f3030;color:#ffd4d4}.badge.restricted{background:#705322;color:#ffe1a1}.actions{display:flex;gap:6px;flex-wrap:wrap}.actions .btn{font-size:12px;padding:7px 9px}.empty{padding:28px;text-align:center;color:#aaa}.privacy{margin-top:18px;font-size:12px;color:#a9a9a9;line-height:1.5}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="top"><div class="brand">Klipza.IA · Administração</div><button id="logout" class="btn secondary hidden">Sair</button></div>
+    <section id="login" class="card auth">
+      <h1>Painel administrativo</h1>
+      <p class="muted">Entre com uma conta marcada como administradora no Supabase.</p>
+      <form id="loginForm">
+        <label class="field">E-mail<input id="email" type="email" autocomplete="username" required></label>
+        <label class="field">Senha<input id="password" type="password" autocomplete="current-password" required></label>
+        <button class="btn" type="submit">Entrar</button>
+      </form>
+      <div id="loginStatus" class="status" role="status"></div>
+    </section>
+    <section id="panel" class="hidden">
+      <div class="top"><div><h1>Usuários</h1><div class="muted">Ações administrativas são executadas no servidor e ficam registradas.</div></div><button id="refresh" class="btn secondary">Atualizar</button></div>
+      <div class="card">
+        <div class="toolbar"><input id="filter" placeholder="Filtrar por e-mail ou nome"><span id="count" class="muted"></span></div>
+        <div class="table-wrap"><table class="users"><thead><tr><th>Conta</th><th>Status</th><th>Atividade</th><th>Ações</th></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty hidden">Nenhuma conta encontrada.</div></div>
+      </div>
+      <p class="privacy">Este painel não mostra senha, token, SMTP ou service_role. A senha administrativa nunca deve ser colocada no GitHub.</p>
+      <div id="panelStatus" class="status" role="status"></div>
+    </section>
+  </main>
+<script>
+(() => {
+  const URL='https://xjvwfytikkxnvuwweqlf.supabase.co';
+  const KEY='sb_publishable_ERwMYbIK-BDyHQ3_sIRPmQ_3a2qBOXi';
+  const client=window.supabase?.createClient?.(URL,KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
+  let users=[];
+  const $=id=>document.getElementById(id);
+  const status=(text,type='')=>{ $('panelStatus').textContent=text; $('panelStatus').className=`status ${type}`; };
+  const loginStatus=(text,type='')=>{ $('loginStatus').textContent=text; $('loginStatus').className=`status ${type}`; };
+  const date=value=>value?new Date(value).toLocaleString('pt-BR'):'Nunca';
+  const esc=value=>String(value??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+  async function token(){const {data,error}=await client.auth.getSession();if(error||!data.session)throw new Error('Sessão expirada.');return data.session.access_token;}
+  async function api(path='') {const access=await token();const response=await fetch(`/api/admin-users${path}`,{headers:{Authorization:`Bearer ${access}`}});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'Não foi possível consultar o painel.');return body;}
+  async function action(item,action){
+    let reason=window.prompt('Informe o motivo desta ação:');
+    if(reason===null)return;
+    reason=reason.trim();if(reason.length<3){status('Informe um motivo com pelo menos 3 caracteres.','error');return;}
+    let newPassword;
+    if(action==='reset_password'){
+      newPassword=window.prompt('Digite uma senha temporária com pelo menos 12 caracteres.');
+      if(newPassword===null)return;
+      if(newPassword.length<12){status('A senha temporária precisa ter pelo menos 12 caracteres.','error');return;}
+    }
+    if(action==='delete'&&!window.confirm('Excluir definitivamente esta conta e os dados associados?'))return;
+    try{
+      status('Executando…');
+      const access=await token();
+      const response=await fetch('/api/admin-users',{method:'POST',headers:{'Content-Type':'application/json',Authorization:`Bearer ${access}`},body:JSON.stringify({userId:item.id,action,reason,newPassword})});
+      const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'Ação recusada.');
+      status('Ação concluída.','ok');await load();
+    }catch(error){status(error.message,'error');}
+  }
+  function render(){
+    const query=$('filter').value.trim().toLowerCase();
+    const filtered=users.filter(item=>`${item.email||''} ${item.profile?.display_name||''}`.toLowerCase().includes(query));
+    $('count').textContent=`${filtered.length} conta(s)`;$('empty').classList.toggle('hidden',filtered.length!==0);
+    $('rows').innerHTML=filtered.map(item=>{
+      const p=item.profile||{};const blocked=p.status==='blocked';const restricted=p.restricted===true;
+      const badges=`<span class="badge ${blocked?'blocked':''}">${esc(p.status||'sem perfil')}</span>${restricted?'<span class="badge restricted">restrita</span>':''}${p.is_admin?'<span class="badge">admin</span>':''}`;
+      const actions=`<button class="btn ${blocked?'secondary':'danger'}" data-action="${blocked?'unblock':'block'}" data-id="${item.id}">${blocked?'Desbloquear':'Bloquear'}</button><button class="btn ${restricted?'secondary':'warn'}" data-action="${restricted?'unrestrict':'restrict'}" data-id="${item.id}">${restricted?'Liberar':'Restringir'}</button><button class="btn secondary" data-action="reset_password" data-id="${item.id}">Trocar senha</button><button class="btn danger" data-action="delete" data-id="${item.id}">Excluir</button>`;
+      return `<tr><td><strong>${esc(p.display_name||'Sem nome')}</strong><br><span class="muted">${esc(item.email||'Sem e-mail')}</span><br><span class="muted">Criada: ${esc(date(item.created_at))}</span></td><td>${badges}</td><td>Último login: ${esc(date(item.last_sign_in_at))}<br>Atividade: ${esc(date(p.last_activity_at))}</td><td><div class="actions">${actions}</div></td></tr>`;
+    }).join('');
+  }
+  async function load(){try{status('Carregando…');const data=await api();users=data.users||[];render();status('Atualizado.','ok');}catch(error){status(error.message,'error');}}
+  $('loginForm').addEventListener('submit',async event=>{event.preventDefault();loginStatus('Entrando…');try{const {error}=await client.auth.signInWithPassword({email:$('email').value.trim().toLowerCase(),password:$('password').value});if(error)throw error;$('login').classList.add('hidden');$('panel').classList.remove('hidden');$('logout').classList.remove('hidden');await load();}catch(error){loginStatus('Não foi possível entrar.','error');}});
+  $('logout').addEventListener('click',async()=>{await client.auth.signOut();location.reload();});$('refresh').addEventListener('click',load);$('filter').addEventListener('input',render);
+  $('rows').addEventListener('click',event=>{const button=event.target.closest('[data-action]');if(!button)return;const item=users.find(user=>user.id===button.dataset.id);if(item)action(item,button.dataset.action);});
+  client.auth.getSession().then(({data})=>{if(data.session){$('login').classList.add('hidden');$('panel').classList.remove('hidden');$('logout').classList.remove('hidden');load();}});
+})();
+</script>
+</body>
+</html>
