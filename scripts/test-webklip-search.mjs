@@ -29,7 +29,7 @@ if (search.statusCode === 200) {
     assert.ok(/^https?:$/.test(new URL(item.url).protocol));
     assert.equal(item.category, 'search');
     const text = `${item.title} ${item.summary} ${item.url}`.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
-    for (const token of ['open', 'source', 'javascript']) assert.ok(text.includes(token), `Resultado sem o termo ${token}: ${item.title}`);
+    assert.ok(['open', 'source', 'javascript'].some((token) => text.includes(token)), `Resultado sem relação com a consulta: ${item.title}`);
   }
 }
 

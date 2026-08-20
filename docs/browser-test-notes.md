@@ -71,3 +71,9 @@ Por fim, o botão Voltar ao chat restaurou a home da conversa pública com compo
 Após o deploy `d105f05`, a busca pública `python game` passou a retornar 28 projetos relacionados do GitHub, exibindo 18 inicialmente e deixando 10 para carregamento progressivo. Os primeiros itens foram `grantjenks/free-python-games`, `kitao/pyxel` e `wangshub/wechat_jump_game`, todos contendo relação textual com Python/jogos. A resposta do endpoint indicou fallback `github` quando as fontes de pesquisa geral não retornaram itens.
 
 A consulta pública `klipzaqzxv-resultado-impossivel-92741` terminou com `0 resultado(s)` e exibiu `Nenhum resultado público encontrado para esta busca.` tanto no resumo quanto no card vazio. Nenhum item aleatório foi inserido.
+
+## Preview interno e fallback de navegador
+
+O build local atualizado carregou o web.klip e abriu o detalhe de um projeto do GitHub. A fonte produziu uma área vazia no iframe, cenário reproduzido na imagem enviada. Após o timeout controlado, o web.klip mudou para o estado `Fonte aberta no navegador`, em vez de permanecer bloqueado, e exibiu as ações `Abrir novamente` e `Voltar ao web.klip`. O retorno restaurou o feed diário sem perder o contexto.
+
+Também foi validada a checagem server-side de políticas: `https://www.google.com/` foi identificado como não incorporável e `https://example.com/` como incorporável. No APK, o fallback usa o plugin InAppBrowser; no navegador web, usa a abertura externa compatível como último recurso.

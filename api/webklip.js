@@ -91,6 +91,45 @@ async function getText(url, options = {}) {
   }
 }
 
+async function inspectFramePolicy(value) {
+  const target = new URL(String(value || ''));
+  if (!['http:', 'https:'].includes(target.protocol)) throw new Error('URL não permitida');
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 7000);
+  try {
+    let response;
+    try {
+      response = await fetch(target, {
+        method: 'HEAD',
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' }
+      });
+    } catch {
+      response = await fetch(target, {
+        method: 'GET',
+        redirect: 'follow',
+        signal: controller.signal,
+        headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' }
+      });
+    }
+    const xFrame = (response.headers.get('x-frame-options') || '').toLowerCase();
+    const csp = (response.headers.get('content-security-policy') || '').toLowerCase();
+    const frameAncestors = csp.match(/frame-ancestors\s+([^;]+)/i)?.[1] || '';
+    const blockedByXFrame = Boolean(xFrame && (xFrame.includes('deny') || xFrame.includes('sameorigin') || xFrame.includes('allow-from')));
+    const allowedByCsp = frameAncestors.includes('*') || frameAncestors.includes('https://klipza-zzz.vercel.app') || frameAncestors.includes('http://localhost') || frameAncestors.includes('http://127.0.0.1');
+    const blockedByCsp = Boolean(frameAncestors && !allowedByCsp);
+    return {
+      url: response.url || target.toString(),
+      status: response.status,
+      embeddable: !blockedByXFrame && !blockedByCsp,
+      reason: blockedByXFrame ? 'x-frame-options' : blockedByCsp ? 'content-security-policy' : null
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function decodeXml(value) {
   return cleanText(value)
     .replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'")
@@ -221,8 +260,26 @@ function mapGitHubSearchResults(data, query) {
 }
 
 export default async function handler(request, response) {
+  response.setHeader('Access-Control-Allow-Origin', '*');
+  response.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  if (request.method === 'OPTIONS') {
+    response.status(204).end();
+    return;
+  }
   if (request.method !== 'GET') {
     response.status(405).json({ error: 'Método não permitido' });
+    return;
+  }
+
+  const checkUrl = cleanText(request.query?.check || '').slice(0, 2048);
+  if (checkUrl) {
+    try {
+      const result = await inspectFramePolicy(checkUrl);
+      response.setHeader('Cache-Control', 's-maxage=600, stale-while-revalidate=3600');
+      response.status(200).json(result);
+    } catch (error) {
+      response.status(200).json({ url: checkUrl, embeddable: null, reason: 'check-unavailable' });
+    }
     return;
   }
 

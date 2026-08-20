@@ -14,6 +14,8 @@
 <link rel="icon" href="/assets/klipza-mark.png" type="image/png">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
 <title>Klipza.IA</title>
+<script src="/vendor/capacitor.js"></script>
+<script src="/vendor/capacitor-inappbrowser.js"></script>
 <style>
 :root{
   --bg:#fff;--panel:#fafafa;--panel2:#f4f4f4;--line:#e5e5e5;--line2:#d8d8d8;
@@ -169,7 +171,7 @@ img{max-width:100%}
 .webklip-subtitle{font-size:12px;line-height:1.55;color:var(--muted);max-width:680px;margin-top:6px}
 .webklip-refresh{height:36px;padding:0 12px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);font-size:11px;font-weight:700;white-space:nowrap}
 .webklip-refresh:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
-.webklip-meta{font-size:10px;color:var(--muted);margin:0 0 12px}.webklip-topbar-label{font-size:10px;color:var(--muted);white-space:nowrap}.webklip-browser-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.webklip-toolbar-button{height:30px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-toolbar-button:hover{background:var(--hover)}.webklip-address{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 5px;color:var(--muted);font-size:10px}.webklip-iframe-wrap{height:calc(100dvh - 150px);min-height:420px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.webklip-iframe{width:100%;height:100%;display:block;border:0;background:var(--bg)}.webklip-frame-note{font-size:10px;line-height:1.45;color:var(--muted);margin-top:8px}.webklip-load-more{display:block;width:min(260px,100%);height:38px;margin:16px auto 0;border:1px solid var(--line2);border-radius:10px;background:var(--panel);color:var(--text);font-size:11px;font-weight:750}.webklip-load-more:hover{background:var(--hover)}.webklip-browser-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}.webklip-search-form{min-width:0;flex:1;height:42px;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);box-shadow:0 3px 12px rgba(0,0,0,.04)}.webklip-search-icon{font-size:19px;color:var(--muted);line-height:1}.webklip-search-form input{min-width:0;flex:1;height:34px;border:0;outline:0;background:transparent;color:var(--text);font-size:12px}.webklip-search-form button,.webklip-clear-search{height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-search-form button:hover,.webklip-clear-search:hover{background:var(--black);color:var(--bg);border-color:var(--black)}.webklip-ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 18px}.webklip-ai-label{font-size:10px;color:var(--muted);font-weight:750;margin-right:2px}.webklip-ai-link{height:28px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font-size:10px;text-decoration:none}.webklip-ai-link:hover{border-color:var(--black);background:var(--hover)}
+.webklip-meta{font-size:10px;color:var(--muted);margin:0 0 12px}.webklip-topbar-label{font-size:10px;color:var(--muted);white-space:nowrap}.webklip-browser-toolbar{display:flex;align-items:center;gap:8px;margin:0 0 12px;padding:6px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.webklip-toolbar-button{height:30px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-toolbar-button:hover{background:var(--hover)}.webklip-address{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 5px;color:var(--muted);font-size:10px}.webklip-iframe-wrap{height:calc(100dvh - 150px);min-height:420px;overflow:hidden;border:1px solid var(--line);border-radius:14px;background:var(--panel)}.webklip-iframe{width:100%;height:100%;display:block;border:0;background:var(--bg)}.webklip-frame-note{font-size:10px;line-height:1.45;color:var(--muted);margin-top:8px}.webklip-preview-state{min-height:calc(100dvh - 230px);display:grid;place-items:center;align-content:center;gap:10px;padding:42px 22px;border:1px solid var(--line);border-radius:14px;background:var(--panel);text-align:center;color:var(--text)}.webklip-preview-state h2{max-width:440px;font-size:18px;line-height:1.25}.webklip-preview-state p{max-width:500px;color:var(--muted);font-size:12px;line-height:1.55}.webklip-preview-icon{width:48px;height:48px;border:1px solid var(--line2);border-radius:14px;display:grid;place-items:center;font-size:24px;font-weight:700;background:var(--bg)}.webklip-preview-warning{border-color:#d7b65a}.webklip-preview-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:8px}.webklip-preview-actions .webklip-action{min-width:170px}.webklip-page-view .webklip-inner{padding-bottom:24px}.webklip-load-more{display:block;width:min(260px,100%);height:38px;margin:16px auto 0;border:1px solid var(--line2);border-radius:10px;background:var(--panel);color:var(--text);font-size:11px;font-weight:750}.webklip-load-more:hover{background:var(--hover)}.webklip-browser-bar{display:flex;align-items:center;gap:8px;margin-bottom:10px}.webklip-search-form{min-width:0;flex:1;height:42px;display:flex;align-items:center;gap:8px;padding:0 6px 0 12px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);box-shadow:0 3px 12px rgba(0,0,0,.04)}.webklip-search-icon{font-size:19px;color:var(--muted);line-height:1}.webklip-search-form input{min-width:0;flex:1;height:34px;border:0;outline:0;background:transparent;color:var(--text);font-size:12px}.webklip-search-form button,.webklip-clear-search{height:32px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:750;white-space:nowrap}.webklip-search-form button:hover,.webklip-clear-search:hover{background:var(--black);color:var(--bg);border-color:var(--black)}.webklip-ai-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:0 0 18px}.webklip-ai-label{font-size:10px;color:var(--muted);font-weight:750;margin-right:2px}.webklip-ai-link{height:28px;display:inline-flex;align-items:center;gap:5px;padding:0 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel);color:var(--text);font-size:10px;text-decoration:none}.webklip-ai-link:hover{border-color:var(--black);background:var(--hover)}
 .webklip-tabs{display:flex;gap:6px;overflow:auto;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;scrollbar-width:none}
 .webklip-tabs::-webkit-scrollbar{display:none}
 .webklip-tab{height:32px;padding:0 12px;border-radius:8px;font-size:10px;font-weight:700;color:var(--muted);white-space:nowrap}
@@ -1343,7 +1345,7 @@ body.prime-modal-open{overflow:hidden}
   let welcomePromptIndex=0;
   const WEBKLIP_API_BASE=(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://klipza-zzz.vercel.app':'';
   const WEBKLIP_PAGE_SIZE=18;
-  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE};
+  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,page:null};
   const WEBKLIP_LOCALES={BR:{label:'Brasil',language:'pt-BR',hl:'pt-BR',gl:'BR',ceid:'BR:pt'},PT:{label:'Portugal',language:'pt-PT',hl:'pt-PT',gl:'PT',ceid:'PT:pt'},US:{label:'Estados Unidos',language:'en-US',hl:'en-US',gl:'US',ceid:'US:en'},GB:{label:'Reino Unido',language:'en-GB',hl:'en-GB',gl:'GB',ceid:'GB:en'},ES:{label:'Espanha',language:'es-ES',hl:'es-ES',gl:'ES',ceid:'ES:es'},MX:{label:'México',language:'es-MX',hl:'es-419',gl:'MX',ceid:'MX:es'},FR:{label:'França',language:'fr-FR',hl:'fr-FR',gl:'FR',ceid:'FR:fr'},DE:{label:'Alemanha',language:'de-DE',hl:'de-DE',gl:'DE',ceid:'DE:de'},JP:{label:'Japão',language:'ja-JP',hl:'ja',gl:'JP',ceid:'JP:ja'},IN:{label:'Índia',language:'en-IN',hl:'en-IN',gl:'IN',ceid:'IN:en'}};
   const WEBKLIP_AI_LINKS=[{name:'ChatGPT',url:'https://chatgpt.com/'},{name:'Claude',url:'https://claude.ai/'},{name:'Gemini',url:'https://gemini.google.com/'},{name:'Perplexity',url:'https://www.perplexity.ai/'},{name:'Microsoft Copilot',url:'https://copilot.microsoft.com/'}];
   const WELCOME_PROMPTS=[
@@ -1491,8 +1493,62 @@ body.prime-modal-open{overflow:hidden}
     renderWebKlipPage();
   }
   function isSafeWebKlipUrl(value){try{const url=new URL(value,location.href);return ['http:','https:'].includes(url.protocol)?url.toString():'';}catch{return '';}}
-  function openWebKlipPage(url,title='Página web'){const safe=isSafeWebKlipUrl(url);if(!safe)return;webKlipState.page={url:safe,title:String(title||'Página web').slice(0,120)};renderWebKlipPage();}
+  function nativeInAppBrowser(){return window.capacitorInAppBrowser?.InAppBrowser||window.Capacitor?.Plugins?.InAppBrowser||null;}
+  async function openWebKlipInDeviceBrowser(url,external=false){
+    const safe=isSafeWebKlipUrl(url);if(!safe)return false;
+    const plugin=nativeInAppBrowser();
+    if(plugin){
+      try{
+        if(external&&typeof plugin.openInExternalBrowser==='function'){await plugin.openInExternalBrowser({url:safe});return true;}
+        if(!external&&typeof plugin.openInWebView==='function'){
+          await plugin.openInWebView({url:safe,options:{showURL:true,showToolbar:true,showNavigationButtons:true,android:{hardwareBack:true,allowZoom:true,isIsolated:true}}});
+          return true;
+        }
+      }catch(error){console.warn('web.klip browser fallback',error);}
+    }
+    if(external){
+      const opened=window.open(safe,'_blank','noopener,noreferrer');
+      if(opened)return true;
+      const anchor=document.createElement('a');anchor.href=safe;anchor.target='_blank';anchor.rel='noopener noreferrer';anchor.click();return true;
+    }
+    return false;
+  }
+  async function openWebKlipExternalFallback(){
+    const page=webKlipState.page;if(!page)return;
+    page.fallbackStarted=true;page.status='external-opening';webKlipState={...webKlipState,page};renderWebKlipPage();
+    const opened=await openWebKlipInDeviceBrowser(page.url,true);
+    if(!opened){page.status='external-blocked';webKlipState={...webKlipState,page};renderWebKlipPage();return;}
+    page.status='external-opened';webKlipState={...webKlipState,page};renderWebKlipPage();
+  }
+  async function checkWebKlipFrame(url){
+    try{
+      const result=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?check=${encodeURIComponent(url)}`);
+      return result&&typeof result==='object'?result:{embeddable:null,reason:'check-unavailable'};
+    }catch{return {embeddable:null,reason:'check-unavailable'};}
+  }
+  async function openWebKlipPage(url,title='Página web'){
+    const safe=isSafeWebKlipUrl(url);if(!safe)return;
+    const page={url:safe,title:String(title||'Página web').slice(0,120),status:'checking',fallbackStarted:false};
+    webKlipState={...webKlipState,page};renderWebKlipPage();
+    const policy=await checkWebKlipFrame(safe);
+    if(webKlipState.page?.url!==safe)return;
+    if(policy.embeddable===false){webKlipState={...webKlipState,page:{...page,status:'blocked',reason:policy.reason||'frame-policy'}};renderWebKlipPage();setTimeout(()=>{if(webKlipState.page?.url===safe&&!webKlipState.page.fallbackStarted)openWebKlipExternalFallback();},900);return;}
+    webKlipState={...webKlipState,page:{...page,status:'loading',policy}};renderWebKlipPage();
+  }
   function closeWebKlipPage(){webKlipState.page=null;renderWebKlipPage();}
+  function webKlipPageStateHTML(page){
+    if(page.status==='checking')return `<div class="webklip-preview-state"><div class="webklip-preview-icon">⌁</div><h2>Verificando a fonte</h2><p>O web.klip está tentando manter esta página dentro do app.</p></div>`;
+    if(page.status==='blocked')return `<div class="webklip-preview-state webklip-preview-warning"><div class="webklip-preview-icon">↗</div><h2>Esta fonte bloqueia a visualização interna</h2><p>Para não deixar uma tela cinza travada, o Klipza abrirá a página no navegador do celular em instantes.</p><div class="webklip-preview-actions"><button class="webklip-action" id="webKlipOpenExternal" type="button">Abrir no navegador agora</button><button class="webklip-action secondary" id="webKlipRetry" type="button">Tentar dentro do Klipza</button></div></div>`;
+    if(page.status==='external-opening')return `<div class="webklip-preview-state"><div class="webklip-preview-icon">↗</div><h2>Abrindo no navegador do dispositivo</h2><p>O conteúdo não pôde ser exibido com segurança dentro do app.</p></div>`;
+    if(page.status==='external-opened')return `<div class="webklip-preview-state"><div class="webklip-preview-icon">✓</div><h2>Fonte aberta no navegador</h2><p>O Klipza continua preservado. Você pode voltar a esta tela quando terminar.</p><div class="webklip-preview-actions"><button class="webklip-action" id="webKlipOpenExternal" type="button">Abrir novamente</button><button class="webklip-action secondary" id="webKlipExternalBack" type="button">Voltar ao web.klip</button></div></div>`;
+    if(page.status==='external-blocked')return `<div class="webklip-preview-state webklip-preview-warning"><div class="webklip-preview-icon">!</div><h2>Não foi possível abrir a fonte automaticamente</h2><p>O navegador bloqueou a abertura automática. Toque abaixo para tentar novamente.</p><div class="webklip-preview-actions"><button class="webklip-action" id="webKlipOpenExternal" type="button">Abrir no navegador</button><button class="webklip-action secondary" id="webKlipExternalBack" type="button">Voltar ao web.klip</button></div></div>`;
+    return `<div class="webklip-iframe-wrap"><iframe class="webklip-iframe" id="webKlipFrame" src="${esc(page.url)}" title="${esc(page.title)}" loading="eager" referrerpolicy="no-referrer" sandbox="allow-forms allow-modals allow-presentation allow-scripts allow-same-origin"></iframe></div><p class="webklip-frame-note" id="webKlipFrameStatus">Visualização dentro do Klipza. Se a fonte bloquear a incorporação, o navegador do celular será usado automaticamente como último recurso.</p>`;
+  }
+  function monitorWebKlipFrame(page){
+    const frame=$('webKlipFrame');if(!frame)return;
+    frame.addEventListener('load',()=>{if(webKlipState.page?.url!==page.url)return;const status=$('webKlipFrameStatus');if(status)status.textContent='Fonte carregada dentro do Klipza.';});
+    window.setTimeout(()=>{if(webKlipState.page?.url!==page.url||page.status!=='loading')return;webKlipState={...webKlipState,page:{...page,status:'blocked',reason:'frame-timeout'}};renderWebKlipPage();window.setTimeout(()=>{if(webKlipState.page?.url===page.url&&!webKlipState.page.fallbackStarted)openWebKlipExternalFallback();},900);},8000);
+  }
   function renderWebKlipPage(){
     const mount=$('main');if(!mount)return;
     const locale=currentWebKlipLocale();
@@ -1501,10 +1557,14 @@ body.prime-modal-open{overflow:hidden}
     const items=searching?webKlipState.searchResults:feedItems;
     if(webKlipState.page){
       const page=webKlipState.page;
-      mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">Navegação interna</span></div></header><section class="webklip-view webklip-page-view"><div class="webklip-inner"><div class="webklip-browser-toolbar"><button class="webklip-toolbar-button" id="webKlipPageBack" type="button">‹ Voltar</button><div class="webklip-address" title="${esc(page.url)}">${esc(page.title)}</div><button class="webklip-toolbar-button" id="webKlipPageHome" type="button">Início</button></div><div class="webklip-iframe-wrap"><iframe class="webklip-iframe" src="${esc(page.url)}" title="${esc(page.title)}" loading="eager" referrerpolicy="no-referrer" sandbox="allow-forms allow-modals allow-presentation allow-scripts allow-same-origin"></iframe></div><p class="webklip-frame-note">Algumas páginas bloqueiam visualização incorporada. Nesse caso, use a opção de abrir a fonte no próprio navegador do dispositivo.</p></div></section>`;
+      mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">Navegação interna</span></div></header><section class="webklip-view webklip-page-view"><div class="webklip-inner"><div class="webklip-browser-toolbar"><button class="webklip-toolbar-button" id="webKlipPageBack" type="button">‹ Voltar</button><div class="webklip-address" title="${esc(page.url)}">${esc(page.title)}</div><button class="webklip-toolbar-button" id="webKlipPageHome" type="button">Início</button></div>${webKlipPageStateHTML(page)}</div></section>`;
       mount.querySelector('#webKlipBack')?.addEventListener('click',()=>setView('chat'));
       mount.querySelector('#webKlipPageBack')?.addEventListener('click',closeWebKlipPage);
       mount.querySelector('#webKlipPageHome')?.addEventListener('click',closeWebKlipPage);
+      mount.querySelector('#webKlipRetry')?.addEventListener('click',()=>openWebKlipPage(page.url,page.title));
+      mount.querySelector('#webKlipOpenExternal')?.addEventListener('click',openWebKlipExternalFallback);
+      mount.querySelector('#webKlipExternalBack')?.addEventListener('click',closeWebKlipPage);
+      if(page.status==='loading')monitorWebKlipFrame(page);
       return;
     }
     const visibleItems=items.slice(0,webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE);

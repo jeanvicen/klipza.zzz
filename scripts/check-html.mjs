@@ -28,11 +28,15 @@ for (const marker of [
   'webKlipSearchInput',
   'id="webKlipBack"',
   'webklip-iframe',
+  'webKlipOpenExternal',
+  'nativeInAppBrowser',
+  'capacitor-inappbrowser.js',
   'WEBKLIP_PAGE_SIZE=18',
   'WEBKLIP_ROTATION_MS=25000',
   'WEBKLIP_CACHE_KEY=\'klipza_webklip_daily_v2\'',
   '/api/webklip?date=',
   '/api/webklip?q=',
+  '/api/webklip?check=',
   'Codar com referência'
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração web.klip ausente: ${marker}`);
@@ -43,6 +47,8 @@ for (const marker of [
   'news.google.com/rss/search',
   'country',
   '.slice(0, 50)',
+  'inspectFramePolicy',
+  'frame-ancestors',
   'celebrity',
   'malware',
   'piracy'
