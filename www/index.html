@@ -13,6 +13,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="icon" href="/assets/klipza-mark.png" type="image/png">
 <link rel="apple-touch-icon" href="/assets/icon-192.png">
+<script src="/vendor/supabase.js"></script>
 <title>Klipza.IA</title>
 <script src="/vendor/capacitor.js"></script>
 <script src="/vendor/capacitor-inappbrowser.js"></script>
@@ -65,12 +66,31 @@ img{max-width:100%}
 .login-card{width:min(390px,100%);text-align:center}
 .login-brand{font-size:34px;line-height:1;font-weight:700;letter-spacing:-1.8px;margin-bottom:12px}
 .login-brand span{font-weight:400}
-.login-copy{font-size:14px;color:var(--muted);margin-bottom:28px}
-.google-btn{width:100%;height:50px;border:1px solid var(--black);border-radius:11px;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;gap:11px;font-size:14px;font-weight:600;transition:.16s}
+.login-copy{font-size:14px;color:var(--muted);margin-bottom:18px}
+.auth-form{display:grid;gap:10px;text-align:left}
+.auth-label{display:grid;gap:5px;font-size:11px;font-weight:650;color:var(--muted)}
+.auth-input{width:100%;height:46px;border:1px solid var(--line2);border-radius:10px;background:var(--bg);padding:0 13px;font-size:14px;outline:none;transition:border-color .16s,box-shadow .16s}
+.auth-input:focus{border-color:var(--black);box-shadow:0 0 0 3px color-mix(in srgb,var(--black) 12%,transparent)}
+.auth-submit{width:100%;height:46px;border-radius:10px;background:var(--black);color:var(--bg);font-size:13px;font-weight:700;margin-top:2px;transition:transform .16s,opacity .16s}
+.auth-submit:active,.auth-secondary:active,.auth-link:active,.google-btn:active{transform:scale(.98)}
+.auth-submit:disabled{opacity:.55;cursor:wait}
+.auth-secondary{width:100%;height:42px;border:1px solid var(--line2);border-radius:10px;background:var(--panel);font-size:12px;font-weight:650;transition:transform .16s,background .16s}
+.auth-secondary:hover{background:var(--hover)}
+.auth-actions{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:1px}
+.auth-link{font-size:11px;color:var(--text);text-decoration:underline;text-underline-offset:3px}
+.auth-link.muted{color:var(--muted);text-decoration:none}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:15px 0;color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.auth-divider:before,.auth-divider:after{content:"";height:1px;background:var(--line);flex:1}
+.google-btn{width:100%;height:46px;border:1px solid var(--black);border-radius:11px;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center;gap:11px;font-size:13px;font-weight:600;transition:.16s}
 .google-btn:hover{background:#000;color:#fff}
-.google-btn:active{transform:translateY(1px)}
 .google-icon{width:18px;height:18px}
-.login-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:18px}
+.auth-status{min-height:18px;margin:8px 0 2px;font-size:11px;line-height:1.45;text-align:center;color:var(--muted)}
+.auth-status.error{color:var(--danger)}
+.auth-status.success{color:#18794e}
+.auth-panel-title{font-size:16px;font-weight:750;letter-spacing:-.3px;margin-bottom:5px}
+.auth-panel-copy{font-size:12px;line-height:1.5;color:var(--muted);margin-bottom:14px}
+.login-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:16px}
+@media(max-width:430px){.login-card{width:min(390px,100%)}.login-brand{font-size:30px}}
 
 /* APP */
 #app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);height:100dvh;width:100%;transition:grid-template-columns .2s ease}
@@ -692,17 +712,27 @@ body.prime-modal-open{overflow:hidden}
 <div id="login">
   <div class="login-card">
     <div class="login-brand-lockup"><img class="brand-symbol" src="/assets/klipza-mark.png" alt="" aria-hidden="true"><div class="login-brand">Klipza<span>.IA</span></div></div>
-    <div class="login-copy">Entre na sua conta para continuar.</div>
-    <button class="google-btn" id="googleBtn">
-      <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path fill="#4285F4" d="M21.35 12.23c0-.72-.06-1.25-.19-1.82H12v3.44h5.36a4.58 4.58 0 0 1-1.99 3.01v2.5h3.22c1.89-1.74 2.76-4.3 2.76-7.13Z"/>
-        <path fill="#34A853" d="M12 21.75c2.7 0 4.97-.89 6.63-2.4l-3.22-2.5c-.89.59-2.03 1.01-3.41 1.01-2.61 0-4.82-1.76-5.61-4.13H3.06v2.57A10.01 10.01 0 0 0 12 21.75Z"/>
-        <path fill="#FBBC05" d="M6.39 13.73A6.03 6.03 0 0 1 6.07 12c0-.6.11-1.18.32-1.73V7.7H3.06A9.99 9.99 0 0 0 2 12c0 1.61.39 3.13 1.06 4.3l3.33-2.57Z"/>
-        <path fill="#EA4335" d="M12 6.14c1.47 0 2.79.51 3.83 1.5l2.87-2.87C16.96 3.16 14.7 2.25 12 2.25a10.01 10.01 0 0 0-8.94 5.48l3.33 2.57C7.18 7.9 9.39 6.14 12 6.14Z"/>
-      </svg>
-      Continuar com Google
-    </button>
-    <div class="login-note">Ao continuar, você concorda com os Termos e com a Política de Privacidade do Klipza.IA.</div>
+    <div class="login-copy" id="authPanelCopy">Entre na sua conta para continuar.</div>
+    <form class="auth-form" id="authEmailForm" novalidate>
+      <label class="auth-label hidden" id="authNameLabel" for="authName">Nome<input class="auth-input" id="authName" type="text" autocomplete="name" placeholder="Como devemos chamar você?"></label>
+      <label class="auth-label" for="authEmail">E-mail<input class="auth-input" id="authEmail" type="email" autocomplete="email" placeholder="voce@exemplo.com" required></label>
+      <label class="auth-label" id="authPasswordLabel" for="authPassword">Senha<input class="auth-input" id="authPassword" type="password" autocomplete="current-password" placeholder="Sua senha" minlength="8" required></label>
+      <label class="auth-label hidden" id="authPasswordConfirmLabel" for="authPasswordConfirm">Confirme a senha<input class="auth-input" id="authPasswordConfirm" type="password" autocomplete="new-password" placeholder="Digite novamente" minlength="8"></label>
+      <div class="auth-status" id="authStatus" role="status" aria-live="polite"></div>
+      <button class="auth-submit" id="authSubmit" type="submit">Entrar</button>
+      <div class="auth-actions"><button class="auth-link" id="authModeToggle" type="button">Criar conta</button><button class="auth-link muted" id="authForgot" type="button">Esqueci minha senha</button></div>
+    </form>
+    <section class="hidden" id="authRecoveryPanel" aria-labelledby="authRecoveryTitle">
+      <div class="auth-panel-title" id="authRecoveryTitle">Criar nova senha</div>
+      <div class="auth-panel-copy">Escolha uma senha nova para voltar à sua conta Klipza.</div>
+      <form class="auth-form" id="authRecoveryForm" novalidate>
+        <label class="auth-label" for="authRecoveryPassword">Nova senha<input class="auth-input" id="authRecoveryPassword" type="password" autocomplete="new-password" minlength="8" required></label>
+        <label class="auth-label" for="authRecoveryConfirm">Confirme a nova senha<input class="auth-input" id="authRecoveryConfirm" type="password" autocomplete="new-password" minlength="8" required></label>
+        <div class="auth-status" id="authRecoveryStatus" role="status" aria-live="polite"></div>
+        <button class="auth-submit" id="authRecoverySubmit" type="submit">Salvar nova senha</button>
+      </form>
+    </section>
+    <div class="login-note">Sua conta é protegida pelo Supabase Auth. Nunca compartilhamos sua senha. Ao continuar, você concorda com os Termos e com a Política de Privacidade do Klipza.IA.</div>
   </div>
 </div>
 
@@ -845,6 +875,11 @@ body.prime-modal-open{overflow:hidden}
   let previousChatId = null;
   let anonymousChat = null;
   let deferredInstallPrompt = null;
+  const SUPABASE_URL = 'https://xjvwfytikkxnvuwweqlf.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ERwMYbIK-BDyHQ3_sIRPmQ_3a2qBOXi';
+  const supabaseClient = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}) || null;
+  let authMode = 'signin';
+  let recoveryMode = false;
 
   function isStandalone(){
     return window.matchMedia?.('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -1023,9 +1058,121 @@ body.prime-modal-open{overflow:hidden}
   function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
   function initials(name){return (name||'K').trim().charAt(0).toUpperCase()}
 
-  function loginDemo(){
-    state.user = {name:'Usuário Google',email:'usuario@gmail.com'};
-    save(); enter();
+  function authRedirect(kind='auth'){
+    const url=new URL(window.location.href);
+    url.search='';
+    url.hash=kind==='recovery'?'reset-password':'';
+    return url.toString();
+  }
+  function setAuthStatus(message='',type=''){
+    const target=$('authStatus');
+    if(!target)return;
+    target.textContent=message;
+    target.className=`auth-status ${type}`.trim();
+  }
+  function setRecoveryStatus(message='',type=''){
+    const target=$('authRecoveryStatus');
+    if(!target)return;
+    target.textContent=message;
+    target.className=`auth-status ${type}`.trim();
+  }
+  function authMessage(error){
+    const message=String(error?.message||error||'').toLowerCase();
+    if(message.includes('invalid login credentials'))return 'E-mail ou senha incorretos. Você também pode pedir um link mágico.';
+    if(message.includes('email not confirmed'))return 'Confirme seu e-mail pelo link recebido antes de entrar.';
+    if(message.includes('user already registered'))return 'Este e-mail já tem uma conta. Tente entrar ou recuperar a senha.';
+    if(message.includes('password should be at least'))return 'A senha precisa ter pelo menos 8 caracteres.';
+    if(message.includes('provider is not enabled'))return 'O login Google ainda precisa ser ativado no painel do Supabase.';
+    if(message.includes('rate limit'))return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
+    return 'Não foi possível concluir agora. Confira os dados e tente novamente.';
+  }
+  function setAuthMode(mode){
+    authMode=mode==='signup'?'signup':'signin';
+    const signup=authMode==='signup';
+    $('authPanelCopy').textContent=signup?'Crie sua conta para começar.':'Entre na sua conta para continuar.';
+    $('authNameLabel').classList.toggle('hidden',!signup);
+    $('authName').required=signup;
+    $('authPasswordLabel').firstChild.textContent=signup?'Crie uma senha':'Senha';
+    $('authPassword').autocomplete=signup?'new-password':'current-password';
+    $('authPasswordConfirmLabel').classList.toggle('hidden',!signup);
+    $('authPasswordConfirm').required=signup;
+    $('authSubmit').textContent=signup?'Criar conta':'Entrar';
+    $('authModeToggle').textContent=signup?'Já tenho uma conta':'Criar conta';
+    $('authForgot').classList.toggle('hidden',signup);
+    setAuthStatus('');
+  }
+  function showRecoveryPanel(show=true){
+    recoveryMode=show;
+    $('authRecoveryPanel').classList.toggle('hidden',!show);
+    $('authEmailForm').classList.toggle('hidden',show);
+    $('authPanelCopy').textContent=show?'Use o link recebido para proteger sua conta.':'Entre na sua conta para continuar.';
+    if(show) $('authRecoveryPassword')?.focus();
+  }
+  async function finishSupabaseUser(user){
+    if(!user)return;
+    let profile=null;
+    try{
+      const response=await supabaseClient.from('profiles').select('display_name,email,avatar_url,country,language,status,deletion_scheduled_for').eq('id',user.id).maybeSingle();
+      profile=response.data||null;
+    }catch(e){console.warn('Perfil ainda não disponível.',e);}
+    if(profile?.status==='blocked'){
+      await supabaseClient.auth.signOut();
+      setAuthStatus('Esta conta está bloqueada. Entre em contato com o suporte do Klipza.','error');
+      return;
+    }
+    state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR'};
+    save();
+    showRecoveryPanel(false);
+    enter();
+  }
+  async function submitEmailAuth(event){
+    event.preventDefault();
+    if(!supabaseClient){setAuthStatus('O serviço de conta ainda não foi carregado. Atualize a página.','error');return;}
+    const name=$('authName').value.trim();
+    const email=$('authEmail').value.trim().toLowerCase();
+    const password=$('authPassword').value;
+    if(authMode==='signup'&&name.length<2){setAuthStatus('Digite seu nome para criar a conta.','error');return;}
+    if(!email||!/^(?:[^\s@]+)@(?:[^\s@]+)\.(?:[^\s@]+)$/.test(email)){setAuthStatus('Digite um e-mail válido.','error');return;}
+    if(password.length<8){setAuthStatus('A senha precisa ter pelo menos 8 caracteres.','error');return;}
+    if(authMode==='signup'&&password!==$('authPasswordConfirm').value){setAuthStatus('As senhas não coincidem.','error');return;}
+    const button=$('authSubmit'); button.disabled=true; setAuthStatus('Aguarde…');
+    try{
+      const result=authMode==='signup'
+        ? await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:authRedirect(),data:{full_name:name}}})
+        : await supabaseClient.auth.signInWithPassword({email,password});
+      if(result.error)throw result.error;
+      if(authMode==='signup'&&!result.data.session){setAuthStatus('Conta criada. Confira seu e-mail para confirmar o cadastro.','success');}
+      else if(result.data.user) await finishSupabaseUser(result.data.user);
+    }catch(error){setAuthStatus(authMessage(error),'error');}
+    finally{button.disabled=false;}
+  }
+  async function sendPasswordReset(){
+    if(!supabaseClient){setAuthStatus('O serviço de conta ainda não foi carregado. Atualize a página.','error');return;}
+    const email=$('authEmail').value.trim().toLowerCase();
+    if(!email||!/^\S+@\S+\.\S+$/.test(email)){setAuthStatus('Digite seu e-mail para receber a recuperação.','error');return;}
+    const button=$('authForgot');button.disabled=true;setAuthStatus('Enviando instruções…');
+    try{
+      const {error}=await supabaseClient.auth.resetPasswordForEmail(email,{redirectTo:authRedirect('recovery')});
+      if(error)throw error;
+      setAuthStatus('Se existir uma conta com esse e-mail, enviaremos instruções para criar uma nova senha.','success');
+    }catch(error){setAuthStatus(authMessage(error),'error');}
+    finally{button.disabled=false;}
+  }
+  async function updateRecoveredPassword(event){
+    event.preventDefault();
+    if(!supabaseClient){setRecoveryStatus('O serviço de conta ainda não foi carregado. Atualize a página.','error');return;}
+    const password=$('authRecoveryPassword').value;
+    if(password.length<8){setRecoveryStatus('A senha precisa ter pelo menos 8 caracteres.','error');return;}
+    if(password!==$('authRecoveryConfirm').value){setRecoveryStatus('As senhas não coincidem.','error');return;}
+    const button=$('authRecoverySubmit');button.disabled=true;setRecoveryStatus('Salvando…');
+    try{
+      const {error}=await supabaseClient.auth.updateUser({password});
+      if(error)throw error;
+      setRecoveryStatus('Senha atualizada. Sua conta está protegida novamente.','success');
+      history.replaceState({},document.title,window.location.pathname);
+      setTimeout(async()=>{const {data}=await supabaseClient.auth.getUser();if(data.user)finishSupabaseUser(data.user);},900);
+    }catch(error){setRecoveryStatus(authMessage(error),'error');}
+    finally{button.disabled=false;}
   }
   function enter(){
     ensureQuota();
@@ -1039,8 +1186,26 @@ body.prime-modal-open{overflow:hidden}
     else { activeChatId=state.activeChatId || Object.keys(state.chats)[0]; save(); renderChat(); }
     adaptSidebar();
   }
-  function logout(){
+  async function logout(){
+    if(supabaseClient) await supabaseClient.auth.signOut();
     state.user=null; save(); location.reload();
+  }
+  async function bootstrapAuth(){
+    if(!supabaseClient){setAuthStatus('Não foi possível carregar o serviço de contas. Atualize a página.','error');return;}
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+      if(event==='PASSWORD_RECOVERY'){showRecoveryPanel(true);return;}
+      if(event==='SIGNED_IN'&&session?.user)setTimeout(()=>finishSupabaseUser(session.user),0);
+      if(event==='SIGNED_OUT'){state.user=null;save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
+    });
+    const {data}=await supabaseClient.auth.getSession();
+    if(data.session?.user){
+      const hash=window.location.hash||'';
+      if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
+      else await finishSupabaseUser(data.session.user);
+    }else{
+      state.user=null;save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
+      if(window.location.hash.includes('reset-password'))showRecoveryPanel(true);
+    }
   }
 
   function adaptSidebar(){
@@ -1905,9 +2070,9 @@ body.prime-modal-open{overflow:hidden}
     window.__klipzaSettingsMobileDetail=false;
     renderSettingsPage();
   }
-  window.K={loginDemo,enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
+  window.K={enter,logout,toggleSidebar,setView,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
     upcoming,openPrimeModal,closePrimeModal,primeComingSoon,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal};
-  $('googleBtn').addEventListener('click',loginDemo);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
+  $('authEmailForm')?.addEventListener('submit',submitEmailAuth);$('authRecoveryForm')?.addEventListener('submit',updateRecoveredPassword);$('authModeToggle')?.addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));$('authForgot')?.addEventListener('click',sendPasswordReset);$('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
   $('installPromptAction').addEventListener('click',installApp);$('installPromptDismiss').addEventListener('click',dismissInstallPrompt);
   document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
   const primeModal=$('primeModal');
@@ -1922,7 +2087,8 @@ body.prime-modal-open{overflow:hidden}
   setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); } }, 1000);
   applyTheme();
   registerAppShell();
-  if(state.user) enter();
+  setAuthMode('signin');
+  bootstrapAuth();
   if(isIOS()) showInstallPrompt();
 })();
 </script>

@@ -81,3 +81,17 @@ Também foi validada a checagem server-side de políticas: `https://www.google.c
 ## Validação no deploy público b5a547d
 
 O deploy `https://klipza-zzz.vercel.app/` carregou a aba web.klip, exibiu `50 item(ns) disponíveis`, filtros e pesquisa. O primeiro card abriu o detalhe corretamente, com os botões `Codar com referência` e `Abrir dentro do Klipza`. A API pública confirmou `www.google.com` como `embeddable: false` por `x-frame-options` e `example.com` como `embeddable: true`.
+
+## Supabase Auth no app — validação visual local
+
+O build local passou a mostrar entrada por e-mail e senha, criação de conta com confirmação de senha, recuperação de senha e a tela simplificada sem Google ou link mágico. A alternância para `Criar conta` exibiu os campos adicionais corretamente. O botão `Esqueci minha senha` mostrou o estado de orientação sem revelar se o e-mail existe, compatível com prevenção de enumeração de contas. O app permaneceu na tela de login quando não havia sessão Supabase, sem usar mais o login demo automático.
+
+## Branding dos e-mails Supabase
+
+O painel autenticado permitiu configurar SMTP customizado. A URL pública `https://klipza-zzz.vercel.app/` foi definida como Site URL e redirect permitido, e os e-mails foram configurados para usar o nome visual `Equipe Klipza`.
+
+A versão local final da autenticação foi validada visualmente. No modo de entrada aparecem apenas e-mail, senha, entrar, criar conta e esqueci minha senha. Ao tocar em `Criar conta`, o campo `Nome`, a confirmação de senha e o botão `Criar conta` aparecem.
+
+Os campos não sensíveis foram corrigidos para remetente `klipzastudio@gmail.com`, nome `Equipe Klipza`, host `smtp.gmail.com`, porta `587` e usuário SMTP completo. Após recarregar o painel, os campos de remetente, nome, host, porta e usuário permaneceram preenchidos, enquanto a senha ficou protegida e não visualizável. O botão de salvar ficou desabilitado, confirmando que o SMTP foi persistido pelo Supabase.
+
+O template `Confirm sign up` foi salvo com assunto `Confirme seu e-mail para entrar no Klipza.IA`, corpo em português, botão `{{ .ConfirmationURL }}`, aviso de segurança e assinatura `Equipe Klipza`. O template `Reset password` também foi salvo com assunto `Recupere sua senha com segurança no Klipza.IA`, botão de redefinição, aviso de expiração e assinatura `Equipe Klipza`. Em ambos os casos, o botão `Save changes` ficou desabilitado após a publicação, indicando ausência de alterações pendentes.

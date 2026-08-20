@@ -14,7 +14,8 @@
   "dependencies": {
     "@capacitor/android": "^7.4.3",
     "@capacitor/core": "^7.4.3",
-    "@capacitor/inappbrowser": "2.5.5"
+    "@capacitor/inappbrowser": "2.5.5",
+    "@supabase/supabase-js": "2.112.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^7.4.3",

@@ -18,5 +18,5 @@ const capacitorCore = resolve(root, 'node_modules/@capacitor/core/dist/capacitor
 const capacitorInAppBrowser = resolve(root, 'node_modules/@capacitor/inappbrowser/dist/plugin.js');
 await cp(capacitorCore, resolve(vendor, 'capacitor.js'));
 await cp(capacitorInAppBrowser, resolve(vendor, 'capacitor-inappbrowser.js'));
-
+await cp(resolve(root, 'vendor/supabase.js'), resolve(vendor, 'supabase.js'));
 console.log(`Klipza web build criado em ${output}`);
