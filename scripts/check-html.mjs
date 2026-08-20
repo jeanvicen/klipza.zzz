@@ -17,8 +17,20 @@ for (const file of [
   'vendor/supabase.js',
   'supabase/migrations/20260820000001_security_lifecycle.sql',
   'supabase/migrations/20260820000002_cron.sql',
+  'supabase/migrations/20260820000003_billing.sql',
+  'supabase/migrations/20260820000004_prime_only.sql',
   'admin.html',
-  'api/admin-users.js'
+  'api/admin-users.js',
+  'api/mercadopago.js',
+  'api/mercadopago-webhook.js',
+  'legal/document.css',
+  'legal/termos-de-uso.html',
+  'legal/politica-de-privacidade.html',
+  'legal/compras-e-prime.html',
+  'legal/retencao-e-inatividade.html',
+  'docs/mercadopago-production-setup.md',
+  'docs/purchases-architecture-notes.md',
+  'docs/mercadopago-production-setup.md'
 ]) {
   await access(resolve(root, file));
 }
@@ -50,15 +62,29 @@ for (const marker of [
   'authRecoveryPasswordStrength',
   'passwordIsStrong',
   'uppercase:/[A-Z]/',
-  'special:/[^A-Za-z0-9\\s]/'
+  'special:/[^A-Za-z0-9\\s]/',
+  'R$ 59,90',
+  '1.500 tokens',
+  'anexos ilimitados',
+  "data-buy-product=\"prime_monthly\""
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração web.klip ausente: ${marker}`);
 }
 
 const api = await readFile(resolve(root, 'api/webklip.js'), 'utf8');
 const adminApi = await readFile(resolve(root, 'api/admin-users.js'), 'utf8');
+const billingApi = await readFile(resolve(root, 'api/mercadopago.js'), 'utf8');
+const webhookApi = await readFile(resolve(root, 'api/mercadopago-webhook.js'), 'utf8');
+const billingMigration = await readFile(resolve(root, 'supabase/migrations/20260820000003_billing.sql'), 'utf8');
 for (const marker of ['SUPABASE_SERVICE_ROLE_KEY', 'auth.admin.listUsers', 'auth.admin.deleteUser', 'admin_audit_log', 'is_admin']) {
   if (!adminApi.includes(marker)) throw new Error(`Painel administrativo inseguro ou incompleto: ${marker}`);
+}
+
+for (const marker of ['billing_products', 'billing_orders', 'wallet_ledger', 'apply_billing_approval', 'consume_wallet_tokens', 'MERCADOPAGO_ACCESS_TOKEN', 'checkout/preferences', 'prime_monthly']) {
+  if (!billingApi.includes(marker) && !billingMigration.includes(marker)) throw new Error(`Billing ausente ou inseguro: ${marker}`);
+}
+for (const marker of ['x-signature', 'createHmac', 'billing_provider_events', 'v1/payments', 'apply_billing_approval', 'mp_payment:']) {
+  if (!webhookApi.includes(marker) && !billingMigration.includes(marker)) throw new Error(`Webhook de billing incompleto: ${marker}`);
 }
 
 for (const marker of [
@@ -77,4 +103,4 @@ for (const marker of [
   if (!api.includes(marker)) throw new Error(`Proteção do endpoint ausente: ${marker}`);
 }
 
-console.log('check:html OK — PWA, web.klip, Supabase Auth, ciclo de vida, endpoint seguro e ícones encontrados.');
+console.log('check:html OK — PWA, web.klip, Auth, ciclo de vida, billing, documentos, endpoint seguro e ícones encontrados.');

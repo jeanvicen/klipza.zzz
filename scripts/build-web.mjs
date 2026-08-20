@@ -14,6 +14,7 @@ await cp(resolve(root, 'admin.html'), resolve(output, 'admin.html'));
 await cp(resolve(root, 'manifest.webmanifest'), resolve(output, 'manifest.webmanifest'));
 await cp(resolve(root, 'sw.js'), resolve(output, 'sw.js'));
 await cp(resolve(root, 'assets'), resolve(output, 'assets'), { recursive: true });
+await cp(resolve(root, 'legal'), resolve(output, 'legal'), { recursive: true });
 
 const capacitorCore = resolve(root, 'node_modules/@capacitor/core/dist/capacitor.js');
 const capacitorInAppBrowser = resolve(root, 'node_modules/@capacitor/inappbrowser/dist/plugin.js');
