@@ -6,6 +6,8 @@ const MAX_IMPORT = 500;
 const ALLOWED_KINDS = new Set(['profile', 'preference', 'instruction', 'project', 'fact', 'temporary']);
 const ALLOWED_RETENTION = new Set(['permanent', 'standard', 'temporary']);
 const ALLOWED_CAPTURE = new Set(['suggested', 'automatic', 'disabled']);
+const MEMORY_MAX = 500;
+const MEMORY_DEFAULTS = { memory_enabled: true, capture_mode: 'automatic', max_memories: MEMORY_MAX, inactivity_notifications: true };
 
 function clean(value, max) {
   return String(value ?? '').replace(/\u0000/g, '').replace(/\s+/g, ' ').trim().slice(0, max);
@@ -57,7 +59,18 @@ async function readSettings(client, userId) {
     .select('memory_enabled,capture_mode,max_memories,inactivity_notifications,created_at,updated_at')
     .eq('user_id', userId).maybeSingle();
   if (error) throw error;
-  return data || { memory_enabled: true, capture_mode: 'suggested', max_memories: 200, inactivity_notifications: true };
+  const current = data || {};
+  const settings = { ...current, ...MEMORY_DEFAULTS, inactivity_notifications: current.inactivity_notifications !== false };
+  const needsNormalize = !data || data.memory_enabled !== true || data.capture_mode !== 'automatic' || Number(data.max_memories) !== MEMORY_MAX;
+  if (needsNormalize) {
+    const { data: normalized, error: normalizeError } = await client.from('user_memory_settings')
+      .upsert({ user_id: userId, ...settings, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+      .select('memory_enabled,capture_mode,max_memories,inactivity_notifications,created_at,updated_at').single();
+    if (normalizeError) throw normalizeError;
+    await client.rpc('prune_user_memories', { p_user_id: userId, p_max: MEMORY_MAX });
+    return normalized;
+  }
+  return settings;
 }
 
 async function upsertMemory(client, userId, body) {
@@ -87,22 +100,22 @@ async function importMemories(client, userId, body) {
     await upsertMemory(client, userId, { ...item, source: 'import' });
     imported += 1;
   }
-  await client.rpc('prune_user_memories', { p_user_id: userId, p_max: null });
+  await client.rpc('prune_user_memories', { p_user_id: userId, p_max: MEMORY_MAX });
   return { imported };
 }
 
 async function updateSettings(client, userId, body) {
   const patch = {
     user_id: userId,
-    memory_enabled: body?.memoryEnabled !== false,
-    capture_mode: ALLOWED_CAPTURE.has(body?.captureMode) ? body.captureMode : 'suggested',
-    max_memories: boundedInt(body?.maxMemories, 20, 5000, 200),
+    memory_enabled: true,
+    capture_mode: 'automatic',
+    max_memories: MEMORY_MAX,
     inactivity_notifications: body?.inactivityNotifications !== false,
     updated_at: new Date().toISOString()
   };
   const { data, error } = await client.from('user_memory_settings').upsert(patch, { onConflict: 'user_id' }).select('memory_enabled,capture_mode,max_memories,inactivity_notifications,created_at,updated_at').single();
   if (error) throw error;
-  await client.rpc('prune_user_memories', { p_user_id: userId, p_max: patch.max_memories });
+  await client.rpc('prune_user_memories', { p_user_id: userId, p_max: MEMORY_MAX });
   return data;
 }
 
