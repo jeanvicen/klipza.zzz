@@ -972,14 +972,26 @@ body.prime-modal-open{overflow:hidden}
     navigator.serviceWorker.register('/sw.js').then(registration=>{
       const pwaMode=isStandalone()||new URLSearchParams(location.search).get('pwa')==='1';
       const notifyMode=()=>navigator.serviceWorker.controller?.postMessage({type:'klipza-client-mode',mode:pwaMode?'pwa':'web'});
+      const activateWebUpdate=()=>{
+        if(!pwaMode && registration.waiting) registration.waiting.postMessage({type:'klipza-activate-web-update'});
+      };
       const onControllerChange=()=>{
         notifyMode();
         if(!pwaMode) window.location.reload();
       };
       navigator.serviceWorker.addEventListener('controllerchange',onControllerChange);
+      registration.addEventListener('updatefound',()=>{
+        const worker=registration.installing;
+        worker?.addEventListener('statechange',()=>{
+          if(worker.state==='installed') activateWebUpdate();
+        });
+      });
       notifyMode();
-      navigator.serviceWorker.ready.then(notifyMode).catch(()=>{});
-      if(!pwaMode) registration.update().catch(()=>{});
+      navigator.serviceWorker.ready.then(()=>{
+        notifyMode();
+        activateWebUpdate();
+      }).catch(()=>{});
+      if(!pwaMode) registration.update().then(activateWebUpdate).catch(()=>{});
     }).catch(()=>{});
   }
   window.addEventListener('beforeinstallprompt',(event)=>{
