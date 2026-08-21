@@ -114,19 +114,8 @@ function historyForGroq(history) {
   return history.map((item) => ({ role: item.role, content: item.content }));
 }
 
-async function resolveGeminiModel(key) {
-  if (process.env.GEMINI_MODEL) return process.env.GEMINI_MODEL;
-  try {
-    const payload = await requestJSON(GEMINI_CONTENT_URL, {
-      headers: { 'x-goog-api-key': key, Accept: 'application/json' }
-    });
-    const models = Array.isArray(payload?.models) ? payload.models : [];
-    const compatible = models.filter((model) => Array.isArray(model?.supportedGenerationMethods) && model.supportedGenerationMethods.includes('generateContent'));
-    const preferred = compatible.find((model) => /gemini-3\.6-flash|gemini-3\.5-flash|gemini-2\.5-flash|gemini-2\.0-flash|gemini-1\.5-flash/i.test(model.name || '')) || compatible.find((model) => /flash/i.test(model.name || '')) || compatible[0];
-    return String(preferred?.name || '').replace(/^models\//, '') || GEMINI_MODEL;
-  } catch {
-    return GEMINI_MODEL;
-  }
+async function resolveGeminiModel() {
+  return GEMINI_MODEL;
 }
 
 async function callGroq({ message, history }) {
