@@ -475,7 +475,14 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .settings-document-list{display:grid;gap:9px;margin-top:10px}
 .settings-document-card{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:13px 14px}
 .settings-document-copy{min-width:0}.settings-document-copy strong{font-size:13px}.settings-document-copy span{display:block;font-size:10px;line-height:1.45;color:var(--muted);margin-top:4px}
-.settings-document-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.settings-document-actions a,.settings-document-actions button{font-size:10px;font-weight:750;border:1px solid var(--line2);border-radius:8px;padding:7px 9px;background:var(--panel);color:var(--text);text-decoration:none;white-space:nowrap}.settings-document-actions a:hover,.settings-document-actions button:hover{background:var(--hover)}
+.settings-document-actions{display:flex;align-items:center;gap:6px;flex:0 0 auto}.settings-document-actions a,.settings-document-actions button{font-size:10px;font-weight:750;border:1px solid var(--line2);border-radius:8px;padding:7px 9px;background:var(--panel);color:var(--text);text-decoration:none;white-space:nowrap}  .settings-document-actions a:hover,.settings-document-actions button:hover{background:var(--hover)}
+  .memory-card,.memory-notification,.memory-backup-row{border:1px solid var(--line);border-radius:12px;background:var(--bg);padding:13px 14px;margin:9px 0;color:var(--text)}
+  .memory-card-head,.memory-notification,.memory-backup-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+  .memory-card-head strong,.memory-notification strong,.memory-backup-row strong{display:block;font-size:13px}.memory-card-head span,.memory-notification span,.memory-backup-row span{display:block;font-size:10px;line-height:1.45;color:var(--muted);margin-top:4px}.memory-card-content{font-size:12px;line-height:1.5;margin-top:10px;color:var(--text)}
+  .memory-notification.read{opacity:.58}.memory-notification small{display:block;color:var(--muted);font-size:10px;margin-top:5px}.memory-notification .settings-badge,.memory-backup-row .settings-badge{flex:0 0 auto}.settings-badge.danger{color:#a33;border-color:#d9bcbc}.memory-backup-row{align-items:center}
+  .artifact-viewer{position:fixed;inset:0;z-index:240;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.45);backdrop-filter:blur(5px)}.artifact-viewer.open{display:flex}.artifact-viewer-dialog{width:min(900px,calc(100vw - 32px));height:min(700px,calc(100dvh - 32px));display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line2);border-radius:18px;overflow:hidden;box-shadow:0 28px 80px rgba(0,0,0,.24)}.artifact-viewer-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}.artifact-viewer-title{font-size:13px;font-weight:750}.artifact-viewer-close{width:32px;height:32px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text)}.artifact-viewer-body{flex:1;min-height:0;background:#fff}.artifact-viewer-body iframe{width:100%;height:100%;border:0;background:#fff}.artifact-viewer-code{height:100%;overflow:auto;padding:18px;background:#111;color:#eee;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}
+  @media(max-width:640px){.memory-card-head,.memory-notification,.memory-backup-row{align-items:flex-start;flex-direction:column}.memory-notification .settings-badge,.memory-backup-row .settings-badge{width:100%}.artifact-viewer{padding:10px}.artifact-viewer-dialog{width:100%;height:calc(100dvh - 20px)}}
+
 .settings-status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:var(--panel2);color:var(--muted);font-size:10px;font-weight:750}
 @media(max-width:640px){.settings-card-grid{grid-template-columns:1fr}.settings-document-card{align-items:flex-start;flex-direction:column}.settings-document-actions{width:100%}.settings-document-actions a,.settings-document-actions button{flex:1;text-align:center}}
 .settings-divider{height:1px;background:var(--line)}
@@ -825,6 +832,10 @@ body.prime-modal-open{overflow:hidden}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5z"/><path d="m8 9 3 3-3 3M13 15h3"/></svg>
           <span class="nav-label">Studio Klip</span>
         </a>
+        <button class="nav-btn nav-subbtn" type="button" onclick="window.K.toggleDeepThinking()" aria-label="Alternar pensamento profundo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 22h4M8 14a6 6 0 1 1 8 0c-1.2 1-2 2.1-2 4h-4c0-1.9-.8-3-2-4Z"/><path d="M12 2v1M4.9 4.9l.7.7M19.1 4.9l-.7.7"/></svg>
+          <span class="nav-label">Pensamento profundo <small class="nav-substatus" id="deepThinkingStatus">${state.settings.thinkingMode==='deep'?'Ativo':'Desativado'}</small></span>
+        </button>
       </div>
     </div>
     <div class="history-head">Histórico</div>
@@ -907,8 +918,10 @@ body.prime-modal-open{overflow:hidden}
   const KEY = 'klipza_pro_v1';
   let state = loadState();
   state.theme = state.theme || 'light';
-  state.settings = {...{notifications:false,sounds:false,language:'pt-BR',country:'BR'},...(state.settings||{})};
+  state.settings = {...{notifications:false,sounds:false,language:'pt-BR',country:'BR',thinkingMode:'standard',provider:'auto',memoryEnabled:true,memoryCaptureMode:'suggested',memoryMax:200,inactivityNotifications:true},...(state.settings||{})};
+  state.memory = {...{memories:[],settings:{memory_enabled:true,capture_mode:'suggested',max_memories:200,inactivity_notifications:true},notifications:[],backups:[]},...(state.memory||{})};
   const ENERGY_MAX=100, MSG_COST=2, TOKEN_COST=MSG_COST, FREE_ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000;
+  const MAX_HISTORY_CHATS=50;
   let currentView = 'chat';
   let webKlipReturnView = 'chat';
   let activeChatId = state.activeChatId || null;
@@ -1043,11 +1056,11 @@ body.prime-modal-open{overflow:hidden}
       const raw = localStorage.getItem(KEY);
       if(raw) return JSON.parse(raw);
     }catch(e){}
-    return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false}};
+    return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR',thinkingMode:'standard',provider:'auto',memoryEnabled:true,memoryCaptureMode:'suggested',memoryMax:200,inactivityNotifications:true},memory:{memories:[],settings:{memory_enabled:true,capture_mode:'suggested',max_memories:200,inactivity_notifications:true},notifications:[],backups:[]}};
   }
   function isObject(value){return value&&typeof value==='object'&&!Array.isArray(value);}
   function compactChatsForRemote(){
-    const chats=Object.entries(state.chats||{}).sort(([,a],[,b])=>(Number(b?.updated)||0)-(Number(a?.updated)||0)).slice(0,12);
+    const chats=Object.entries(state.chats||{}).sort(([,a],[,b])=>(Number(b?.updated)||0)-(Number(a?.updated)||0)).slice(0,MAX_HISTORY_CHATS);
     const result={}; let total=0;
     for(const [id,chat] of chats){
       const messages=[];
@@ -1256,14 +1269,103 @@ body.prime-modal-open{overflow:hidden}
   function clearAllLocalData(){
     openConfirmModal('Limpar dados locais?', 'Conversas, artefatos, energia e preferências deste navegador serão removidos. Os dados sincronizados na sua conta permanecerão intactos.', ()=>{
       const user=state.user; remoteSyncSuspended=true; localStorage.removeItem(KEY);
-      state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR'}};
+      state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR',thinkingMode:'standard',provider:'auto',memoryEnabled:true,memoryCaptureMode:'suggested',memoryMax:200,inactivityNotifications:true},memory:{memories:[],settings:{memory_enabled:true,capture_mode:'suggested',max_memories:200,inactivity_notifications:true},notifications:[],backups:[]}};
       applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter(); remoteSyncSuspended=false;
     });
   }
   function browserNotification(title,body){
     if(state.settings.notifications && 'Notification' in window && Notification.permission==='granted'){ try{new Notification(title,{body});}catch(e){} }
   }
+  async function memoryRequest(body=null,view=''){
+    if(!supabaseClient||!state.user?.id)return null;
+    const sessionResult=await supabaseClient.auth.getSession();
+    const accessToken=sessionResult?.data?.session?.access_token;
+    if(!accessToken)throw new Error('Sua sessão expirou.');
+    const url=view?`/api/memory?view=${encodeURIComponent(view)}`:'/api/memory';
+    const response=await fetch(url,{method:body?'POST':'GET',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:'application/json'},body:body?JSON.stringify(body):undefined});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(payload?.error||'Não foi possível acessar a memória da conta.');
+    return payload;
+  }
+  async function hydrateMemoryData(user=state.user){
+    if(!user?.id)return false;
+    try{
+      const payload=await memoryRequest(null,'all');
+      state.memory={memories:Array.isArray(payload?.memories)?payload.memories:[],settings:payload?.settings||state.memory.settings,notifications:Array.isArray(payload?.notifications)?payload.notifications:[],backups:Array.isArray(payload?.backups)?payload.backups:[]};
+      const settings=state.memory.settings||{};
+      state.settings.memoryEnabled=settings.memory_enabled!==false;
+      state.settings.memoryCaptureMode=settings.capture_mode||'suggested';
+      state.settings.memoryMax=Number(settings.max_memories)||200;
+      state.settings.inactivityNotifications=settings.inactivity_notifications!==false;
+      save();
+      const unread=state.memory.notifications.find(item=>!item.read_at);
+      if(unread&&currentView==='chat')setTimeout(()=>showResponseStatus(`${unread.title}: ${unread.body}`),500);
+      if(currentView==='settings')renderSettingsPage();
+      return true;
+    }catch(error){console.warn('A memória da conta não está disponível agora; usando o estado local.',error);return false;}
+  }
+  function downloadJson(filename,payload){
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=filename;document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  async function exportAllData(){
+    try{
+      showResponseStatus('Preparando sua exportação…',true);
+      const result=await memoryRequest({action:'backup',kind:'export'});
+      downloadJson(`klipza-dados-${new Date().toISOString().slice(0,10)}.json`,{format:'klipza.export',version:1,exportedAt:new Date().toISOString(),backup:result.backup});
+      await hydrateMemoryData();showResponseStatus('Exportação baixada.');setTimeout(()=>showResponseStatus(''),3200);
+    }catch(error){showResponseStatus(error.message||'Não foi possível exportar seus dados.');setTimeout(()=>showResponseStatus(''),3200);}
+  }
+  async function createMemorySnapshot(){
+    try{showResponseStatus('Criando backup privado…',true);await memoryRequest({action:'backup',kind:'snapshot'});await hydrateMemoryData();showResponseStatus('Backup criado com segurança.');setTimeout(()=>showResponseStatus(''),2600);}
+    catch(error){showResponseStatus(error.message||'Não foi possível criar o backup.');setTimeout(()=>showResponseStatus(''),3200);}
+  }
+  function restoreMemoryBackup(backupId){
+    openConfirmModal('Restaurar backup?', 'As memórias do backup serão mescladas às memórias atuais da sua conta. Duplicatas serão atualizadas, não duplicadas.', async()=>{
+      try{showResponseStatus('Restaurando memórias…',true);const result=await memoryRequest({action:'restore',backupId});await hydrateMemoryData();showResponseStatus(`${result?.restored||0} memória(s) restaurada(s).`);setTimeout(()=>showResponseStatus(''),3200);}
+      catch(error){showResponseStatus(error.message||'Não foi possível restaurar o backup.');setTimeout(()=>showResponseStatus(''),3200);}
+    });
+  }
+  async function deleteMemory(memoryId){
+    try{await memoryRequest({action:'delete',memoryId});await hydrateMemoryData();}
+    catch(error){showResponseStatus(error.message||'Não foi possível apagar a memória.');setTimeout(()=>showResponseStatus(''),3200);}
+  }
+  async function addManualMemory(){
+    const memoryKey=window.prompt('Título curto da memória (ex.: linguagem preferida):','');if(!memoryKey)return;
+    const content=window.prompt('O que o Klipza deve lembrar? Evite senhas, tokens e dados sensíveis:','');if(!content)return;
+    try{await memoryRequest({action:'upsert',memoryKey,content,kind:'fact',priority:70,retentionClass:'standard'});await hydrateMemoryData();showResponseStatus('Memória salva e deduplicada.');setTimeout(()=>showResponseStatus(''),2600);}
+    catch(error){showResponseStatus(error.message||'Não foi possível salvar a memória.');setTimeout(()=>showResponseStatus(''),3200);}
+  }
+  async function saveMemorySettings(patch){
+    const previous={...state.settings};
+    state.settings={...state.settings,...patch};save();
+    try{
+      const settings=await memoryRequest({action:'settings',memoryEnabled:state.settings.memoryEnabled,captureMode:state.settings.memoryCaptureMode,maxMemories:state.settings.memoryMax,inactivityNotifications:state.settings.inactivityNotifications});
+      state.memory.settings=settings;save();if(currentView==='settings')renderSettingsPage();
+    }catch(error){state.settings=previous;save();if(currentView==='settings')renderSettingsPage();showResponseStatus(error.message||'Não foi possível salvar a preferência.');setTimeout(()=>showResponseStatus(''),3200);}
+  }
+  async function markNotificationRead(notificationId){
+    try{await memoryRequest({action:'read_notification',notificationId});const item=state.memory.notifications.find(row=>row.id===notificationId);if(item)item.read_at=new Date().toISOString();if(currentView==='settings')renderSettingsPage();}
+    catch(error){console.warn('Não foi possível marcar a notificação como lida.',error);}
+  }
+  function setThinkingMode(mode){
+    state.settings.thinkingMode=mode==='deep'?'deep':'standard';save();
+    const status=$('deepThinkingStatus');if(status)status.textContent=state.settings.thinkingMode==='deep'?'Ativo':'Desativado';
+    if(currentView==='settings')renderSettingsPage();
+  }
+  function toggleDeepThinking(){setThinkingMode(state.settings.thinkingMode==='deep'?'standard':'deep');showResponseStatus(state.settings.thinkingMode==='deep'?'Pensamento profundo ativado.':'Pensamento profundo desativado.');setTimeout(()=>showResponseStatus(''),2200);}
+  function setProviderMode(provider){
+    state.settings.provider=['auto','groq','qwen','hermes'].includes(provider)?provider:'auto';save();
+    if(currentView==='settings')renderSettingsPage();
+    showResponseStatus(`Provedor selecionado: ${state.settings.provider==='auto'?'automático':state.settings.provider}.`);setTimeout(()=>showResponseStatus(''),2200);
+  }
+  function enforceHistoryLimit(){
+    const ids=Object.keys(state.chats||{}).sort((a,b)=>(Number(state.chats[b]?.updated)||0)-(Number(state.chats[a]?.updated)||0));
+    ids.slice(MAX_HISTORY_CHATS).forEach(id=>{delete state.chats[id];});
+    if(activeChatId&&!state.chats[activeChatId]){activeChatId=ids.find(id=>state.chats[id])||null;state.activeChatId=activeChatId;}
+  }
   function save(){
+    enforceHistoryLimit();
     try{localStorage.setItem(KEY,JSON.stringify(state));}catch(error){console.warn('Não foi possível salvar o cache local.',error);}
     if(!remoteSyncSuspended)queueRemoteStateSync();
   }
@@ -1362,6 +1464,7 @@ body.prime-modal-open{overflow:hidden}
     hydrateRemoteState(user).then(async(loaded)=>{
       if(loaded){save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();}
       await hydrateMessageFeedback(user);
+      await hydrateMemoryData(user);
       queueRemoteStateSync();
     }).catch(()=>{});
     if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
@@ -1459,7 +1562,7 @@ body.prime-modal-open{overflow:hidden}
       if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
       else await finishSupabaseUser(data.session.user);
     }else{
-      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
+      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.memory={memories:[],settings:{memory_enabled:true,capture_mode:'suggested',max_memories:200,inactivity_notifications:true},notifications:[],backups:[]};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       if(window.location.hash.includes('reset-password'))showRecoveryPanel(true);
     }
   }
@@ -1682,7 +1785,7 @@ body.prime-modal-open{overflow:hidden}
     if(!responseState.active)return;
     clearInterval(responseState.timer); responseState.timer=null; stopResponseProgress(); responseState.active=false; responseState.stopped=true;
     const row=$('messages')?.querySelector('.msg.ai.streaming');
-    if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat(); chat.messages.push({id:messageId(),role:'ai',content:text,stopped:true,regenCount:responseState.regenerateCount||0}); chat.updated=Date.now(); persistIfNeeded();} row.remove(); renderMessages();}
+    if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat(); chat.messages.push({id:messageId(),role:'ai',content:text,stopped:true,regenCount:responseState.regenerateCount||0}); chat.updated=Date.now(); autoCreateArtifactsFromReply(text); persistIfNeeded();} row.remove(); renderMessages();}
     responseState.regenerateCount=0; setResponseUI(false); showResponseStatus('Você parou a resposta.'); setTimeout(()=>showResponseStatus(''),3200);
   }
   async function requestAIAnswer(message, aiAttachments, mode, researchContext){
@@ -1691,11 +1794,32 @@ body.prime-modal-open{overflow:hidden}
     if(!accessToken) throw new Error('Sua sessão expirou. Entre novamente para continuar.');
     const chat=currentChat();
     const history=chat.messages.slice(0,-1).slice(-16).map(item=>({role:item.role,content:item.content}));
-    const response=await fetch(`${AI_API_BASE}/api/ai`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({message,history,mode,attachments:aiAttachments,researchContext})});
+    const thinkingMode=state.settings.thinkingMode==='deep'?'deep':'standard';
+    const provider=['auto','groq','qwen','hermes'].includes(state.settings.provider)?state.settings.provider:'auto';
+    const response=await fetch(`${AI_API_BASE}/api/ai`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({message,history,mode,attachments:aiAttachments,researchContext,thinkingMode,provider})});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok) throw new Error(payload?.error||'Não foi possível concluir a resposta agora.');
     if(!payload?.answer) throw new Error('A resposta veio vazia.');
     return payload.answer;
+  }
+  function extractCodeBlocks(value){
+    const blocks=[];const source=String(value||'');const pattern=/```([^\n]*)\n?([\s\S]*?)```/g;let match;let index=0;
+    while((match=pattern.exec(source))){
+      let label=String(match[1]||'').trim().toLowerCase().replace(/[^a-z0-9+#-]/g,'');let code=String(match[2]||'').trim();
+      const firstLine=code.match(/^(html?|css|javascript|js|typescript|ts|python|py|json|jsx|tsx|sql|bash|sh|java|go|rust|c|cpp|php|ruby)\s*\n/i);
+      if(!label&&firstLine){label=firstLine[1].toLowerCase();code=code.slice(firstLine[0].length).trim();}
+      if(code.length<32)continue;
+      const isHTML=label==='html'||label==='htm'||/^<!doctype\s+html|^<html[\s>]/i.test(code);
+      const extension=isHTML?'html':({javascript:'js',js:'js',typescript:'ts',ts:'ts',jsx:'jsx',tsx:'tsx',python:'py',py:'py',json:'json',css:'css',java:'java',go:'go',rust:'rs',cpp:'cpp',c:'c',php:'php',ruby:'rb',bash:'sh',sh:'sh',html:'html',htm:'html'}[label]||'txt');
+      blocks.push({code,name:isHTML?'index.html':`codigo-${++index}.${extension}`,isHTML});
+    }
+    return blocks.slice(0,8);
+  }
+  function autoCreateArtifactsFromReply(reply){
+    if(anonymousMode)return 0;
+    const blocks=extractCodeBlocks(reply);if(!blocks.length)return 0;
+    blocks.forEach(block=>{const id='art_'+Math.random().toString(36).slice(2,9);state.artifacts[id]={id,name:block.name,type:'code',content:block.code,preview:block.code.slice(0,240),created:Date.now()};});
+    save();renderArtifactsCount();return blocks.length;
   }
   function streamReply(reply){
     const chat=currentChat();
@@ -1708,7 +1832,7 @@ body.prime-modal-open{overflow:hidden}
       if(i>=reply.length){
         clearInterval(responseState.timer); responseState.timer=null;
         const row=$('messages')?.querySelector('.msg.ai.streaming'); if(row)row.remove();
-        chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount}); chat.updated=Date.now(); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
+        chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount}); chat.updated=Date.now(); autoCreateArtifactsFromReply(reply); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
         responseState.regenerateCount=0;
         setResponseUI(false); showResponseStatus('');
       }
@@ -1836,8 +1960,10 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     }
   }
   function createArtifactFromCode(code, name='artefato.html'){
+    if(anonymousMode){showResponseStatus('Artefatos não são salvos em mensagens anônimas.');setTimeout(()=>showResponseStatus(''),2600);return;}
+    const safeCode=String(code||'').slice(0,100000);const safeName=String(name||'artefato.html').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'artefato.html';
     const id='art_'+Math.random().toString(36).slice(2,9);
-    state.artifacts[id]={id,name,type:'code',content:code,preview:code.slice(0,200),created:Date.now()};
+    state.artifacts[id]={id,name:safeName,type:'code',content:safeCode,preview:safeCode.slice(0,240),created:Date.now()};
     save(); renderArtifactsCount();
     alert('Artefato criado! Você pode vê-lo na aba Artefatos ou no Studio Klip.');
   }
@@ -2282,9 +2408,21 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   function renderArtifactsPage(){
     const items=Object.values(state.artifacts).sort((a,b)=>b.created-a.created);
     $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Artefatos</div></div></header>
-      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos</h1><div class="page-sub">Tudo que o Klipza.IA gerar pode ficar reunido aqui.</div>
-      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':a.type==='image'?'IMG':'TXT'}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)}</div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>`;
+      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos</h1><div class="page-sub">O Klipza cria automaticamente um artefato quando uma resposta contém código útil. Você também pode abrir o preview.</div>
+      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card" role="button" tabindex="0" onclick="window.K.openArtifact('${a.id}')" onkeydown="if(event.key==='Enter')window.K.openArtifact('${a.id}')"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':a.type==='image'?'IMG':'TXT'}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)}</div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div><div class="artifact-card-cta">Abrir preview →</div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>
+      <div class="artifact-viewer" id="artifactViewer" aria-hidden="true"><div class="artifact-viewer-dialog" role="dialog" aria-modal="true" aria-labelledby="artifactViewerTitle"><div class="artifact-viewer-head"><div class="artifact-viewer-title" id="artifactViewerTitle">Artefato</div><button class="artifact-viewer-close" type="button" onclick="window.K.closeArtifact()" aria-label="Fechar preview">×</button></div><div class="artifact-viewer-body" id="artifactViewerBody"></div></div></div>`;
   }
+  function openArtifact(id){
+    const artifact=state.artifacts?.[id];const viewer=$('artifactViewer'),body=$('artifactViewerBody'),title=$('artifactViewerTitle');
+    if(!artifact||!viewer||!body)return;
+    title.textContent=artifact.name||'Artefato';
+    const isHTML=artifact.type==='code'&&(/\\.html?$/i.test(artifact.name||'')||/^<!doctype\\s+html|^<html[\\s>]/i.test(String(artifact.content||'')));
+    body.innerHTML='';
+    if(isHTML){const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-scripts');frame.title='Preview do artefato';frame.srcdoc=String(artifact.content||'');body.appendChild(frame);}
+    else{const code=document.createElement('pre');code.className='artifact-viewer-code';code.textContent=String(artifact.content||artifact.preview||'');body.appendChild(code);}
+    viewer.classList.add('open');viewer.setAttribute('aria-hidden','false');
+  }
+  function closeArtifact(){const viewer=$('artifactViewer');if(!viewer)return;viewer.classList.remove('open');viewer.setAttribute('aria-hidden','true');const body=$('artifactViewerBody');if(body)body.innerHTML='';}
 
   function renderSettingsPage(){
     const ini=initials(state.user?.name||'K');
@@ -2293,6 +2431,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       ['conta','Conta','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0'],
       ['recursos','Recursos pagos','M12 3l2.8 5.7L21 9.6l-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z'],
       ['dados','Dados e privacidade','M6 4h12v16H6zM9 8h6M9 12h6M9 16h4'],
+      ['memoria','Memória da conta','M12 3a9 9 0 1 0 9 9M12 7v5l3 2'],
+      ['inteligencia','Pensamento e IA','M12 3v18M3 12h18'],
       ['documentos','Termos e documentos','M6 3h9l3 3v15H6zM9 12h6M9 16h6M9 8h3'],
       ['notificacoes','Notificações','M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'],
       ['seguranca','Segurança e login','M7 11V8a5 5 0 0 1 10 0v3M5 11h14v9H5z']
@@ -2333,8 +2473,29 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
           <div class="settings-group-title">Seus dados neste navegador</div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Conversas</div><div class="settings-line-desc">${Object.keys(state.chats).length} conversa(s) salva(s) localmente.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.clearHistory()">Apagar histórico</button></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Artefatos</div><div class="settings-line-desc">${Object.keys(state.artifacts).length} artefato(s) armazenado(s).</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setView('artifacts')">Abrir artefatos</button></div></div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Exportação de dados</div><div class="settings-line-desc">Ainda não disponível.</div></div><div class="settings-line-value"><span class="settings-badge">Em breve</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Histórico de conversas</div><div class="settings-line-desc">Até ${MAX_HISTORY_CHATS} conversas recentes ficam disponíveis por conta. As mais antigas são removidas do histórico local e sincronizado.</div></div><div class="settings-line-value"><span class="settings-badge">${Math.min(MAX_HISTORY_CHATS,Object.keys(state.chats).length)}/${MAX_HISTORY_CHATS}</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Exportação de dados</div><div class="settings-line-desc">Baixe conversas, artefatos, preferências e memórias vinculadas à sua conta em um arquivo JSON.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.exportAllData()">Baixar meus dados</button></div></div>
         </div>`;
+    } else if(active==='memoria'){
+      const memory=state.memory||{memories:[],notifications:[],backups:[]};
+      const memories=Array.isArray(memory.memories)?memory.memories:[];
+      const notifications=Array.isArray(memory.notifications)?memory.notifications:[];
+      const backups=Array.isArray(memory.backups)?memory.backups:[];
+      const memoryRows=memories.length?memories.map(item=>`<div class="memory-card"><div class="memory-card-head"><div><strong>${esc(item.memory_key||'Memória')}</strong><span>${esc(item.kind||'fact')} · prioridade ${Number(item.priority)||0} · ${esc(item.retention_class||'standard')}</span></div><button class="settings-badge danger" type="button" onclick="window.K.deleteMemory('${item.id}')">Apagar</button></div><div class="memory-card-content">${esc(item.content||'')}</div></div>`).join(''):'<div class="empty-page">Nenhuma memória salva ainda.</div>';
+      const notificationRows=notifications.length?notifications.map(item=>`<div class="memory-notification ${item.read_at?'read':''}"><div><strong>${esc(item.title)}</strong><span>${esc(item.body)}</span><small>${new Date(item.created_at).toLocaleString('pt-BR')}</small></div>${item.read_at?'':'<button class="settings-badge" type="button" onclick="window.K.markNotificationRead(\''+item.id+'\')">Marcar como lida</button>'}</div>`).join(''):'<div class="settings-note">Nenhum aviso pendente.</div>';
+      const backupRows=backups.length?backups.map(item=>`<div class="memory-backup-row"><div><strong>${esc(item.backup_kind==='export'?'Exportação':'Snapshot privado')}</strong><span>${new Date(item.created_at).toLocaleString('pt-BR')} · SHA ${esc(String(item.checksum||'').slice(0,12))}</span></div><button class="settings-badge" type="button" onclick="window.K.restoreMemoryBackup('${item.id}')">Restaurar</button></div>`).join(''):'<div class="settings-note">Nenhum backup privado criado.</div>';
+      content=`<div class="settings-titlebar"><h1>Memória da conta</h1></div>
+        <div class="settings-hero"><div class="settings-hero-kicker">Memória privada e controlável</div><div class="settings-hero-title">O Klipza lembra apenas o que é útil</div><div class="settings-hero-copy">As memórias ficam isoladas pela sua conta, são deduplicadas por conteúdo e têm prioridade. Você pode desligar, revisar, apagar, exportar e restaurar seus dados a qualquer momento.</div></div>
+        <div class="settings-panel">
+          <div class="settings-group-title">Como a memória funciona</div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Memória personalizada</div><div class="settings-line-desc">Quando desligada, o Klipza não lê nem salva memórias desta conta.</div></div><div class="settings-line-value"><button class="settings-toggle ${state.settings.memoryEnabled?'on':''}" type="button" aria-label="Alternar memória" aria-pressed="${state.settings.memoryEnabled?'true':'false'}" onclick="window.K.saveMemorySettings({memoryEnabled:${!state.settings.memoryEnabled}})"></button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Modo de captura</div><div class="settings-line-desc">Sugestivo salva somente frases explícitas como “lembre que” e preferências declaradas. Automático amplia a identificação de informações úteis.</div></div><div class="settings-line-value"><select class="settings-badge" aria-label="Modo de captura de memória" onchange="window.K.saveMemorySettings({memoryCaptureMode:this.value})"><option value="suggested" ${state.settings.memoryCaptureMode==='suggested'?'selected':''}>Sugestivo</option><option value="automatic" ${state.settings.memoryCaptureMode==='automatic'?'selected':''}>Automático</option><option value="disabled" ${state.settings.memoryCaptureMode==='disabled'?'selected':''}>Desativado</option></select></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Limite de memórias</div><div class="settings-line-desc">Ao atingir o limite, memórias temporárias antigas e de menor prioridade são removidas primeiro.</div></div><div class="settings-line-value"><input class="settings-badge" style="width:86px" type="number" min="20" max="5000" value="${Number(state.settings.memoryMax)||200}" onchange="window.K.saveMemorySettings({memoryMax:Math.max(20,Math.min(5000,Number(this.value)||200))})"></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Avisos de inatividade</div><div class="settings-line-desc">Receba avisos dentro do app em 90, 30 e 7 dias antes da revisão de uma conta sem atividade por 24 meses.</div></div><div class="settings-line-value"><button class="settings-toggle ${state.settings.inactivityNotifications?'on':''}" type="button" aria-label="Alternar avisos de inatividade" aria-pressed="${state.settings.inactivityNotifications?'true':'false'}" onclick="window.K.saveMemorySettings({inactivityNotifications:${!state.settings.inactivityNotifications}})"></button></div></div>
+        </div>
+        <div class="settings-panel"><div class="settings-group-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px"><span>Memórias salvas (${memories.length})</span><button class="settings-badge" type="button" onclick="window.K.addManualMemory()">Adicionar</button></div>${memoryRows}</div>
+        <div class="settings-panel"><div class="settings-group-title">Notificações da conta</div>${notificationRows}</div>
+        <div class="settings-panel"><div class="settings-group-title">Exportação e recuperação</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Exportar todos os dados</div><div class="settings-line-desc">Gera um JSON com estado do app, artefatos, memórias e configurações desta conta.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.exportAllData()">Exportar JSON</button></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Criar snapshot privado</div><div class="settings-line-desc">Mantém uma cópia versionada no Supabase para recuperação posterior.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.createMemorySnapshot()">Criar snapshot</button></div></div>${backupRows}</div>`;
     } else if(active==='armazenamento'){
       content=`
         <div class="settings-titlebar"><h1>Armazenamento</h1></div>
@@ -2358,6 +2519,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         </div>`;
     } else if(active==='recursos'||active==='compras'||active==='prime'){
       content=`<div class="settings-titlebar"><h1>Recursos pagos</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Klipza.Prime e tokens</div><div class="settings-hero-title">Em desenvolvimento</div><div class="settings-hero-copy">A área de recursos pagos ainda está sendo estruturada. Nesta versão não existe checkout, cobrança ou ativação de benefícios pagos.</div><button class="prime-action secondary" type="button" onclick="window.K.openPrimeModal('prime')">Ver apresentação do Prime</button></div><div class="settings-panel"><div class="settings-group-title">O que será definido aqui</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Klipza.Prime</div><div class="settings-line-desc">Plano, benefícios, limites, preço e condições serão publicados antes da ativação.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tokens adicionais</div><div class="settings-line-desc">O saldo atual permanece protegido; nenhuma compra avulsa ou cobrança está disponível.</div></div><div class="settings-line-value"><span class="settings-badge">Indisponível</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Anexos e fotos</div><div class="settings-line-desc">Os limites atuais continuam valendo até a publicação oficial dos benefícios.</div></div><div class="settings-line-value"><span class="settings-badge">Limites atuais</span></div></div></div>`;
+    } else if(active==='inteligencia'){
+      content=`<div class="settings-titlebar"><h1>Pensamento e IA</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Clips Premium · modo configurável</div><div class="settings-hero-title">Mais análise antes de responder</div><div class="settings-hero-copy">O modo profundo adiciona planejamento, verificação de riscos e checagem de código ao pedido. Ele não exibe raciocínio interno privado; mostra apenas um resumo útil quando necessário.</div></div><div class="settings-panel"><div class="settings-group-title">Preferências de resposta</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Pensamento profundo</div><div class="settings-line-desc">Ative análises mais cuidadosas para projetos, decisões e código.</div></div><div class="settings-line-value"><button class="settings-toggle ${state.settings.thinkingMode==='deep'?'on':''}" type="button" aria-label="Alternar pensamento profundo" aria-pressed="${state.settings.thinkingMode==='deep'?'true':'false'}" onclick="window.K.setThinkingMode('${state.settings.thinkingMode==='deep'?'standard':'deep'}')"></button></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Provedor de texto</div><div class="settings-line-desc">Automático usa o provedor principal e tenta Qwen/Hermes apenas quando estiverem configurados no servidor. A escolha não expõe chaves no navegador.</div></div><div class="settings-line-value"><select class="settings-badge" aria-label="Provedor de texto" onchange="window.K.setProviderMode(this.value)"><option value="auto" ${state.settings.provider==='auto'?'selected':''}>Automático</option><option value="groq" ${state.settings.provider==='groq'?'selected':''}>Groq</option><option value="qwen" ${state.settings.provider==='qwen'?'selected':''}>Qwen</option><option value="hermes" ${state.settings.provider==='hermes'?'selected':''}>Hermes</option></select></div></div></div><div class="settings-panel"><div class="settings-group-title">Artefatos automáticos</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Criar artefatos ao gerar código</div><div class="settings-line-desc">Ativo por padrão: blocos de código com tamanho útil são salvos automaticamente e ficam com preview na aba Artefatos.</div></div><div class="settings-line-value"><span class="settings-status-pill">Ativo</span></div></div></div>`;
     } else if(active==='documentos'){
       content=`<div class="settings-titlebar"><h1>Termos e documentos</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Documentação oficial</div><div class="settings-hero-title">Leia como o Klipza funciona</div><div class="settings-hero-copy">Explicamos conta, chat, histórico, artefatos, web.klip, dados, segurança, recursos em desenvolvimento, inatividade e exclusão em linguagem clara. Os documentos podem ser lidos no app ou baixados para consulta.</div></div><div class="settings-document-list"><article class="settings-document-card"><div class="settings-document-copy"><strong>Guia de uso do Klipza.IA</strong><span>Como usar conta, conversas, artefatos, anexos, web.klip, configurações e segurança.</span></div><div class="settings-document-actions"><a href="/legal/guia-do-klipza.html" target="_blank" rel="noopener">Ler</a><a href="/legal/guia-do-klipza.html" download="klipza-guia-oficial.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Termos de Uso</strong><span>Regras de utilização do Klipza.IA, conta, conteúdo, segurança e recursos em desenvolvimento.</span></div><div class="settings-document-actions"><a href="/legal/termos-de-uso.html" target="_blank" rel="noopener">Ler</a><a href="/legal/termos-de-uso.html" download="klipza-termos-de-uso.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Política de Privacidade</strong><span>O que é coletado, por que é usado, onde fica armazenado e como solicitar direitos.</span></div><div class="settings-document-actions"><a href="/legal/politica-de-privacidade.html" target="_blank" rel="noopener">Ler</a><a href="/legal/politica-de-privacidade.html" download="klipza-politica-de-privacidade.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Recursos pagos e Klipza.Prime</strong><span>Como os recursos pagos funcionarão, quais benefícios serão oferecidos e como serão publicados antes da ativação.</span></div><div class="settings-document-actions"><a href="/legal/compras-e-prime.html" target="_blank" rel="noopener">Ler</a><a href="/legal/compras-e-prime.html" download="klipza-compras-e-prime.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Retenção e inatividade</strong><span>Contas sem atividade por 24 meses recebem avisos em 90, 30 e 7 dias antes da exclusão definitiva.</span></div><div class="settings-document-actions"><a href="/legal/retencao-e-inatividade.html" target="_blank" rel="noopener">Ler</a><a href="/legal/retencao-e-inatividade.html" download="klipza-retencao-e-inatividade.html">Baixar</a></div></article></div>`;
     } else if(active==='notificacoes'){
@@ -2434,8 +2597,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     window.__klipzaSettingsMobileDetail=false;
     renderSettingsPage();
   }
-  window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,
-    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal};
+  window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,openArtifact,closeArtifact,
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal,hydrateMemoryData,exportAllData,createMemorySnapshot,restoreMemoryBackup,deleteMemory,saveMemorySettings,markNotificationRead,addManualMemory,setThinkingMode,toggleDeepThinking,setProviderMode};
   $('authEmailForm')?.addEventListener('submit',submitEmailAuth);
   $('authRecoveryForm')?.addEventListener('submit',updateRecoveredPassword);
   $('authModeToggle')?.addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));

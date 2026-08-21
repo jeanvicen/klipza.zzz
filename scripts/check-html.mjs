@@ -19,6 +19,9 @@ for (const file of [
   'supabase/migrations/20260820000002_cron.sql',
   'supabase/migrations/20260820000003_billing.sql',
   'supabase/migrations/20260820000004_prime_only.sql',
+  'supabase/migrations/20260821000007_memory_accounts.sql',
+  'api/_auth.js',
+  'api/memory.js',
   'admin.html',
   'Studio.html',
   'api/admin-users.js',
@@ -67,13 +70,22 @@ for (const marker of [
   'Em desenvolvimento',
   'Nenhuma cobrança',
   'href="/Studio.html"',
-  'Studio Klip'
+  'Studio Klip',
+  'Memória da conta',
+  'Pensamento profundo',
+  'autoCreateArtifactsFromReply',
+  'MAX_HISTORY_CHATS=50',
+  'exportAllData',
+  'restoreMemoryBackup'
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração ou estado esperado ausente: ${marker}`);
 }
 
-const api = await readFile(resolve(root, 'api/webklip.js'), 'utf8');
-const adminApi = await readFile(resolve(root, 'api/admin-users.js'), 'utf8');
+  const api = await readFile(resolve(root, 'api/webklip.js'), 'utf8');
+  const memoryApi = await readFile(resolve(root, 'api/memory.js'), 'utf8');
+  const authApi = await readFile(resolve(root, 'api/_auth.js'), 'utf8');
+  const aiApi = await readFile(resolve(root, 'api/ai.js'), 'utf8');
+  const adminApi = await readFile(resolve(root, 'api/admin-users.js'), 'utf8');
 for (const marker of ['SUPABASE_SERVICE_ROLE_KEY', 'auth.admin.listUsers', 'auth.admin.deleteUser', 'admin_audit_log', 'is_admin']) {
   if (!adminApi.includes(marker)) throw new Error(`Painel administrativo inseguro ou incompleto: ${marker}`);
 }
@@ -92,6 +104,15 @@ for (const marker of [
   'node:dns/promises'
 ]) {
   if (!api.includes(marker)) throw new Error(`Proteção ou pesquisa do endpoint ausente: ${marker}`);
+}
+for (const marker of ['user_memories', 'user_data_backups', 'restore_user_data_backup', 'requireUser', 'cors']) {
+  if (!memoryApi.includes(marker)) throw new Error(`API de memória ausente ou insegura: ${marker}`);
+}
+for (const marker of ['Cache-Control', 'no-store', 'Authorization']) {
+  if (!authApi.includes(marker)) throw new Error(`Helper de autenticação ausente ou inseguro: ${marker}`);
+}
+for (const marker of ['QWEN_API_KEY', 'HERMES_API_KEY', 'DEEP_THINKING_PROMPT', 'loadUserMemoryContext', 'userScopedClient']) {
+  if (!aiApi.includes(marker)) throw new Error(`Roteamento de IA ou memória ausente: ${marker}`);
 }
 
 console.log('check:html OK — PWA, web.klip, Studio Klip, Auth, ciclo de vida, recursos pagos em desenvolvimento, documentos, endpoint seguro e ícones encontrados.');
