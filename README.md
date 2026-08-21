@@ -8,7 +8,7 @@ A home agora usa uma saudação contextual de acordo com o horário e um único 
 
 No menu lateral, abaixo de Artefatos, existe o agrupador **Mais**. Ao expandi-lo, a pessoa encontra o botão **web.klip**. Essa tela possui categorias, pacote diário por data, botão de atualização, cards com resumo, abertura da fonte e a ação **Codar com referência**, que volta ao chat com o contexto preenchido para a pessoa complementar antes de enviar.
 
-O endpoint `api/webklip.js` coleta até 50 itens por dia, usa RSS público de notícias e consultas públicas do GitHub, filtra celebridades, fofoca, fraude, malware, cracks, ativadores e contorno de licenças, e retorna um pacote marcado pela data. O frontend armazena o resultado do dia no `localStorage` e não mistura automaticamente pacotes de datas diferentes.
+O módulo `web.klip` coleta até 50 itens por dia, usa fontes públicas de notícias e consultas públicas do GitHub, filtra celebridades, fofoca, fraude, malware, cracks, ativadores e contorno de licenças, e retorna um pacote marcado pela data. A interface armazena o resultado do dia no `localStorage` e não mistura automaticamente pacotes de datas diferentes.
 
 ## PWA e Android
 
@@ -30,7 +30,7 @@ O APK de debug serve para testes internos. O release gerado localmente é não a
 
 ## Testes
 
-O validador `scripts/check-html.mjs` verifica o JavaScript inline, manifesto, service worker, ícones, menu web.klip, rotação, cache, endpoint e marcadores de filtro. O teste `scripts/test-webklip-api.mjs` valida o endpoint, limite de 50 itens, fontes disponíveis e ausência de termos bloqueados.
+O validador `scripts/check-html.mjs` verifica o JavaScript inline, manifesto, service worker, ícones, menu web.klip, rotação, cache e marcadores de filtro. O teste `scripts/test-webklip-api.mjs` valida o limite de 50 itens, fontes disponíveis e ausência de termos bloqueados.
 
 ```bash
 pnpm check:html
@@ -41,7 +41,7 @@ git diff --check
 
 ## Publicação web
 
-O repositório foi preparado para o Vercel: o conteúdo estático continua na raiz e `api/webklip.js` é uma função server-side. Em um servidor estático local sem a pasta `api` executável, a interface usa projetos públicos do GitHub como fallback e informa que a categoria Notícias precisa do endpoint server-side publicado. Essa decisão evita fingir que uma manchete foi obtida quando a fonte não respondeu.
+O projeto foi preparado para publicação web, mantendo o conteúdo estático na raiz e o módulo web.klip integrado à experiência principal. Em ambientes de teste que não oferecem todas as fontes, a interface usa projetos públicos do GitHub como fallback e informa quando a categoria Notícias está temporariamente indisponível. Essa decisão evita fingir que uma manchete foi obtida quando a fonte não respondeu.
 
 ## Identidade visual
 

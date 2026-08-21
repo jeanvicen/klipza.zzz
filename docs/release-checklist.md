@@ -33,4 +33,4 @@ cd android
 ./gradlew assembleRelease
 ```
 
-O endpoint `api/webklip.js` deve ser publicado junto do projeto Vercel para que a categoria Notícias use o RSS público no lado server-side. No servidor estático local, o app usa projetos públicos do GitHub como fallback e informa a limitação na interface; ele não inventa manchetes.
+O módulo web.klip deve ser publicado junto do projeto para que a categoria Notícias use as fontes públicas disponíveis. Em ambientes de teste sem todas as fontes, o app usa projetos públicos do GitHub como fallback e informa a limitação na interface; ele não inventa manchetes.

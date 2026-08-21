@@ -26,7 +26,7 @@ Também apareceram resultados inadequados para um feed editorial: executores de 
 
 ## Fonte de notícias corrigida
 
-A consulta direta do GDELT não funcionou a partir do servidor deste ambiente. Foi verificado que o RSS público do Google News responde e entrega itens recentes com título, fonte, data e link original. O endpoint foi atualizado para usar esse RSS no lado server-side e manter filtros de celebridades, fofoca e entretenimento.
+A consulta direta do GDELT não funcionou neste ambiente. Foi verificado que o RSS público do Google News responde e entrega itens recentes com título, fonte, data e link original. A integração foi atualizada para usar esse RSS e manter filtros de celebridades, fofoca e entretenimento.
 
 O teste `scripts/test-webklip-api.mjs` passou com `status: 200`, `count: 50` e todas as fontes como `ok`: notícias, código, jogos e design. O teste também confirmou que termos bloqueados como celebrity, executor, activator, malware, piracy e cheat não aparecem nos itens retornados.
 
@@ -36,13 +36,13 @@ Fonte externa usada para o RSS: https://news.google.com/rss/search?q=world+OR+sc
 
 No build atualizado, a home segue sem os quatro cards fixos, a pergunta alterna a cada 25 segundos e o menu Mais permanece abaixo de Artefatos. A expansão revelou web.klip sem erros visíveis.
 
-No navegador local, o web.klip exibiu 41 projetos após os filtros, sem os executores e ativadores que apareceram na primeira rodada. A interface também informou de forma transparente que as notícias diárias dependem do endpoint server-side, que não existe no servidor estático local. Em produção no Vercel, o endpoint `api/webklip.js` retorna o pacote completo de 50 itens no teste direto.
+No navegador local, o web.klip exibiu 41 projetos após os filtros, sem os executores e ativadores que apareceram na primeira rodada. A interface também informou de forma transparente quando as notícias diárias não estavam disponíveis. Na versão publicada, a integração retornou o pacote completo de 50 itens no teste direto.
 
 A abertura de um item mostrou a tela de detalhes com resumo, fonte original e os botões “Codar com referência” e “Abrir fonte”. O detalhe funciona, mas o fallback local mostra `\\n\\n` literalmente no metadado de estrelas, então esse separador deve ser corrigido para uma quebra de linha real antes da entrega.
 
 ## Regressão observada no reload
 
-Após um reload limpo no servidor estático local, a tela web.klip chegou a exibir 0 itens sem erro no console. Isso precisa ser diagnosticado antes da entrega. O endpoint server-side continua passando o teste direto com 50 itens; o problema está restrito ao fallback/localStorage ou à chamada do servidor estático local.
+Após um reload limpo em ambiente local, a tela web.klip chegou a exibir 0 itens sem erro no console. Isso precisa ser diagnosticado antes da entrega. A integração continua passando o teste direto com 50 itens; o problema está restrito ao fallback, ao `localStorage` ou à disponibilidade da fonte local.
 
 A correção do cache foi validada: depois de recarregar a aplicação e abrir web.klip, os 41 itens salvos apareceram normalmente no DOM. A tela não permanece mais vazia quando o pacote do dia já existe no armazenamento local.
 
@@ -50,4 +50,4 @@ O fluxo de referência foi validado: ao clicar em “Codar com referência”, o
 
 ## Última rodada automatizada
 
-`pnpm check:html`, `node --check api/webklip.js`, `node --check sw.js`, `node scripts/test-webklip-api.mjs` e `git diff --check` passaram. Nesta execução, o RSS de notícias respondeu e o GitHub apresentou indisponibilidade temporária, então o endpoint retornou 20 notícias; em uma execução anterior com todas as fontes disponíveis, retornou 50 itens. O limite do endpoint continua sendo 50 e o teste aceita variação real de disponibilidade, sem inventar conteúdo para preencher o pacote.
+`pnpm check:html`, `node --check api/webklip.js`, `node --check sw.js`, `node scripts/test-webklip-api.mjs` e `git diff --check` passaram. Nesta execução, o RSS de notícias respondeu e o GitHub apresentou indisponibilidade temporária, então a integração retornou 20 notícias; em uma execução anterior com todas as fontes disponíveis, retornou 50 itens. O limite continua sendo 50 e o teste aceita variação real de disponibilidade, sem inventar conteúdo para preencher o pacote.

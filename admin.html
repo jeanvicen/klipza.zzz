@@ -15,7 +15,7 @@
     <div class="top"><div class="brand">Klipza.IA · Administração</div><button id="logout" class="btn secondary hidden">Sair</button></div>
     <section id="login" class="card auth">
       <h1>Painel administrativo</h1>
-      <p class="muted">Entre com uma conta marcada como administradora no Supabase.</p>
+      <p class="muted">Entre com uma conta marcada como administradora.</p>
       <form id="loginForm">
         <label class="field">E-mail<input id="email" type="email" autocomplete="username" required></label>
         <label class="field">Senha<input id="password" type="password" autocomplete="current-password" required></label>
@@ -24,12 +24,12 @@
       <div id="loginStatus" class="status" role="status"></div>
     </section>
     <section id="panel" class="hidden">
-      <div class="top"><div><h1>Usuários</h1><div class="muted">Ações administrativas são executadas no servidor e ficam registradas.</div></div><button id="refresh" class="btn secondary">Atualizar</button></div>
+      <div class="top"><div><h1>Usuários</h1><div class="muted">Ações administrativas ficam registradas para fins de segurança e auditoria.</div></div><button id="refresh" class="btn secondary">Atualizar</button></div>
       <div class="card">
         <div class="toolbar"><input id="filter" placeholder="Filtrar por e-mail ou nome"><span id="count" class="muted"></span></div>
         <div class="table-wrap"><table class="users"><thead><tr><th>Conta</th><th>Status</th><th>Atividade</th><th>Ações</th></tr></thead><tbody id="rows"></tbody></table><div id="empty" class="empty hidden">Nenhuma conta encontrada.</div></div>
       </div>
-      <p class="privacy">Este painel não mostra senha, token, SMTP ou service_role. A senha administrativa nunca deve ser colocada no GitHub.</p>
+      <p class="privacy">Este painel não mostra senhas, tokens ou credenciais privadas. Nunca compartilhe esses dados no GitHub.</p>
       <div id="panelStatus" class="status" role="status"></div>
     </section>
   </main>

@@ -4,7 +4,7 @@ Data do teste: 2026-08-19.
 
 ## Fase inicial
 
-`vercel.json` estava ausente no repositório. Foi criado com cabeçalhos para service worker sem cache, manifesto PWA com MIME correto e assets imutáveis. O arquivo passou no parse JSON.
+O arquivo de configuração de publicação estava ausente no repositório. Foi criado com cabeçalhos para service worker sem cache, manifesto PWA com MIME correto e assets imutáveis. O arquivo passou no parse JSON.
 
 O teste `scripts/test-webklip-api.mjs` passou com 50 itens e todas as fontes públicas como `ok`: notícias, código, jogos e design.
 
@@ -12,7 +12,7 @@ No navegador local, o manifesto foi encontrado em `/manifest.webmanifest`, o ser
 
 ## Falha encontrada
 
-No servidor estático local, o cache diário contém projetos do GitHub, mas não notícias. Ao abrir a aba Notícias, a interface exibiu zero itens. Isso é uma regressão de experiência: mesmo quando a fonte jornalística estiver indisponível, a aba deve mostrar um cartão transparente informando a indisponibilidade, em vez de parecer quebrada. O endpoint server-side em produção continua retornando notícias quando o RSS responde.
+Em ambiente local, o cache diário contém projetos do GitHub, mas não notícias. Ao abrir a aba Notícias, a interface exibiu zero itens. Isso é uma regressão de experiência: mesmo quando a fonte jornalística estiver indisponível, a aba deve mostrar um cartão transparente informando a indisponibilidade, em vez de parecer quebrada. A versão publicada continua retornando notícias quando o RSS responde.
 
 ## Correção validada
 
@@ -26,15 +26,15 @@ A home mostrou prompt único rotativo e o clique preencheu a mensagem sem enviar
 
 O manifesto e o service worker foram confirmados no navegador, com service worker `activated`, contexto seguro e botão de instalação visível. O botão Instalar foi acionado sem exceções no console. O navegador de sandbox não confirma a instalação nativa na interface automatizada, então a validação final em aparelho físico precisa ser feita no Chrome Android ou Safari iOS; o código agora esconde o aviso em `finally` quando o prompt é fechado ou falha.
 
-## Produção no Vercel
+## Publicação em produção
 
-O domínio `https://klipza-zzz.vercel.app/` respondeu publicamente com a tela de autenticação. Em produção, o manifesto foi carregado em `/manifest.webmanifest`, o service worker ficou `activated`, o contexto foi HTTPS e o botão de instalação apareceu. O fluxo do Google não foi acionado durante a auditoria para não iniciar login do proprietário sem confirmação.
+O domínio público respondeu com a tela de autenticação. Em produção, o manifesto foi carregado em `/manifest.webmanifest`, o service worker ficou `activated`, o contexto foi HTTPS e o botão de instalação apareceu. O fluxo do Google não foi acionado durante a auditoria para não iniciar login do proprietário sem confirmação.
 
 ## Endpoint em produção
 
-A consulta `https://klipza-zzz.vercel.app/api/webklip?date=2026-08-19` respondeu com status 200, 50 itens e todas as fontes `ok`. A distribuição foi Notícias 20, Código 10, Jogos 10 e Design 10. A verificação automática encontrou zero ocorrências de celebridade, fofoca, malware, crack, pirataria, ativação ou fraude nos campos retornados.
+A consulta pública de conteúdo respondeu com status 200, 50 itens e todas as fontes `ok`. A distribuição foi Notícias 20, Código 10, Jogos 10 e Design 10. A verificação automática encontrou zero ocorrências de celebridade, fofoca, malware, crack, pirataria, ativação ou fraude nos campos retornados.
 
-## Cabeçalhos do Vercel
+## Cabeçalhos de publicação
 
 `sw.js` e `manifest.webmanifest` responderam 200 em produção. O manifesto veio com `Content-Type: application/manifest+json`, o service worker veio como JavaScript e ambos tiveram `cache-control: public, max-age=0, must-revalidate`, adequado para revalidação. A requisição HEAD ao endpoint retornou 405 porque a função aceita GET; a consulta GET já foi validada com status 200 e 50 itens.
 

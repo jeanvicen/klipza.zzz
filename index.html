@@ -764,7 +764,7 @@ body.prime-modal-open{overflow:hidden}
         <button class="auth-submit" id="authRecoverySubmit" type="submit">Salvar nova senha</button>
       </form>
     </section>
-    <div class="login-note">Sua conta é protegida pelo Supabase Auth. Nunca compartilhamos sua senha. Ao continuar, você concorda com os Termos e com a Política de Privacidade do Klipza.IA.</div>
+    <div class="login-note">Sua conta é protegida pelos recursos de segurança do Klipza. Nunca compartilhamos sua senha. Ao continuar, você concorda com os Termos e com a Política de Privacidade do Klipza.IA.</div>
   </div>
 </div>
 
@@ -1131,10 +1131,10 @@ body.prime-modal-open{overflow:hidden}
     if(message.includes('email not confirmed'))return 'Esta conta ainda exige confirmação de e-mail. Confira sua caixa de entrada.';
     if(message.includes('user already registered')||message.includes('email address already registered'))return 'Este e-mail já tem uma conta. Tente entrar ou recuperar a senha.';
     if(message.includes('signup is disabled')||message.includes('signups not allowed'))return 'O cadastro está temporariamente desativado. Tente novamente mais tarde.';
-    if(message.includes('database error saving new user'))return 'O cadastro chegou ao banco, mas o perfil não pôde ser concluído. Tente novamente; se persistir, informe este horário ao suporte.';
+    if(message.includes('database error saving new user'))return 'O cadastro foi iniciado, mas não foi possível concluir o perfil. Tente novamente; se persistir, informe este horário ao suporte.';
     if(message.includes('email rate limit exceeded')||message.includes('rate limit'))return 'Muitas tentativas ou e-mails em pouco tempo. Aguarde alguns minutos e tente novamente.';
     if(message.includes('password should be at least'))return 'A senha precisa ter pelo menos 8 caracteres.';
-    if(message.includes('provider is not enabled'))return 'O login Google ainda precisa ser ativado no painel do Supabase.';
+    if(message.includes('provider is not enabled'))return 'O login Google ainda precisa ser ativado nas configurações da conta.';
     if(message.includes('rate limit'))return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
     return 'Não foi possível concluir agora. Confira os dados e tente novamente.';
   }
@@ -1667,14 +1667,14 @@ body.prime-modal-open{overflow:hidden}
   function fallbackWebKlipItems(){
     return [
       {id:'fallback_news',category:'news',title:'O web.klip está preparando o pacote público do dia',summary:'As fontes públicas ainda não responderam. Atualize novamente para buscar novidades globais sem inventar manchetes.',source:'Klipza · fallback',url:'',date:new Date().toISOString(),fallback:true},
-      {id:'fallback_code',category:'code',title:'Projetos abertos para explorar',summary:'Quando a API do GitHub estiver disponível, esta categoria mostrará projetos públicos recentes, descrição, linguagem e sinais de interesse.',source:'GitHub · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
+      {id:'fallback_code',category:'code',title:'Projetos abertos para explorar',summary:'Quando a fonte do GitHub estiver disponível, esta categoria mostrará projetos públicos recentes, descrição, linguagem e sinais de interesse.',source:'GitHub · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
       {id:'fallback_games',category:'games',title:'Novos jogos e experiências interativas',summary:'A categoria de jogos usa projetos públicos e referências técnicas; não inclui fofoca ou notícias de pessoas famosas.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true},
       {id:'fallback_design',category:'design',title:'Referências de design para criar melhor',summary:'A categoria de design reunirá ferramentas, sistemas visuais e projetos publicados na web.',source:'web.klip · aguardando fonte',url:'',date:new Date().toISOString(),fallback:true}
     ];
   }
   function ensureNewsItem(items,error=''){
     if(items.some(item=>item.category==='news'))return {items,error};
-    const unavailable={id:'news_source_unavailable',category:'news',title:'Notícias globais aguardando fonte',summary:'A fonte jornalística pública não respondeu neste momento. Atualize novamente quando o endpoint server-side estiver disponível; nenhuma manchete foi inventada.',source:'Klipza · fonte indisponível',url:'',date:new Date().toISOString(),fallback:true};
+    const unavailable={id:'news_source_unavailable',category:'news',title:'Notícias globais aguardando fonte',summary:'A fonte jornalística pública não respondeu neste momento. Atualize novamente para buscar novidades; nenhuma manchete foi inventada.',source:'Klipza · fonte indisponível',url:'',date:new Date().toISOString(),fallback:true};
     return {items:[...items,unavailable],error:error||'A fonte de notícias está indisponível neste momento; mostrando estado transparente.'};
   }
   async function fetchJSON(url,options={}){
@@ -1705,7 +1705,7 @@ body.prime-modal-open{overflow:hidden}
       const data=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?date=${encodeURIComponent(today)}&country=${encodeURIComponent(state.settings.country||'BR')}&language=${encodeURIComponent(locale.language)}`);
       const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>!blockedNews(`${item.title||''} ${item.summary||''} ${item.source||''}`)).slice(0,50);
       const baseItems=items.length?items:fallbackWebKlipItems();
-      const ready=ensureNewsItem(baseItems,items.length?'':'O endpoint diário não encontrou itens públicos agora; mostrando estado de fallback.');
+      const ready=ensureNewsItem(baseItems,items.length?'':'Não encontramos itens públicos para hoje; mostrando estado de fallback.');
       webKlipState={...webKlipState,dayKey:today,items:ready.items,loading:false,error:ready.error};
       webKlipCacheWrite({dayKey:today,items:ready.items,savedAt:Date.now()});
     }catch(apiError){
@@ -1719,7 +1719,7 @@ body.prime-modal-open{overflow:hidden}
       const unique=[];const seen=new Set();
       [...games,...code,...design].forEach(item=>{if(!seen.has(item.url||item.id)&&unique.length<50){seen.add(item.url||item.id);unique.push(item);}});
       const baseItems=unique.length?unique:fallbackWebKlipItems();
-      const ready=ensureNewsItem(baseItems,unique.length?'Notícias diárias exigem endpoint server-side; mostrando fontes públicas de projetos enquanto ele não estiver publicado.':'As fontes públicas não responderam agora; mostrando estado de fallback.');
+      const ready=ensureNewsItem(baseItems,unique.length?'As notícias diárias dependem de uma fonte disponível; mostrando fontes públicas de projetos enquanto isso.':'As fontes públicas não responderam agora; mostrando estado de fallback.');
       webKlipState={...webKlipState,dayKey:today,items:ready.items,loading:false,error:ready.error};
       webKlipCacheWrite({dayKey:today,items:ready.items,savedAt:Date.now()});
     }
@@ -2051,7 +2051,7 @@ body.prime-modal-open{overflow:hidden}
         <div class="settings-titlebar"><h1>Conta</h1></div>
         <div class="settings-panel">
           <div class="settings-account-card"><div class="settings-account-row"><div class="settings-account-avatar">${esc(ini)}</div><div class="settings-account-meta"><strong>${esc(state.user?.name||'Usuário')}</strong><div>${esc(state.user?.email||'')}</div></div></div></div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação</div><div class="settings-line-desc">Sua conta usa e-mail e senha protegidos pelo Supabase Auth.</div></div><div class="settings-line-value"><span class="settings-status-pill">● Conectada</span></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação</div><div class="settings-line-desc">Sua conta usa e-mail e senha com proteção de acesso do Klipza.</div></div><div class="settings-line-value"><span class="settings-status-pill">● Conectada</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Atividade da conta</div><div class="settings-line-desc">${inactivity}</div></div><div class="settings-line-value"><span class="settings-badge">Política ativa</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Recursos pagos</div><div class="settings-line-desc">Tokens adicionais e Klipza.Prime estão em desenvolvimento e aparecem em uma única seção.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('recursos')">Ver status</button></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
@@ -2073,7 +2073,7 @@ body.prime-modal-open{overflow:hidden}
       </div>`;
     } else if(active==='seguranca'||active==='login'){
       content=`<div class="settings-titlebar"><h1>${active==='seguranca'?'Segurança':'Segurança e login'}</h1></div><div class="settings-panel"><div class="settings-group-title">Proteção da conta</div>
-        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão protegida pelo Supabase Auth.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
+        <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Login</div><div class="settings-line-desc">Sessão protegida com os recursos de segurança do Klipza.</div></div><div class="settings-line-value"><span class="settings-badge">Conectado</span></div></div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação avançada</div><div class="settings-line-desc">2FA e gerenciamento avançado ainda estão em desenvolvimento.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div>
       </div>`;

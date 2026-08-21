@@ -8,9 +8,9 @@ O navegador indicou que o conteúdo visual está em viewport de aproximadamente 
 
 O menu `Mais` expandiu e exibiu `web.klip`. O clique abriu um modal sobre a conversa, sem substituir a home. O modal carregou o feed diário, o país/idioma (`Brasil · pt-BR`), as categorias, o campo `Pesquisar na web`, os botões para ChatGPT, Claude, Gemini, Perplexity e Microsoft Copilot, e fontes do fallback GitHub quando o RSS local não responde. O layout apareceu responsivo e os cards ficaram em duas colunas no viewport do teste.
 
-## Pesquisa no servidor estático
+## Pesquisa em ambiente local
 
-A barra de pesquisa abriu a aba de resultados, preservou o texto e exibiu `Ver feed diário`, limite de 50 e estado vazio. Como o teste usou `python -m http.server`, a rota `/api/webklip` não existe nesse servidor estático; por isso a UI mostrou indisponibilidade pública. O endpoint server-side foi testado separadamente com Node e retornou `status=200`, 10 resultados para `open source javascript` e URLs HTTP(S) válidas.
+A barra de pesquisa abriu a aba de resultados, preservou o texto e exibiu `Ver feed diário`, limite de 50 e estado vazio. Como o teste usou um ambiente local simples, a fonte de pesquisa não estava disponível nessa execução; por isso a interface mostrou indisponibilidade pública. A integração foi validada separadamente com Node e retornou `status=200`, 10 resultados para `open source javascript` e URLs HTTP(S) válidas.
 
 ## Configurações
 
@@ -34,7 +34,7 @@ No Chromium de sandbox, o clique no microfone não exibiu texto de transcrição
 
 ## Verificação pública pós-push
 
-A página pública `https://klipza-zzz.vercel.app/` carregou. A chamada pública `/api/webklip?q=open%20source%20javascript&country=BR&language=pt-BR` respondeu HTTP 200, mas o payload observado ainda tinha o formato antigo de feed (`dayKey`, itens de categorias e sem `query`), indicando que o deploy automático ainda não havia propagado o commit `05eff3e` ou que a resposta estava em cache. O endpoint local do commit novo foi validado separadamente com pesquisa real e retornou resultados de categoria `search`; é necessário confirmar a propagação antes de afirmar que a busca já está ativa em produção.
+A página pública carregou. A chamada pública de pesquisa respondeu HTTP 200, mas o payload observado ainda tinha o formato antigo de feed (`dayKey`, itens de categorias e sem `query`), indicando que a versão publicada ainda não havia sido atualizada ou que a resposta estava em cache. A versão local foi validada separadamente com pesquisa real e retornou resultados de categoria `search`; é necessário confirmar a atualização antes de afirmar que a busca já está ativa em produção.
 
 ## Correção da aba interna — teste inicial
 
@@ -46,15 +46,15 @@ O submenu Mais abriu corretamente e exibiu web.klip. O clique agora mudou imedia
 
 O feed agora renderiza 18 cards inicialmente e mostra `Carregar mais 18`, reduzindo o custo de DOM. O card abriu detalhe compacto com `Abrir dentro do Klipza`; o clique mudou para a tela `Navegação interna` com Voltar/Início e iframe, sem nova aba. A fonte GitHub exibiu o estado de bloqueio de incorporação do próprio site, enquanto o app permaneceu aberto e navegável.
 
-O botão Voltar da página interna retornou ao feed na mesma aba. A pesquisa também permaneceu dentro de web.klip e mostrou o estado vazio sem travar; no servidor estático local, a rota API não existe, então o teste visual exibiu indisponibilidade. O endpoint server-side do projeto continua sendo a fonte usada no deploy e no APK.
+O botão Voltar da página interna retornou ao feed na mesma aba. A pesquisa também permaneceu dentro de web.klip e mostrou o estado vazio sem travar; em um ambiente local limitado, a fonte de pesquisa não estava disponível, então o teste visual exibiu indisponibilidade. A versão integrada do projeto continua sendo a fonte usada na publicação web e no APK.
 
 ## Deploy público
 
-Após o login no Vercel, o projeto `klipza-zzz` foi localizado. O deployment do commit `cb31433` falhou antes do build porque a validação do Vercel informou: ``vercel.json schema validation failed: `version` should be <= 2``. A correção necessária é trocar a versão do arquivo de configuração para 2 e reenviar o commit.
+Durante a publicação, o projeto `klipza-zzz` foi localizado. A versão do commit `cb31433` falhou antes do build porque a validação do arquivo de configuração informou que o campo `version` deveria ser menor ou igual a 2. A correção necessária foi ajustar a versão do arquivo de configuração e reenviar o commit.
 
 ## Teste público — rodada atual
 
-A home pública `https://klipza-zzz.vercel.app/` carregou com o aviso de instalação PWA e o botão Continuar com Google. O modo demo abriu a conversa normalmente, mantendo o compositor, o prompt do momento e os controles principais. Houve um snapshot inicial obsoleto durante o carregamento, mas uma nova navegação e o modo demo resolveram o estado sem erro persistente.
+A home pública carregou com o aviso de instalação PWA e o botão Continuar com Google. O modo demo abriu a conversa normalmente, mantendo o compositor, o prompt do momento e os controles principais. Houve um snapshot inicial obsoleto durante o carregamento, mas uma nova navegação e o modo demo resolveram o estado sem erro persistente.
 
 Na versão pública, a barra lateral abriu e o submenu Mais expandiu sem erro. O botão `web.klip` ficou visível como item interativo do menu, confirmando que o problema de abertura não ocorre mais nessa etapa.
 
@@ -76,27 +76,27 @@ A consulta pública `klipzaqzxv-resultado-impossivel-92741` terminou com `0 resu
 
 O build local atualizado carregou o web.klip e abriu o detalhe de um projeto do GitHub. A fonte produziu uma área vazia no iframe, cenário reproduzido na imagem enviada. Após o timeout controlado, o web.klip mudou para o estado `Fonte aberta no navegador`, em vez de permanecer bloqueado, e exibiu as ações `Abrir novamente` e `Voltar ao web.klip`. O retorno restaurou o feed diário sem perder o contexto.
 
-Também foi validada a checagem server-side de políticas: `https://www.google.com/` foi identificado como não incorporável e `https://example.com/` como incorporável. No APK, o fallback usa o plugin InAppBrowser; no navegador web, usa a abertura externa compatível como último recurso.
+Também foi validada a checagem de segurança de políticas: `https://www.google.com/` foi identificado como não incorporável e `https://example.com/` como incorporável. No APK, o fallback usa o plugin InAppBrowser; no navegador web, usa a abertura externa compatível como último recurso.
 
-## Validação no deploy público b5a547d
+## Validação da publicação b5a547d
 
-O deploy `https://klipza-zzz.vercel.app/` carregou a aba web.klip, exibiu `50 item(ns) disponíveis`, filtros e pesquisa. O primeiro card abriu o detalhe corretamente, com os botões `Codar com referência` e `Abrir dentro do Klipza`. A API pública confirmou `www.google.com` como `embeddable: false` por `x-frame-options` e `example.com` como `embeddable: true`.
+A publicação carregou a aba web.klip, exibiu `50 item(ns) disponíveis`, filtros e pesquisa. O primeiro card abriu o detalhe corretamente, com os botões `Codar com referência` e `Abrir dentro do Klipza`. A consulta pública confirmou `www.google.com` como `embeddable: false` por `x-frame-options` e `example.com` como `embeddable: true`.
 
-## Supabase Auth no app — validação visual local
+## Autenticação por e-mail no app — validação visual local
 
-O build local passou a mostrar entrada por e-mail e senha, criação de conta com confirmação de senha, recuperação de senha e a tela simplificada sem Google ou link mágico. A alternância para `Criar conta` exibiu os campos adicionais corretamente. O botão `Esqueci minha senha` mostrou o estado de orientação sem revelar se o e-mail existe, compatível com prevenção de enumeração de contas. O app permaneceu na tela de login quando não havia sessão Supabase, sem usar mais o login demo automático.
+O build local passou a mostrar entrada por e-mail e senha, criação de conta com confirmação de senha, recuperação de senha e a tela simplificada sem Google ou link mágico. A alternância para `Criar conta` exibiu os campos adicionais corretamente. O botão `Esqueci minha senha` mostrou o estado de orientação sem revelar se o e-mail existe, compatível com prevenção de enumeração de contas. O app permaneceu na tela de login quando não havia sessão ativa, sem usar mais o login demo automático.
 
-## Branding dos e-mails Supabase
+## Identidade dos e-mails
 
-O painel autenticado permitiu configurar SMTP customizado. A URL pública `https://klipza-zzz.vercel.app/` foi definida como Site URL e redirect permitido, e os e-mails foram configurados para usar o nome visual `Equipe Klipza`.
+O painel autenticado permitiu configurar SMTP customizado. O endereço público do projeto foi definido como Site URL e redirect permitido, e os e-mails foram configurados para usar o nome visual `Equipe Klipza`.
 
 A versão local final da autenticação foi validada visualmente. No modo de entrada aparecem apenas e-mail, senha, entrar, criar conta e esqueci minha senha. Ao tocar em `Criar conta`, o campo `Nome`, a confirmação de senha e o botão `Criar conta` aparecem.
 
-Os campos não sensíveis foram corrigidos para remetente `klipzastudio@gmail.com`, nome `Equipe Klipza`, host `smtp.gmail.com`, porta `587` e usuário SMTP completo. Após recarregar o painel, os campos de remetente, nome, host, porta e usuário permaneceram preenchidos, enquanto a senha ficou protegida e não visualizável. O botão de salvar ficou desabilitado, confirmando que o SMTP foi persistido pelo Supabase.
+Os campos não sensíveis foram corrigidos para remetente `klipzastudio@gmail.com`, nome `Equipe Klipza`, host `smtp.gmail.com`, porta `587` e usuário SMTP completo. Após recarregar o painel, os campos de remetente, nome, host, porta e usuário permaneceram preenchidos, enquanto a senha ficou protegida e não visualizável. O botão de salvar ficou desabilitado, confirmando que a configuração de envio foi salva corretamente.
 
 O template `Confirm sign up` foi salvo com assunto `Confirme seu e-mail para entrar no Klipza.IA`, corpo em português, botão `{{ .ConfirmationURL }}`, aviso de segurança e assinatura `Equipe Klipza`. O template `Reset password` também foi salvo com assunto `Recupere sua senha com segurança no Klipza.IA`, botão de redefinição, aviso de expiração e assinatura `Equipe Klipza`. Em ambos os casos, o botão `Save changes` ficou desabilitado após a publicação, indicando ausência de alterações pendentes.
 
-O deploy público `f42f696` carregou a tela de entrada com apenas e-mail, senha, Entrar, Criar conta e Esqueci minha senha. O modo Criar conta exibiu somente Nome, E-mail, senha, confirmação de senha e os botões apropriados; Google e link mágico não aparecem.
+A publicação `f42f696` carregou a tela de entrada com apenas e-mail, senha, Entrar, Criar conta e Esqueci minha senha. O modo Criar conta exibiu somente Nome, E-mail, senha, confirmação de senha e os botões apropriados; Google e link mágico não aparecem.
 
-O deploy público também abriu o fluxo `Esqueci minha senha`: o app manteve a estrutura simples e exibiu a orientação `Digite seu e-mail para receber a recuperação.` sem revelar se o endereço existe. O teste não submeteu o formulário, portanto nenhum e-mail foi enviado durante a validação.
+A publicação também abriu o fluxo `Esqueci minha senha`: o app manteve a estrutura simples e exibiu a orientação `Digite seu e-mail para receber a recuperação.` sem revelar se o endereço existe. O teste não submeteu o formulário, portanto nenhum e-mail foi enviado durante a validação.
 
