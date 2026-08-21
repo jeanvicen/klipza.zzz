@@ -4,7 +4,7 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GEMINI_CONTENT_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
 const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const MAX_MESSAGE_LENGTH = 12000;
 const MAX_HISTORY_ITEMS = 16;
 const MAX_ATTACHMENT_DATA = 3600000;
@@ -122,7 +122,7 @@ async function resolveGeminiModel(key) {
     });
     const models = Array.isArray(payload?.models) ? payload.models : [];
     const compatible = models.filter((model) => Array.isArray(model?.supportedGenerationMethods) && model.supportedGenerationMethods.includes('generateContent'));
-    const preferred = compatible.find((model) => /gemini-2\.5-flash|gemini-2\.0-flash|gemini-1\.5-flash/i.test(model.name || '')) || compatible.find((model) => /flash/i.test(model.name || '')) || compatible[0];
+    const preferred = compatible.find((model) => /gemini-3\.6-flash|gemini-3\.5-flash|gemini-2\.5-flash|gemini-2\.0-flash|gemini-1\.5-flash/i.test(model.name || '')) || compatible.find((model) => /flash/i.test(model.name || '')) || compatible[0];
     return String(preferred?.name || '').replace(/^models\//, '') || GEMINI_MODEL;
   } catch {
     return GEMINI_MODEL;
