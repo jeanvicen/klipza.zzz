@@ -1,26 +1,23 @@
-# Diagnóstico Auth — 20 Aug 2026
+# Validação de acesso e cadastro
 
-O painel de autenticação confirmou que **User Signups** está habilitado, **Email** está habilitado e a configuração **Confirm email** está disponível. O texto do painel informa que, quando Confirm email está habilitado, o usuário precisa confirmar o e-mail antes do primeiro login. Isso explica por que `auth.signUp()` pode retornar `data.user` sem `data.session`; o fluxo atual tratava esse caso somente como aviso de confirmação e não fazia login automático.
+## Cadastro
 
-Ainda é necessário verificar o erro concreto relatado no cadastro, melhorar a mensagem de erro para não mascarar falhas do serviço de autenticação e decidir/configurar explicitamente a confirmação de e-mail conforme o requisito de entrar direto após o cadastro.
+O fluxo de criação de conta foi revisado com e-mail, nome, senha e confirmação de senha. A interface apresenta regras de senha forte, medidor de segurança e mensagens claras para dados inválidos ou tentativas repetidas.
 
+Quando a conta é criada, o aplicativo conclui o acesso conforme a configuração vigente. Se for necessário confirmar o endereço antes de entrar, a pessoa recebe uma orientação objetiva para verificar a caixa de entrada.
 
-A consulta de esquema confirmou que `public.profiles` tem `display_name` NOT NULL com default `'Usuário Klipza'`, `country` NOT NULL com default `BR`, `language` NOT NULL com default `pt-BR`, `status` NOT NULL com default `active` e as colunas de lifecycle com defaults. Não foi identificado, nesse resultado, um campo obrigatório que explique sozinho o erro. O SQL Editor mostrou 17 colunas em `profiles`; os resultados de função/trigger precisam ser consultados separadamente porque o painel exibiu a última seleção como resultado ativo.
+## Perfil
 
+O perfil é criado com nome, e-mail, idioma, país e estado da conta. A tela de acesso não apresenta informações administrativas nem detalhes de funcionamento que não sejam necessários à pessoa usuária.
 
-A função live `public.handle_new_user()` foi consultada e está definida como `SECURITY DEFINER`, com `search_path = public`, inserindo `id`, `display_name`, `email` e `avatar_url` em `public.profiles`, usando `coalesce` e `on conflict`. A definição não referencia colunas removidas e parece compatível com o esquema atual. A trigger associada a `auth.users` ainda será consultada isoladamente.
+## Recuperação
 
+O fluxo **Esqueci minha senha** mantém a mesma resposta para endereços cadastrados e não cadastrados. Essa abordagem reduz a exposição de informações sobre contas e orienta a pessoa a criar uma nova senha por um link temporário.
 
-A trigger live também está presente: `on_auth_user_created AFTER INSERT ON auth.users FOR EACH ROW EXECUTE FUNCTION handle_new_user()`. Portanto, a criação de perfil deveria ocorrer automaticamente; o diagnóstico agora aponta para configuração de confirmação de e-mail, política de senha ou um erro do endpoint Auth que precisa de mensagem mais específica, não para ausência do trigger.
+## Teste visual
 
+A tela de entrada, o cadastro, a confirmação de senha, o medidor de força e a recuperação foram conferidos visualmente. Os campos aparecem somente quando necessários, os estados de carregamento são compreensíveis e nenhuma conta de teste foi criada durante a conferência.
 
-A configuração foi salva após confirmação explícita do usuário. Estado acessível live: `signup=true`, `manualLinking=false`, `anonymous=false`, `confirmEmail=false`. Assim, novos cadastros por e-mail podem receber sessão imediatamente; nenhum provedor social ou login anônimo foi ativado.
+## Resultado
 
-
-## Teste visual live
-
-Após limpar o service worker desta sessão, a produção exibiu o formulário de e-mail e senha atualizado. Ao abrir `Criar conta`, apareceram nome, confirmação de senha, medidor e as cinco regras. Com a senha de teste `Abc1!xyz` (usada somente no navegador de teste e não enviada), o medidor mostrou `Forte` e todas as regras ficaram aprovadas. Ao clicar em `Mostrar`, o campo passou para `type=text`, exibiu `Ocultar` e manteve o valor; nenhuma conta foi criada durante o teste.
-
-
-A consulta pública `GET /auth/v1/settings` confirmou o estado live após a alteração: `disable_signup=false` e `mailer_autoconfirm=true`. Isso permite que `signUp()` entregue sessão e o app conclua o carregamento do perfil imediatamente; a política de senha forte continua sendo aplicada no cliente antes do envio.
-
+A experiência de acesso foi simplificada e permanece orientada ao usuário. Erros internos não são exibidos diretamente; a pessoa recebe uma mensagem útil e um próximo passo seguro.

@@ -1,48 +1,35 @@
 # Klipza.IA
 
-Klipza.IA é uma interface web de conversa com suporte a instalação como PWA e empacotamento Android via Capacitor. O projeto mantém a experiência de chat existente e adiciona o **web.klip**, uma área diária de pesquisa com notícias globais, jogos, código e design.
+O **Klipza.IA** é uma experiência de conversa, criação e pesquisa projetada para ajudar pessoas a organizar ideias, trabalhar com arquivos e transformar referências em resultados práticos.
 
-## O que foi implementado
+## O que o Klipza oferece
 
-A home agora usa uma saudação contextual de acordo com o horário e um único botão de pergunta que alterna a cada 25 segundos. Os cards fixos de Ideias, Explique, Escreva e Analise foram removidos.
+O aplicativo reúne conversas, histórico, artefatos, anexos, voz e uma área de pesquisa chamada **web.klip**. A interface foi desenhada para manter o fluxo simples: a pessoa inicia uma conversa, escolhe uma referência quando necessário e continua o trabalho sem perder o contexto.
 
-No menu lateral, abaixo de Artefatos, existe o agrupador **Mais**. Ao expandi-lo, a pessoa encontra o botão **web.klip**. Essa tela possui categorias, pacote diário por data, botão de atualização, cards com resumo, abertura da fonte e a ação **Codar com referência**, que volta ao chat com o contexto preenchido para a pessoa complementar antes de enviar.
+O web.klip apresenta informações públicas organizadas por categorias como notícias, jogos, código e design. Os resultados são filtrados para reduzir conteúdo inadequado, evitar temas de risco e manter a experiência focada em pesquisa e criação. Quando uma fonte não está disponível, a interface informa a situação de forma transparente, sem inventar conteúdo.
 
-O módulo `web.klip` coleta até 50 itens por dia, usa fontes públicas de notícias e consultas públicas do GitHub, filtra celebridades, fofoca, fraude, malware, cracks, ativadores e contorno de licenças, e retorna um pacote marcado pela data. A interface armazena o resultado do dia no `localStorage` e não mistura automaticamente pacotes de datas diferentes.
+## Conta e segurança
 
-## PWA e Android
+O acesso é feito por e-mail e senha. O cadastro, a recuperação de senha, o encerramento de sessão e os controles de privacidade foram organizados para que a pessoa tenha clareza sobre sua conta e seus dados.
 
-O projeto contém `manifest.webmanifest`, `sw.js`, ícones instaláveis e o fluxo de instalação já presente na interface. O projeto Android fica em `android/` e é gerado pelo Capacitor com identificador `ia.klipza.app`, nome `Klipza`, SDK de compilação 35, SDK mínimo 23 e target 35.
+O Klipza não solicita senhas, códigos de segurança ou dados completos de cartão por mensagens não solicitadas. Informações importantes devem ser conferidas nos documentos oficiais exibidos dentro do aplicativo.
 
-Os comandos principais são:
+## Instalação
 
-```bash
-pnpm install
-pnpm check:html
-pnpm build:web
-pnpm cap:sync
-cd android
-./gradlew assembleDebug
-./gradlew assembleRelease
-```
+O Klipza.IA pode ser usado no navegador e instalado como aplicativo quando o dispositivo oferecer esse recurso. Também existe uma versão para Android, distribuída separadamente conforme a disponibilidade definida pelo responsável pelo produto.
 
-O APK de debug serve para testes internos. O release gerado localmente é não assinado. Antes de publicar na Google Play, o proprietário precisa configurar uma keystore própria e gerar um AAB release assinado. A App Store exige um projeto iOS separado, certificados Apple e provisioning profiles; o PWA continua sendo a alternativa instalável no iPhone pelo Safari.
+## Recursos em desenvolvimento
 
-## Testes
+O Klipza.Prime, créditos adicionais, integrações externas, suporte avançado e outros recursos identificados como **Em desenvolvimento** ainda não representam uma oferta ativa. Preços, limites, benefícios, cancelamento e demais condições serão publicados antes de qualquer ativação comercial.
 
-O validador `scripts/check-html.mjs` verifica o JavaScript inline, manifesto, service worker, ícones, menu web.klip, rotação, cache e marcadores de filtro. O teste `scripts/test-webklip-api.mjs` valida o limite de 50 itens, fontes disponíveis e ausência de termos bloqueados.
+## Documentos oficiais
 
-```bash
-pnpm check:html
-node --check api/webklip.js
-node scripts/test-webklip-api.mjs
-git diff --check
-```
+O aplicativo disponibiliza o Guia de Uso, os Termos de Uso, a Política de Privacidade, as informações sobre recursos pagos e a Política de Retenção e Inatividade. Esses documentos explicam o funcionamento do produto em linguagem clara e podem ser consultados a qualquer momento.
 
-## Publicação web
+## Identidade
 
-O projeto foi preparado para publicação web, mantendo o conteúdo estático na raiz e o módulo web.klip integrado à experiência principal. Em ambientes de teste que não oferecem todas as fontes, a interface usa projetos públicos do GitHub como fallback e informa quando a categoria Notícias está temporariamente indisponível. Essa decisão evita fingir que uma manchete foi obtida quando a fonte não respondeu.
+A marca Klipza é monocromática, minimalista e orientada à leitura. O objetivo visual é oferecer uma experiência discreta, consistente e confortável em telas grandes e pequenas.
 
-## Identidade visual
+## Contato
 
-A marca é monocromática e usa o ativo próprio em `assets/klipza-mark.png`, com versões de ícone para PWA. A forma final é uma variação geométrica inédita inspirada apenas na compactação visual da referência fornecida; o caractere Unicode 𖣂 não é usado literalmente como logotipo.
+Dúvidas sobre conta, privacidade, segurança ou recursos em desenvolvimento podem ser enviadas para **klipzastudio@gmail.com**. Nunca inclua senhas, códigos de segurança ou dados completos de cartão em uma mensagem de contato.

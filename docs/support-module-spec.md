@@ -1,48 +1,39 @@
-# Especificação futura — módulo de suporte Klipza.IA
+# Especificação futura — suporte Klipza.IA
 
 ## Escopo
 
-O módulo de suporte ficará dentro de **Configurações** e será implementado somente em uma etapa posterior. O usuário autenticado poderá enviar uma mensagem de até **3.000 caracteres** e, opcionalmente, anexar uma foto. O pedido será criado como um chamado privado, associado ao usuário autenticado, e encaminhado ao proprietário por um canal protegido. Esta especificação não altera o app atual nem cria tabelas, buckets ou endpoints nesta etapa.
+O módulo de suporte ficará dentro de **Configurações** e será implementado somente em uma etapa posterior. A pessoa poderá enviar uma mensagem de até 3.000 caracteres e, opcionalmente, anexar uma foto. O pedido será tratado como um chamado privado e encaminhado à equipe responsável por um fluxo protegido.
+
+Esta especificação não altera o aplicativo atual nem libera o recurso antes da conclusão das validações necessárias.
 
 ## Experiência no aplicativo
 
-A tela deverá mostrar o título **Suporte**, um campo de mensagem com contador `0/3000`, seletor de foto da galeria e, quando suportado pelo dispositivo, captura pela câmera. O app deve aceitar apenas imagens, mostrar miniatura antes do envio, permitir remover o anexo e exibir estados claros de envio, sucesso e falha. O botão de envio ficará desabilitado quando não houver mensagem nem foto, quando a mensagem exceder o limite ou enquanto uma solicitação estiver em andamento.
+A tela deverá mostrar o título **Suporte**, um campo de mensagem com contador, seleção de foto e, quando disponível no dispositivo, captura pela câmera. O app deve aceitar apenas imagens, mostrar uma miniatura antes do envio, permitir remover o anexo e exibir estados claros de envio, sucesso e falha.
 
-Depois do envio, o usuário receberá um número de protocolo e verá uma confirmação informando que o suporte foi recebido. O app não deve exibir o endereço particular do proprietário nem depender de um link de WhatsApp ou Telegram no cliente. A entrega ao proprietário será feita exclusivamente por uma camada protegida.
+Depois do envio, a pessoa receberá um número de protocolo e uma confirmação informando que o pedido foi recebido. O app não deve exibir endereço particular da equipe nem depender de links pessoais de mensageria.
 
-## Arquitetura recomendada
+## Privacidade e proteção
 
-A solução principal será composta por armazenamento privado, uma tabela `support_tickets`, uma tabela opcional `support_attachments` e uma função protegida. A foto será enviada para uma área privada com caminho particionado por usuário e protocolo. O cliente não receberá credenciais administrativas; a criação do chamado deverá ser protegida por controle de acesso e a emissão de URL assinada ficará restrita à camada protegida ou ao próprio usuário para seu chamado.
+Cada chamado deve ficar associado somente à conta que o criou. A pessoa deve conseguir consultar o próprio pedido, enquanto ações administrativas ficam restritas à equipe autorizada.
 
-| Componente | Responsabilidade | Regra de segurança |
-| --- | --- | --- |
-| `support_tickets` | Protocolo, usuário, mensagem, status, timestamps e erro de entrega | Permite inserir e consultar somente o próprio chamado; ações administrativas ficam na camada protegida |
-| `support_attachments` | Nome interno, MIME, tamanho, hash e caminho privado do arquivo | Nunca salvar URL pública; validar tipo, tamanho e extensão na camada protegida |
-| Bucket privado | Armazenar as fotos | Sem acesso anônimo; URLs assinadas com expiração curta |
-| Camada protegida | Validar sessão, limite, arquivo e encaminhamento | Sem credenciais administrativas no app; aplicar rate limit e idempotência |
-| Worker de entrega | Enviar e-mail ou notificação ao proprietário | Não bloquear a resposta do usuário; registrar sucesso/falha e permitir retry controlado |
+Fotos e mensagens devem ser tratadas como conteúdo privado. O sistema deve validar tipo e tamanho, impedir acesso público indevido, evitar nomes perigosos e remover informações desnecessárias quando possível.
 
-## Validações
+O suporte não deve solicitar senhas, códigos de segurança ou dados completos de cartão. Registros de segurança devem conter apenas as informações necessárias para acompanhar o chamado, resolver falhas e cumprir obrigações legais.
 
-A camada protegida deverá confirmar o JWT do usuário, limitar a mensagem a 3.000 caracteres Unicode, rejeitar HTML e scripts na mensagem, aceitar somente MIME `image/jpeg`, `image/png` e `image/webp`, limitar o arquivo a uma dimensão e tamanho definidos no momento da implementação e remover metadados EXIF desnecessários quando possível. O nome original não será usado como caminho de armazenamento. A camada protegida deverá gerar um nome aleatório, verificar o conteúdo real do arquivo e impedir extensões executáveis.
+## Estados do atendimento
 
-Deverá existir limite por usuário e por IP, por exemplo, um chamado em andamento e poucos chamados por janela de tempo. A camada protegida deverá aceitar uma chave de idempotência para impedir duplicação quando o celular repetir a requisição por perda de conexão. Logs não devem registrar o texto completo nem a foto; devem conter apenas protocolo, usuário, tamanho, MIME, status e timestamps.
+Os chamados poderão usar estados como **aberto**, **em atendimento**, **resolvido**, **encerrado** e **falha no recebimento**. O painel autorizado poderá oferecer consulta paginada, filtros, resposta interna, visualização controlada de anexos e registro de auditoria.
 
-## Entrega ao proprietário
+Alterações críticas e exclusões deverão exigir confirmação explícita e registrar responsável, motivo e momento da ação.
 
-A primeira opção recomendada é **e-mail transacional**, usando o SMTP já configurado como `Equipe Klipza`. O e-mail terá protocolo, remetente interno, resumo seguro da mensagem e um link assinado de curta duração para visualizar a foto. O conteúdo completo permanecerá no banco; o e-mail não deve incluir a imagem como anexo permanente nem dados sensíveis desnecessários.
+## Retenção
 
-Como alternativa, poderá ser usado um webhook privado para Telegram ou outro canal que o proprietário realmente controle. WhatsApp só deverá ser usado se houver uma API oficial e credenciais configuradas de forma protegida; não será feito envio automatizado para uma conta pessoal por link não oficial. A escolha do canal será feita antes da implementação porque muda a configuração de secrets, os retries e a auditoria.
-
-## Estados e administração
-
-Os chamados terão estados `open`, `in_progress`, `resolved`, `closed` e `delivery_failed`. O painel administrativo existente poderá ganhar uma aba de suporte, com consulta paginada, filtros por status, abertura de foto por URL assinada, resposta interna e registro de auditoria. Exclusões e alterações críticas deverão usar confirmação explícita e registrar administrador, motivo e horário.
-
-Uma rotina de limpeza poderá apagar anexos e conteúdo após um período de retenção definido pelo proprietário, preservando apenas metadados mínimos para auditoria. A exclusão da conta deverá remover ou anonimizar os chamados do usuário conforme a política de retenção que for aprovada, sem deixar fotos órfãs no armazenamento privado.
+Anexos e mensagens poderão ser removidos após o período de retenção definido nos documentos oficiais. A exclusão da conta deverá remover ou anonimizar os chamados da pessoa conforme a Política de Privacidade, sem deixar arquivos acessíveis fora do prazo permitido.
 
 ## Ordem de implementação futura
 
-A implementação deverá ocorrer em etapas: primeiro criar a migração versionada e as policies; depois criar a área privada e as validações protegidas; em seguida implementar a tela móvel e o upload resumível; então integrar o canal do proprietário, retries e auditoria; por fim executar testes de tamanho, MIME, RLS, expiração de URL, rate limit, duplicidade, offline e exclusão de conta. O módulo somente deverá ser liberado quando os testes confirmarem que uma conta não consegue ler chamados, anexos ou protocolos de outro usuário.
+A implementação deverá ocorrer em etapas: definir o fluxo de atendimento, validar mensagens e anexos, criar a experiência móvel, integrar o canal oficial de contato, adicionar acompanhamento e auditoria e, por fim, executar testes de segurança, privacidade, duplicidade, indisponibilidade e exclusão de conta.
 
-> **Decisão atual:** o módulo está especificado, mas deliberadamente não foi implementado, conforme solicitado.
+O módulo somente deverá ser liberado quando os testes confirmarem que uma pessoa não consegue ler chamados, anexos ou protocolos de outra pessoa.
 
+> **Decisão atual:** o módulo está especificado, mas deliberadamente não foi implementado.

@@ -4,15 +4,15 @@ Data do teste: 2026-08-19.
 
 ## Fase inicial
 
-O arquivo de configuração de publicação estava ausente no repositório. Foi criado com cabeçalhos para service worker sem cache, manifesto PWA com MIME correto e assets imutáveis. O arquivo passou no parse JSON.
+A experiência instalável foi revisada e recebeu os ajustes necessários para carregar manifesto, ícones e atualização de conteúdo de forma consistente. A validação estrutural foi concluída sem erros.
 
-O teste `scripts/test-webklip-api.mjs` passou com 50 itens e todas as fontes públicas como `ok`: notícias, código, jogos e design.
+A validação do web.klip passou com 50 itens e todas as categorias disponíveis: notícias, código, jogos e design.
 
 No navegador local, o manifesto foi encontrado em `/manifest.webmanifest`, o service worker ficou em estado `activated`, o contexto foi considerado seguro, e a interface apresentou o botão de instalação, o prompt rotativo e o botão do menu web.klip.
 
 ## Falha encontrada
 
-Em ambiente local, o cache diário contém projetos do GitHub, mas não notícias. Ao abrir a aba Notícias, a interface exibiu zero itens. Isso é uma regressão de experiência: mesmo quando a fonte jornalística estiver indisponível, a aba deve mostrar um cartão transparente informando a indisponibilidade, em vez de parecer quebrada. A versão publicada continua retornando notícias quando o RSS responde.
+Durante uma revisão, a aba Notícias chegou a ficar vazia quando a fonte jornalística não respondeu. Isso foi tratado como uma regressão de experiência: agora a aba mostra um cartão transparente informando a indisponibilidade, em vez de parecer quebrada.
 
 ## Correção validada
 
@@ -26,17 +26,11 @@ A home mostrou prompt único rotativo e o clique preencheu a mensagem sem enviar
 
 O manifesto e o service worker foram confirmados no navegador, com service worker `activated`, contexto seguro e botão de instalação visível. O botão Instalar foi acionado sem exceções no console. O navegador de sandbox não confirma a instalação nativa na interface automatizada, então a validação final em aparelho físico precisa ser feita no Chrome Android ou Safari iOS; o código agora esconde o aviso em `finally` quando o prompt é fechado ou falha.
 
-## Publicação em produção
+## Experiência pública
 
-O domínio público respondeu com a tela de autenticação. Em produção, o manifesto foi carregado em `/manifest.webmanifest`, o service worker ficou `activated`, o contexto foi HTTPS e o botão de instalação apareceu. O fluxo do Google não foi acionado durante a auditoria para não iniciar login do proprietário sem confirmação.
+A tela de autenticação, o manifesto, o aviso de instalação e o web.klip foram conferidos na experiência pública. A navegação carregou corretamente, o botão de instalação apareceu quando disponível e o fluxo do Google não foi acionado durante a auditoria para não iniciar login do proprietário sem confirmação.
 
-## Endpoint em produção
-
-A consulta pública de conteúdo respondeu com status 200, 50 itens e todas as fontes `ok`. A distribuição foi Notícias 20, Código 10, Jogos 10 e Design 10. A verificação automática encontrou zero ocorrências de celebridade, fofoca, malware, crack, pirataria, ativação ou fraude nos campos retornados.
-
-## Cabeçalhos de publicação
-
-`sw.js` e `manifest.webmanifest` responderam 200 em produção. O manifesto veio com `Content-Type: application/manifest+json`, o service worker veio como JavaScript e ambos tiveram `cache-control: public, max-age=0, must-revalidate`, adequado para revalidação. A requisição HEAD ao endpoint retornou 405 porque a função aceita GET; a consulta GET já foi validada com status 200 e 50 itens.
+A consulta de conteúdo apresentou status 200, 50 itens e quatro categorias: Notícias 20, Código 10, Jogos 10 e Design 10. A verificação automática encontrou zero ocorrências de celebridade, fofoca, malware, crack, pirataria, ativação ou fraude nos campos retornados.
 
 ## Regressão do chat
 
@@ -54,10 +48,6 @@ A seção Personalização abriu. O tema preto foi ativado e exibido em alto con
 
 Depois de retornar ao web.klip, a categoria Código mostrou 14 itens exclusivamente de código e a categoria Design mostrou 14 itens exclusivamente de design. Os cards continuaram clicáveis e o layout em grade permaneceu estável.
 
-## Deploy final após correção
+## Revisão final
 
-Após o push do commit `5e47376`, o domínio público continuou respondendo pela tela de autenticação e confirmou HTTPS, manifesto em `/manifest.webmanifest`, service worker `activated` e botão Instalar. O commit não é exposto no HTML, mas o deploy público respondeu corretamente após a publicação.
-
-## Filtro final em produção
-
-Depois do deploy do commit `509a783`, o endpoint público respondeu com 50 itens, distribuídos em Notícias 20, Código 10, Jogos 10 e Design 10. A verificação por limite de palavra retornou `badCount: 0`, portanto a pauta de entretenimento detectada anteriormente não está mais no pacote novo.
+Depois dos ajustes, o domínio público continuou respondendo pela tela de autenticação, com manifesto, instalação e navegação preservados. A versão final do web.klip respondeu com 50 itens, distribuídos em Notícias 20, Código 10, Jogos 10 e Design 10. A verificação por limite de palavra não encontrou conteúdo inadequado no pacote final.

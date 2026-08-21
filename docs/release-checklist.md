@@ -1,36 +1,33 @@
-# Klipza — build e publicação
+# Checklist público de qualidade do Klipza.IA
 
-## Estado dos artefatos
+## Experiência principal
 
-O projeto Android foi gerado com Capacitor, identificador `ia.klipza.app`, nome de aplicativo `Klipza`, `minSdkVersion 23`, `targetSdkVersion 35` e `compileSdkVersion 35`.
+A tela de entrada deve carregar com identidade visual consistente, campos claros e mensagens úteis. A pessoa deve conseguir criar a conta, entrar, recuperar o acesso e encerrar a sessão sem receber detalhes internos.
 
-| Artefato | Estado | Uso |
-| --- | --- | --- |
-| `app-debug.apk` | Compilado e validado | Instalação e testes internos; não usar como publicação final. |
-| `app-release-unsigned.apk` | Compilado | Base para assinatura; ainda não é aceito como release final pela Play Store. |
-| AAB assinado | Pendente da chave do proprietário | Formato recomendado para publicação na Google Play. |
+A home deve abrir com Conversas, Artefatos, web.klip e compositor de mensagens. O menu lateral, o histórico e os estados vazios devem permanecer utilizáveis em telas grandes e pequenas.
 
-## O que já foi validado
+## web.klip
 
-O APK de debug contém o nome Klipza, o identificador `ia.klipza.app`, o manifesto PWA, o service worker, a marca e os ícones 192/512. O build foi concluído com sucesso usando a plataforma Android 35.
+A área de pesquisa deve apresentar campo de busca, categorias, resultados, detalhes, atualização, estados de carregamento e estado vazio. A ação para usar uma referência no chat não pode enviar uma mensagem automaticamente.
 
-O web.klip foi integrado ao pacote web e sincronizado com o projeto Android. Ele possui menu expansível, pacote diário em cache por data, rotação de pergunta a cada 25 segundos, categorias, tela de detalhes e ação “Codar com referência”.
+Quando uma fonte estiver indisponível, a interface deve informar a situação sem inventar conteúdo. Quando uma página não puder ser exibida dentro do aplicativo, a pessoa deve receber uma alternativa clara.
 
-## Assinatura necessária antes da publicação
+## Instalação
 
-Não foi criada uma keystore nova automaticamente, porque a chave de assinatura deve ficar sob controle do proprietário do aplicativo. Para publicar, gerar ou fornecer uma keystore protegida, configurar as variáveis de assinatura somente no ambiente de build e nunca commitá-las no repositório. Depois disso, gerar um AAB release assinado e fazer o upload pelo Play Console.
+O aplicativo deve apresentar manifesto, ícones, aviso de instalação e comportamento adequado em navegadores compatíveis. A versão Android deve manter identidade visual, navegação, recursos de conta e controles de segurança.
 
-A Apple App Store exige um fluxo separado com projeto iOS, conta Apple Developer, certificados e provisioning profiles. O PWA continua sendo instalável no iPhone pelo Safari, mas isso não substitui um pacote nativo assinado para a App Store.
+## Segurança
 
-## Comandos principais
+O produto não deve exibir senhas, códigos secretos ou dados completos de cartão. A recuperação de acesso não deve revelar se um e-mail existe, e as ações administrativas devem exigir autorização e confirmação.
 
-```bash
-pnpm check:html
-pnpm build:web
-pnpm cap:sync
-cd android
-./gradlew assembleDebug
-./gradlew assembleRelease
-```
+## Recursos em desenvolvimento
 
-O módulo web.klip deve ser publicado junto do projeto para que a categoria Notícias use as fontes públicas disponíveis. Em ambientes de teste sem todas as fontes, o app usa projetos públicos do GitHub como fallback e informa a limitação na interface; ele não inventa manchetes.
+Recursos pagos, créditos adicionais, integrações externas e suporte avançado devem permanecer identificados como **Em desenvolvimento** até que estejam disponíveis e documentados. Nenhuma tela informativa deve ser interpretada como cobrança ativa ou promessa de benefício.
+
+## Documentos
+
+O Guia de Uso, os Termos de Uso, a Política de Privacidade, o documento de recursos pagos e a Política de Retenção e Inatividade devem estar acessíveis dentro do aplicativo, com linguagem consistente e fácil de consultar.
+
+## Resultado esperado
+
+O release está pronto para revisão quando a navegação principal, conta, pesquisa, instalação, documentos, privacidade e estados de erro estiverem claros, responsivos e sem exposição de informações internas.

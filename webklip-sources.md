@@ -1,53 +1,29 @@
-# Fontes do web.klip
+# web.klip — critérios editoriais
 
-## Fontes avaliadas
+## Objetivo
 
-A documentação do GDELT confirma que a API DOC 2.0 oferece busca de cobertura jornalística global, suporte a múltiplos idiomas, formatos JSON/JSONP e cabeçalho CORS aberto, o que permite consulta direta pelo navegador. Fonte: https://blog.gdeltproject.org/gdelt-doc-2-0-api-debuts/
+O web.klip foi criado para oferecer uma área de pesquisa integrada ao Klipza.IA. A proposta é reunir referências públicas recentes, organizar os resultados por tema e permitir que a pessoa continue o trabalho no chat.
 
-A documentação da API de busca do GitHub confirma que é possível pesquisar repositórios públicos com parâmetros de consulta, ordenação e paginação. A própria documentação mostra consultas ordenadas por estrelas, o que serve para selecionar novidades técnicas e projetos públicos. Fonte: https://docs.github.com/en/rest/search/search
+## Critérios de seleção
 
-## Decisão técnica provisória
+Os resultados devem ser públicos, relevantes e adequados para uma experiência de pesquisa. A seleção evita celebridades, fofoca, fraude, malware, pirataria, ativadores, contorno de licenças e outros temas que não contribuem para o objetivo do produto.
 
-O primeiro corte será client-side: o app consulta as fontes públicas quando o usuário abre o web.klip, grava um pacote diário por data no armazenamento local e mantém esse pacote até mudar o dia. A rotação de 25 segundos será apenas da pergunta exibida na home; ela não fará novas chamadas de rede. A tela de feed poderá atualizar manualmente e ao trocar a data.
+As categorias atuais são **Notícias**, **Jogos**, **Código** e **Design**. Cada item pode apresentar título, resumo, origem, data e uma ação para continuar a pesquisa. O limite diário mantém a tela objetiva e facilita a leitura.
 
-Para não expor chaves, o código não usará tokens privados. Itens de notícias serão filtrados por termos de celebridades, fofoca e entretenimento; projetos serão classificados em notícias, jogos, código e design usando termos e tópicos públicos. Se uma fonte falhar ou limitar requisições, o app usará um conjunto de fallback local claramente marcado como demonstração, sem simular que é notícia real do dia.
+## Experiência de uso
 
-## Verificação da primeira integração
+O web.klip começa com uma busca simples. A pessoa digita um assunto, escolhe uma categoria quando desejar e abre o resultado que mais interessa. O conteúdo do dia pode ser atualizado manualmente e fica organizado para evitar mistura entre períodos diferentes.
 
-A home local agora exibe a saudação contextual de acordo com o horário e um único botão “Pergunta do momento” com rotação indicada de 25 segundos. Os cards fixos Ideias, Explique, Escreva e Analise não aparecem mais. O menu lateral mostra “Mais” imediatamente abaixo de Artefatos, pronto para revelar web.klip.
+Quando uma referência não pode ser exibida dentro do aplicativo, o Klipza informa a limitação e oferece uma alternativa compatível com o navegador do dispositivo. A ação **Usar no chat** leva o título, o resumo e a origem para uma nova mensagem, sem enviar nada automaticamente.
 
-O submenu web.klip abriu abaixo de Mais e a tela mostrou as categorias Tudo, Notícias, Jogos, Código e Design, além do botão Atualizar agora. A busca de fontes iniciou e exibiu o estado de carregamento sem travar o chat ou o menu.
+## Transparência
 
-## Problemas encontrados no primeiro pacote
+A disponibilidade das fontes pode variar. Quando isso acontece, o web.klip mostra um estado claro e usa apenas referências disponíveis e identificadas. Nenhuma manchete, projeto ou informação é inventada para preencher a tela.
 
-O GitHub retornou 48 itens, distribuídos entre Jogos, Código e Design, mas a chamada direta do GDELT falhou com `TypeError: Failed to fetch` no navegador, indicando que a fonte de notícias não está acessível neste ambiente via CORS ou rede. Portanto, a arquitetura precisa aceitar uma fonte intermediária/proxy para notícias se quisermos garantir conteúdo jornalístico real no PWA.
+## Privacidade e segurança
 
-Também apareceram resultados inadequados para um feed editorial: executores de Roblox, ferramentas de ativação de software e projetos potencialmente associados a fraude/contorno de licença. Eles devem ser filtrados por termos de risco antes de aparecerem no web.klip. A seleção atual não deve ser considerada pronta para publicação ainda.
+A pesquisa deve utilizar somente os dados necessários para apresentar resultados e manter o contexto escolhido pela pessoa. O Klipza não solicita senhas, códigos de segurança ou dados completos de cartão. Links externos devem ser tratados com cautela e abertos apenas quando a pessoa escolher continuar.
 
-## Fonte de notícias corrigida
+## Validação editorial
 
-A consulta direta do GDELT não funcionou neste ambiente. Foi verificado que o RSS público do Google News responde e entrega itens recentes com título, fonte, data e link original. A integração foi atualizada para usar esse RSS e manter filtros de celebridades, fofoca e entretenimento.
-
-O teste `scripts/test-webklip-api.mjs` passou com `status: 200`, `count: 50` e todas as fontes como `ok`: notícias, código, jogos e design. O teste também confirmou que termos bloqueados como celebrity, executor, activator, malware, piracy e cheat não aparecem nos itens retornados.
-
-Fonte externa usada para o RSS: https://news.google.com/rss/search?q=world+OR+science+OR+technology+OR+climate+OR+business+when%3A1d&hl=en-US&gl=US&ceid=US%3Aen
-
-## Validação após os filtros
-
-No build atualizado, a home segue sem os quatro cards fixos, a pergunta alterna a cada 25 segundos e o menu Mais permanece abaixo de Artefatos. A expansão revelou web.klip sem erros visíveis.
-
-No navegador local, o web.klip exibiu 41 projetos após os filtros, sem os executores e ativadores que apareceram na primeira rodada. A interface também informou de forma transparente quando as notícias diárias não estavam disponíveis. Na versão publicada, a integração retornou o pacote completo de 50 itens no teste direto.
-
-A abertura de um item mostrou a tela de detalhes com resumo, fonte original e os botões “Codar com referência” e “Abrir fonte”. O detalhe funciona, mas o fallback local mostra `\\n\\n` literalmente no metadado de estrelas, então esse separador deve ser corrigido para uma quebra de linha real antes da entrega.
-
-## Regressão observada no reload
-
-Após um reload limpo em ambiente local, a tela web.klip chegou a exibir 0 itens sem erro no console. Isso precisa ser diagnosticado antes da entrega. A integração continua passando o teste direto com 50 itens; o problema está restrito ao fallback, ao `localStorage` ou à disponibilidade da fonte local.
-
-A correção do cache foi validada: depois de recarregar a aplicação e abrir web.klip, os 41 itens salvos apareceram normalmente no DOM. A tela não permanece mais vazia quando o pacote do dia já existe no armazenamento local.
-
-O fluxo de referência foi validado: ao clicar em “Codar com referência”, o web.klip voltou para Conversas e preencheu o campo de mensagem com título, categoria, resumo e fonte, sem enviar automaticamente. A pessoa pode complementar e enviar depois, como solicitado.
-
-## Última rodada automatizada
-
-`pnpm check:html`, `node --check api/webklip.js`, `node --check sw.js`, `node scripts/test-webklip-api.mjs` e `git diff --check` passaram. Nesta execução, o RSS de notícias respondeu e o GitHub apresentou indisponibilidade temporária, então a integração retornou 20 notícias; em uma execução anterior com todas as fontes disponíveis, retornou 50 itens. O limite continua sendo 50 e o teste aceita variação real de disponibilidade, sem inventar conteúdo para preencher o pacote.
+A interface foi revisada para manter o feed legível, evitar resultados inadequados, preservar o contexto da busca e retornar ao chat sem perder o trabalho já iniciado. O comportamento de carregamento, atualização, filtros, detalhes e estados vazios deve permanecer claro em telas grandes e pequenas.

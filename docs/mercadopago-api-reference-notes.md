@@ -1,12 +1,23 @@
-# Notas de referência da API do Mercado Pago
+# Recursos pagos — nota pública
 
-Data da verificação: 2026-08-21.
+## Estado atual
 
-A referência oficial identifica a operação solicitada como **API Payments (legacy) → Pagamentos → Criar pagamento**. O endpoint é `POST https://api.mercadopago.com/v1/payments`, com `Authorization: Bearer <ACCESS_TOKEN>`, `Content-Type: application/json` e `X-Idempotency-Key`.
+Os recursos pagos do Klipza.Prime e os créditos adicionais ainda estão em desenvolvimento. Nesta versão não há cobrança ativa, compra avulsa nem ativação automática de benefícios.
 
-A documentação atual informa que, para novas integrações de Checkout Transparente, o Mercado Pago recomenda a **Orders API**; a API Payments existente continua funcionando, recebendo apenas correções de segurança e estabilidade. O projeto Klipza já possui integração baseada em Checkout Pro para compras e usa `/v1/payments/{id}` para consulta no webhook, portanto a implementação deve preservar compatibilidade e não substituir o fluxo existente sem decisão explícita.
+## Princípios para uma ativação futura
 
-A página oficial lista as operações de criação, consulta, atualização, cancelamento e reembolso da API Payments, além de clientes, cartões, endereços, meios de pagamento e tipos de documento. A URL enviada originalmente com `V1` maiúsculo não corresponde ao recurso; a forma documentada é `v1` minúsculo.
+Antes de qualquer ativação comercial, o Klipza deverá publicar preço, periodicidade, benefícios, limites, cancelamento, reembolso, tratamento de falhas e canais de atendimento.
 
-Fonte principal: https://www.mercadopago.com.br/developers/pt/reference/online-payments/checkout-api-payments/create-payment/post
-Fonte de contexto: https://www.mercadopago.com.br/developers/pt/docs/checkout-api-payments/overview
+A pessoa verá as informações dentro do aplicativo antes de escolher continuar. Qualquer pagamento deverá ocorrer em uma página segura e oficialmente divulgada, com confirmação antes da liberação de benefícios.
+
+## Compatibilidade
+
+A ativação futura deverá preservar a experiência atual de conta, apresentar o status com clareza e evitar alterações de benefícios apenas por uma tela de retorno. O histórico de uma contratação deverá permanecer associado à conta correta.
+
+## Segurança
+
+O Klipza não solicita senhas, códigos de segurança ou dados completos de cartão por chat, e-mail ou suporte. Nenhuma informação confidencial deve ser enviada em mensagens não solicitadas.
+
+## Referência para a próxima etapa
+
+Quando os recursos pagos forem disponibilizados, este documento será atualizado com as condições completas da oferta e com instruções de uso acessíveis dentro do aplicativo.

@@ -1,11 +1,19 @@
-# Pesquisa de UX de voz
+# Experiência de voz do Klipza.IA
 
-## Referências consultadas
+## Objetivo
 
-A documentação oficial do Claude descreve dois modos úteis para o Klipza: um modo sem as mãos, que escuta pausas naturais, e um modo push-to-talk, que dá ao usuário controle explícito em ambientes ruidosos. A mesma referência posiciona a voz como uma experiência que preenche o prompt enquanto a pessoa fala, com um controle claro para parar a captura. Fonte: https://support.claude.com/en/articles/11101966-use-voice-mode.
+A voz deve ajudar a pessoa a preencher uma mensagem com naturalidade, sem substituir o controle manual. O aplicativo precisa deixar claro quando está ouvindo, quando está transcrevendo e como interromper a captura.
 
-A documentação do MDN sobre Web Speech API diferencia resultados intermediários (`interimResults`) de resultados finais e mostra que `isFinal` deve ser usado para separar o texto provisório do texto confirmado. Também documenta `continuous`, `lang`, `maxAlternatives`, `start()`, `stop()`, `speechend` e `error` como pontos importantes do ciclo de reconhecimento. Fonte: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API/Using_the_Web_Speech_API.
+## Decisões de experiência
 
-## Decisões para o Klipza
+A animação será calma, com halo discreto, ondas suaves e uma mensagem curta. O controle de iniciar e parar deve permanecer sempre compreensível, especialmente em ambientes ruidosos ou quando a pessoa precisar retomar a conversa rapidamente.
 
-A animação será um estado de escuta calmo, com halo pulsante, ondas discretas e uma mensagem curta, sem copiar a interface do Claude. A transcrição será acumulada apenas uma vez por resultado final, enquanto o trecho intermediário será exibido separadamente; reinícios automáticos serão protegidos contra duplicação e contra múltiplos listeners. O idioma será derivado das configurações do usuário e poderá usar o idioma do navegador como fallback.
+O texto provisório pode ser mostrado separadamente até que a fala seja confirmada. A mensagem final deve ser adicionada uma única vez, evitando repetições. O idioma acompanha as preferências da pessoa e pode seguir o idioma escolhido no dispositivo.
+
+## Disponibilidade
+
+A função depende do suporte e da permissão do dispositivo. Quando a voz não estiver disponível, a conversa continua funcionando normalmente e o aplicativo não deve apresentar uma falha bloqueadora.
+
+## Privacidade
+
+A pessoa deve iniciar a captura conscientemente e poder interrompê-la a qualquer momento. O Klipza não deve solicitar informações sensíveis por voz e deve orientar o usuário a revisar o texto antes de enviar.

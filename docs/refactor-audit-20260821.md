@@ -1,27 +1,25 @@
-# Auditoria para refatoração — 2026-08-21
+# Auditoria de refatoração do Klipza.IA
 
-## Objetivo recebido
+## Objetivo
 
-Remover referências visíveis e ativas ao provedor de pagamentos por enquanto, marcar cobrança e Prime como em desenvolvimento, eliminar repetições nas configurações, mover web.klip para abaixo de Conversas e Artefatos no menu, simplificar web.klip para uma busca interna e consolidar documentação oficial dentro das configurações.
+A refatoração teve como objetivo simplificar a experiência do Klipza.Prime, reduzir repetições nas configurações, organizar o web.klip, consolidar os documentos oficiais e manter a navegação principal clara.
 
-## Estado encontrado
+## Estado preservado
 
-O `index.html` é monolítico e reúne o menu lateral, autenticação, configurações, modal do Prime, estado de carteira e web.klip. O menu mostrava Conversas e Artefatos e um grupo Mais com web.klip. O web.klip já possuía pesquisa, feed diário, filtros, detalhes, envio de referência ao chat e navegação interna/fallback externo.
+Continuam disponíveis autenticação por e-mail, recuperação de senha, ciclo de vida da conta, histórico, artefatos, chat, anexos, voz, PWA, Android, proteção de navegação e abertura alternativa de fontes externas.
 
-A implementação anterior do Prime continha textos de checkout e cobrança. O cliente chamava um fluxo específico de pagamentos para catálogo, saldo, consumo e checkout. Também havia guias de implantação e integrações específicas que foram retiradas da interface.
+O web.klip continua podendo enviar uma referência selecionada para o chat e abrir uma fonte dentro do aplicativo quando isso for permitido.
 
-As configurações possuíam seções duplicadas para saldo, compras e Prime, além de ramificações legadas. Alguns temas se repetiam entre Geral, Conta, Saldo e cobrança e Prime, especialmente tokens, benefícios, status e dados de conta.
+## Alterações realizadas
 
-## Preservado
+A área de recursos pagos mostra somente o status **Em desenvolvimento**, sem checkout funcional, promessa de ativação ou confirmação de benefício. O estado de créditos não é liberado por retorno visual nem por dados locais.
 
-Permanecem a autenticação por e-mail, recuperação de senha, ciclo de vida de conta, histórico, artefatos, chat, anexos, voz, PWA, APK, proteção contra requisições inseguras e fallback de abertura externa. O módulo web.klip continua podendo enviar uma referência selecionada para o chat e abrir uma fonte dentro do app quando permitido.
+O web.klip passou a priorizar a busca: campo em destaque, estado vazio limpo, resultados após consulta, detalhes compactos e ação para usar uma referência no chat. O feed diário e as categorias continuam disponíveis sem sobrecarregar a tela inicial.
 
-## Alterado
+O menu lateral foi organizado para manter Conversas, Artefatos e web.klip próximos, sem caminhos repetidos.
 
-A interface do Prime mostra apenas o status `Em desenvolvimento`, sem checkout funcional, sem promessa de ativação e sem menção a provedor. O estado de carteira não libera tokens por retorno visual ou por armazenamento local.
+As configurações foram consolidadas em Geral, Conta, Dados e privacidade, Termos e documentos, Notificações, Segurança e login e Recursos pagos. A documentação explica conta, dados, segurança, inatividade, exclusão e recursos em desenvolvimento em linguagem clara.
 
-O web.klip abre com uma experiência de busca: campo de pesquisa em destaque, estado vazio limpo, resultados somente após uma consulta e ação `Usar no chat`/`Criar com esta referência`. O feed diário, categorias e carregamento automático deixaram de ser a tela inicial para reduzir peso e repetição.
+## Resultado
 
-O menu lateral contém Conversas, Artefatos e logo abaixo web.klip, sem o agrupador Mais.
-
-As configurações possuem uma única seção de Recursos pagos, além de Geral, Conta, Dados e privacidade, Termos e documentos, Notificações e Segurança e login. A documentação explica funcionamento, dados, segurança, conta, inatividade, exclusão e recursos em desenvolvimento sem afirmar que pagamentos estão ativos.
+A interface ficou mais simples, coerente e orientada ao uso. Nenhum fluxo essencial foi removido, e os recursos que ainda não estão disponíveis são apresentados de forma explícita.
