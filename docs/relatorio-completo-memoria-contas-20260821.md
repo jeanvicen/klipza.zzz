@@ -137,3 +137,12 @@ A migração `20260821000007_memory_accounts.sql` foi executada no projeto Supab
 [1]: https://www.alibabacloud.com/help/en/model-studio/first-api-call-to-qwen "Alibaba Cloud Model Studio — Make your first API call to Qwen"
 
 [2]: https://hermes-agent.nousresearch.com/docs/user-guide/features/api-server "Hermes Agent — API Server"
+
+
+## Adendo de atualização — 21 de agosto de 2026
+
+Este documento descreve a implementação inicial. O estado atual foi refinado depois: a captura de memória passou a ser automática para todas as contas, o limite operacional foi fixado em 500 memórias por usuário por meio da migração `20260821000008_memory_automatic_500.sql`, e a interface deixou de oferecer criação manual, escolha de modo, ajuste de limite, seleção de provedor ou seção técnica de IA. Permanecem visíveis apenas a revisão essencial, a exclusão de memória e o download dos dados.
+
+O Pensamento profundo agora fica exclusivamente no menu +. A experiência visual foi transformada em um bloco expansível dentro da mensagem do assistente, com resumo operacional contextual, tópicos, verificações e revisão, sem exibir cadeia de raciocínio privada completa. A versão atual também aplica custo de 7 pontos por resposta profunda: 2 pontos normais mais 5 pontos adicionais.
+
+Para a visão consolidada de todas as alterações, consulte `docs/relatorio-integral-klipza-ia-20260821.md`.
