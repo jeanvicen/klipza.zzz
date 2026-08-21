@@ -43,3 +43,5 @@ O navegador registrou chamadas reais a `/api/memory` autenticadas enquanto a se�
 Foi enviado um pedido explícito de memória de teste em sessão autenticada com Pensamento profundo ativo. A resposta foi concluída normalmente; o chat permaneceu isolado e sem exposição de dados. A seguir, a memória de teste será conferida na central da conta e removida para não poluir os dados do usuário.
 
 O endpoint autenticado também foi exercitado com uma memória sintética temporária: `upsert` retornou HTTP 200, produziu um ID e `delete` retornou HTTP 200. O registro de teste foi removido imediatamente; nenhum conteúdo real foi incluído no relatório.
+
+Na checagem final do commit `ca0d7e8`, a aba Artefatos carregou o item existente e o botão `Abrir preview` abriu o HTML com sucesso dentro do painel isolado. O frontend respondeu HTTP 200 e os marcadores de memória, histórico de 50 e artefatos automáticos estavam presentes; `/api/memory` sem bearer continuou respondendo HTTP 401.
