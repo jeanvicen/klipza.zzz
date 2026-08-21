@@ -2417,7 +2417,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     const artifact=state.artifacts?.[id];const viewer=$('artifactViewer'),body=$('artifactViewerBody'),title=$('artifactViewerTitle');
     if(!artifact||!viewer||!body)return;
     title.textContent=artifact.name||'Artefato';
-    const isHTML=artifact.type==='code'&&(/\\.html?$/i.test(artifact.name||'')||/^<!doctype\\s+html|^<html[\\s>]/i.test(String(artifact.content||'')));
+    const isHTML=artifact.type==='code'&&(/\.html?$/i.test(artifact.name||'')||/^<!doctype\s+html|^<html[\s>]/i.test(String(artifact.content||'')));
     body.innerHTML='';
     if(isHTML){const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-scripts');frame.title='Preview do artefato';frame.srcdoc=String(artifact.content||'');body.appendChild(frame);}
     else{const code=document.createElement('pre');code.className='artifact-viewer-code';code.textContent=String(artifact.content||artifact.preview||'');body.appendChild(code);}
