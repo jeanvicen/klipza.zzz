@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GEMINI_CONTENT_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
-const GEMINI_INTERACTIONS_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_MESSAGE_LENGTH = 12000;
@@ -110,18 +109,6 @@ function extractGeminiText(payload) {
   return result;
 }
 
-function extractInteractionText(payload) {
-  if (typeof payload?.output_text === 'string' && payload.output_text.trim()) return payload.output_text.trim();
-  const steps = Array.isArray(payload?.steps) ? payload.steps : [];
-  const texts = steps.flatMap((step) => {
-    const blocks = Array.isArray(step?.content) ? step.content : [];
-    return blocks.filter((block) => block?.type === 'text' && block.text).map((block) => block.text);
-  });
-  const result = texts.join('\n').trim();
-  if (!result) throw httpError(502, 'A pesquisa não trouxe uma resposta.');
-  return result;
-}
-
 function historyForGroq(history) {
   return history.map((item) => ({ role: item.role, content: item.content }));
 }
@@ -179,18 +166,22 @@ async function callGeminiResearch({ message, history, reference }) {
   const context = researchText(reference);
   const previous = history.slice(-8).map((item) => `${item.role === 'assistant' ? 'Klipza' : 'Pessoa'}: ${item.content}`).join('\n');
   const input = [
-    SYSTEM_PROMPT,
-    'Responda à pesquisa abaixo usando busca atualizada. Cite as fontes principais em Markdown quando a busca retornar referências.',
+    'Use pesquisa atualizada para responder com precisão. Cite as fontes principais em Markdown quando houver referências disponíveis.',
     context ? `Referência selecionada no web.klip:\n${context}` : '',
     previous ? `Contexto recente:\n${previous}` : '',
     `Pergunta atual:\n${message}`
   ].filter(Boolean).join('\n\n');
-  const payload = await requestJSON(GEMINI_INTERACTIONS_URL, {
+  const payload = await requestJSON(`${GEMINI_CONTENT_URL}/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
     method: 'POST',
     headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ model: GEMINI_MODEL, input, tools: [{ type: 'google_search' }] })
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      contents: [{ role: 'user', parts: [{ text: input }] }],
+      tools: [{ googleSearch: {} }],
+      generationConfig: { temperature: 0.2, maxOutputTokens: 1600 }
+    })
   });
-  return extractInteractionText(payload);
+  return extractGeminiText(payload);
 }
 
 function json(response, status, body) {
