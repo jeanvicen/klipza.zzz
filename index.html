@@ -1602,12 +1602,12 @@ body.prime-modal-open{overflow:hidden}
   }
   function useSuggestion(t){$('prompt').value=t;$('prompt').dispatchEvent(new Event('input'));$('prompt').focus()}
 
-  const AI_API_BASE=(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://klipza-zzz.vercel.app':'';
+  const AI_API_BASE='https://klipza-zzz.vercel.app';
   const WEBKLIP_CACHE_KEY='klipza_webklip_search_v3';
   const WEBKLIP_ROTATION_MS=25000;
   let welcomeRotatorTimer=null;
   let welcomePromptIndex=0;
-  const WEBKLIP_API_BASE=(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://klipza-zzz.vercel.app':'';
+  const WEBKLIP_API_BASE='https://klipza-zzz.vercel.app';
   const WEBKLIP_PAGE_SIZE=18;
   let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,page:null};
   const WEBKLIP_LOCALES={BR:{label:'Brasil',language:'pt-BR',hl:'pt-BR',gl:'BR',ceid:'BR:pt'},PT:{label:'Portugal',language:'pt-PT',hl:'pt-PT',gl:'PT',ceid:'PT:pt'},US:{label:'Estados Unidos',language:'en-US',hl:'en-US',gl:'US',ceid:'US:en'},GB:{label:'Reino Unido',language:'en-GB',hl:'en-GB',gl:'GB',ceid:'GB:en'},ES:{label:'Espanha',language:'es-ES',hl:'es-ES',gl:'ES',ceid:'ES:es'},MX:{label:'México',language:'es-MX',hl:'es-419',gl:'MX',ceid:'MX:es'},FR:{label:'França',language:'fr-FR',hl:'fr-FR',gl:'FR',ceid:'FR:fr'},DE:{label:'Alemanha',language:'de-DE',hl:'de-DE',gl:'DE',ceid:'DE:de'},JP:{label:'Japão',language:'ja-JP',hl:'ja',gl:'JP',ceid:'JP:ja'},IN:{label:'Índia',language:'en-IN',hl:'en-IN',gl:'IN',ceid:'IN:en'}};
