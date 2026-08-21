@@ -1057,7 +1057,7 @@ body.prime-modal-open{overflow:hidden}
         const remaining=Math.max(0,700000-total);
         const safeContent=content.slice(0,remaining);
         total+=safeContent.length;
-        messages.push({role:message?.role==='ai'?'ai':'user',content:safeContent,attachments:(Array.isArray(message?.attachments)?message.attachments:[]).slice(0,4).map(file=>({name:String(file?.name||'arquivo').slice(0,180),type:String(file?.type||'file').slice(0,120)}))});
+        messages.push({id:typeof message?.id==='string'?message.id:undefined,role:message?.role==='ai'?'ai':'user',content:safeContent,liked:message?.liked===true,disliked:message?.disliked===true,regenCount:Number(message?.regenCount)||0,attachments:(Array.isArray(message?.attachments)?message.attachments:[]).slice(0,4).map(file=>({name:String(file?.name||'arquivo').slice(0,180),type:String(file?.type||'file').slice(0,120)}))});
       }
       result[id]={id,title:String(chat?.title||'Nova conversa').slice(0,120),created:Number(chat?.created)||Date.now(),updated:Number(chat?.updated)||Date.now(),messages};
     }
@@ -1110,6 +1110,27 @@ body.prime-modal-open{overflow:hidden}
       activeChatId=state.activeChatId||Object.keys(state.chats)[0]||null;
       return true;
     }catch(error){console.warn('Não foi possível carregar o estado remoto agora; usando o cache local.',error);return false;}
+  }
+
+  async function hydrateMessageFeedback(user){
+    if(!supabaseClient||!user?.id)return;
+    try{
+      const result=await Promise.race([
+        supabaseClient.from('message_feedback').select('message_id,feedback_type').eq('user_id',user.id),
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error('feedback_timeout')),1800))
+      ]);
+      if(result.error)throw result.error;
+      const feedbackById=Object.fromEntries((result.data||[]).map(item=>[item.message_id,item.feedback_type]));
+      let changed=false;
+      Object.values(state.chats||{}).forEach(chat=>(chat.messages||[]).forEach(message=>{
+        if(message.role!=='ai')return;
+        if(!message.id){message.id=messageId();changed=true;}
+        const type=feedbackById[message.id]||'';
+        const liked=type==='like', disliked=type==='dislike';
+        if(message.liked!==liked||message.disliked!==disliked){message.liked=liked;message.disliked=disliked;changed=true;}
+      }));
+      if(changed){save();if(currentView==='chat')renderMessages();}
+    }catch(error){console.warn('Não foi possível carregar as avaliações agora.',error);}
   }
 
   state.wallet=state.wallet||{tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
@@ -1323,8 +1344,9 @@ body.prime-modal-open{overflow:hidden}
     enter();
     refreshWallet();
     queueRemoteStateSync();
-    hydrateRemoteState(user).then((loaded)=>{
+    hydrateRemoteState(user).then(async(loaded)=>{
       if(loaded){save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();}
+      await hydrateMessageFeedback(user);
       queueRemoteStateSync();
     }).catch(()=>{});
     if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
@@ -1732,7 +1754,9 @@ body.prime-modal-open{overflow:hidden}
   }
   function renderMessages(){
     const chat=currentChat(), box=$('messages');
-    chat.messages.forEach(m=>{if(m.role==='ai'&&!m.id)m.id=messageId();});
+    let idsAssigned=false;
+    chat.messages.forEach(m=>{if(m.role==='ai'&&!m.id){m.id=messageId();idsAssigned=true;}});
+    if(idsAssigned&&!anonymousMode)save();
     if(!chat.messages.length){
       box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta"></span></span><span aria-hidden="true">→</span></button></div></div></div>`; startWelcomeRotator(); return;
     }
