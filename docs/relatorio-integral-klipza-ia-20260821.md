@@ -199,3 +199,10 @@ O modo profundo mostra um resumo operacional seguro, não uma transcrição lite
 [4]: https://supabase.com/docs/guides/database/postgres/row-level-security "Supabase — Row Level Security"
 
 [5]: https://vercel.com/docs/functions "Vercel — Functions"
+
+
+## 13. Evidência final do modo especialista e energia
+
+No deploy do commit `9822d43`, o botão + mostrou Pensamento profundo ativo e uma pergunta real recebeu plano contextual com tópicos e verificações adequados ao assunto. A primeira medição ainda usou cache anterior e consumiu 2 pontos. Depois da remoção controlada do service worker e dos caches do navegador, o cliente carregou `DEEP_EXTRA_ENERGY=5` e `DEEP_MSG_COST=7`; a mensagem seguinte reduziu a energia de 84 para 77, confirmando 7 pontos por resposta profunda. O estado permaneceu em `thinkingMode: deep`.
+
+O relatório detalhado desse teste está em `docs/teste-pensamento-especialista-energia-20260821.md`.
