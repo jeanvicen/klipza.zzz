@@ -1,4 +1,4 @@
-const CACHE_NAME = 'klipza-shell-v9';
+const CACHE_NAME = 'klipza-shell-v10';
 const APP_SHELL = [
   '/?pwa=1',
   '/index.html',
@@ -14,7 +14,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting())
+      .then(() => undefined)
   );
 });
 
@@ -41,6 +41,10 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('message', (event) => {
   const clientId = event.source?.id;
+  if (event.data?.type === 'klipza-activate-web-update') {
+    self.skipWaiting();
+    return;
+  }
   if (!clientId || event.data?.type !== 'klipza-client-mode') return;
   if (event.data.mode === 'pwa') pwaClients.add(clientId);
   else pwaClients.delete(clientId);

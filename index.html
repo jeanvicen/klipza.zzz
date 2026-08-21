@@ -894,6 +894,9 @@ body.prime-modal-open{overflow:hidden}
   const SUPABASE_URL = 'https://xjvwfytikkxnvuwweqlf.supabase.co';
   const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ERwMYbIK-BDyHQ3_sIRPmQ_3a2qBOXi';
   const supabaseClient = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}) || null;
+  let authResolved=false;
+  let remoteStateTimer=null, remoteStateBusy=false, remoteStatePending=false, remoteSyncSuspended=false;
+  const REMOTE_STATE_DEBOUNCE_MS=1400;
   let authMode = 'signin';
   let recoveryMode = false;
   const PASSWORD_RULE_NAMES = ['length','uppercase','lowercase','number','special'];
@@ -1015,6 +1018,70 @@ body.prime-modal-open{overflow:hidden}
     }catch(e){}
     return {user:null,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false}};
   }
+  function isObject(value){return value&&typeof value==='object'&&!Array.isArray(value);}
+  function compactChatsForRemote(){
+    const chats=Object.entries(state.chats||{}).sort(([,a],[,b])=>(Number(b?.updated)||0)-(Number(a?.updated)||0)).slice(0,12);
+    const result={}; let total=0;
+    for(const [id,chat] of chats){
+      const messages=[];
+      for(const message of (Array.isArray(chat?.messages)?chat.messages:[]).slice(-16)){
+        if(total>=700000)break;
+        const content=String(message?.content||'').slice(0,5000);
+        const remaining=Math.max(0,700000-total);
+        const safeContent=content.slice(0,remaining);
+        total+=safeContent.length;
+        messages.push({role:message?.role==='ai'?'ai':'user',content:safeContent,attachments:(Array.isArray(message?.attachments)?message.attachments:[]).slice(0,4).map(file=>({name:String(file?.name||'arquivo').slice(0,180),type:String(file?.type||'file').slice(0,120)}))});
+      }
+      result[id]={id,title:String(chat?.title||'Nova conversa').slice(0,120),created:Number(chat?.created)||Date.now(),updated:Number(chat?.updated)||Date.now(),messages};
+    }
+    return result;
+  }
+  function compactArtifactsForRemote(){
+    const artifacts=Object.entries(state.artifacts||{}).slice(0,40);
+    return Object.fromEntries(artifacts.map(([id,artifact])=>[id,{...artifact,name:String(artifact?.name||'Artefato').slice(0,180),preview:String(artifact?.preview||'').slice(0,1200),data:typeof artifact?.data==='string'&&artifact.data.startsWith('data:')?null:artifact?.data}]));
+  }
+  function remoteStatePatch(){
+    return {chats:compactChatsForRemote(),artifacts:compactArtifactsForRemote(),quota:isObject(state.quota)?state.quota:{},settings:isObject(state.settings)?state.settings:{},active_chat_id:state.activeChatId||activeChatId||null};
+  }
+  function queueRemoteStateSync(){
+    if(remoteSyncSuspended||!authResolved||!state.user?.id||!supabaseClient||anonymousMode)return;
+    clearTimeout(remoteStateTimer);
+    remoteStateTimer=setTimeout(()=>syncRemoteState(),REMOTE_STATE_DEBOUNCE_MS);
+  }
+  async function syncRemoteState(){
+    if(remoteSyncSuspended||!authResolved||!state.user?.id||!supabaseClient||anonymousMode)return;
+    if(remoteStateBusy){remoteStatePending=true;return;}
+    remoteStateBusy=true;
+    try{
+      const result=await Promise.race([
+        supabaseClient.rpc('sync_app_user_state',{p_patch:remoteStatePatch()}),
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error('sync_timeout')),2500))
+      ]);
+      if(result.error)throw result.error;
+    }catch(error){console.warn('A sincronização da conta não está disponível agora; o Klipza continuará usando o salvamento local.',error);}
+    finally{
+      remoteStateBusy=false;
+      if(remoteStatePending){remoteStatePending=false;queueRemoteStateSync();}
+    }
+  }
+  async function hydrateRemoteState(user){
+    if(!supabaseClient||!user?.id)return false;
+    try{
+      const result=await Promise.race([
+        supabaseClient.from('app_user_state').select('chats,artifacts,quota,settings,active_chat_id').eq('user_id',user.id).maybeSingle(),
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error('hydrate_timeout')),1800))
+      ]);
+      if(result.error)throw result.error;
+      if(!result.data)return false;
+      if(isObject(result.data.chats))state.chats=result.data.chats;
+      if(isObject(result.data.artifacts))state.artifacts=result.data.artifacts;
+      if(isObject(result.data.quota)&&Object.keys(result.data.quota).length)state.quota=result.data.quota;
+      if(isObject(result.data.settings))state.settings={...state.settings,...result.data.settings};
+      state.activeChatId=result.data.active_chat_id||null;
+      activeChatId=state.activeChatId||Object.keys(state.chats)[0]||null;
+      return true;
+    }catch(error){console.warn('Não foi possível carregar o estado remoto agora; usando o cache local.',error);return false;}
+  }
 
   state.wallet=state.wallet||{tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
   function primeActive(){return state.wallet?.primeStatus==='active';}
@@ -1122,16 +1189,19 @@ body.prime-modal-open{overflow:hidden}
     state.settings.sounds=!state.settings.sounds; save(); renderSettingsPage();
   }
   function clearAllLocalData(){
-    openConfirmModal('Limpar dados locais?', 'Conversas, artefatos, energia e preferências salvas neste navegador serão removidos. Essa ação não pode ser desfeita.', ()=>{
-      const user=state.user; localStorage.removeItem(KEY);
+    openConfirmModal('Limpar dados locais?', 'Conversas, artefatos, energia e preferências deste navegador serão removidos. Os dados sincronizados na sua conta permanecerão intactos.', ()=>{
+      const user=state.user; remoteSyncSuspended=true; localStorage.removeItem(KEY);
       state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR'}};
-      applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter();
+      applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter(); remoteSyncSuspended=false;
     });
   }
   function browserNotification(title,body){
     if(state.settings.notifications && 'Notification' in window && Notification.permission==='granted'){ try{new Notification(title,{body});}catch(e){} }
   }
-  function save(){localStorage.setItem(KEY,JSON.stringify(state));}
+  function save(){
+    try{localStorage.setItem(KEY,JSON.stringify(state));}catch(error){console.warn('Não foi possível salvar o cache local.',error);}
+    if(!remoteSyncSuspended)queueRemoteStateSync();
+  }
   function uid(prefix){return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7)}
   function esc(s){return String(s??'').replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
   function initials(name){return (name||'K').trim().charAt(0).toUpperCase()}
@@ -1216,12 +1286,15 @@ body.prime-modal-open{overflow:hidden}
       setAuthStatus('Esta conta está bloqueada. Entre em contato com o suporte do Klipza.','error');
       return;
     }
+    await hydrateRemoteState(user);
     state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR',status:profile?.status||'active',restricted:profile?.restricted===true,restrictionReason:profile?.restriction_reason||''};
     state.wallet={...state.wallet,tokenBalance:Number(profile?.token_balance||0),primeStatus:profile?.prime_status||'inactive',primePlanCode:profile?.prime_plan_code||null,primeSubscriptionId:profile?.prime_subscription_id||null,primeCurrentPeriodEnd:profile?.prime_current_period_end||null};
+    authResolved=true;
     save();
     showRecoveryPanel(false);
     enter();
     refreshWallet();
+    queueRemoteStateSync();
     if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
     await touchSupabaseActivity(true);
   }
@@ -1300,6 +1373,7 @@ body.prime-modal-open{overflow:hidden}
     adaptSidebar();
   }
   async function logout(){
+    authResolved=false; clearTimeout(remoteStateTimer); remoteStateTimer=null;
     if(supabaseClient) await supabaseClient.auth.signOut();
     state.user=null; state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]}; save(); location.reload();
   }
@@ -1308,7 +1382,7 @@ body.prime-modal-open{overflow:hidden}
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       if(event==='PASSWORD_RECOVERY'){showRecoveryPanel(true);return;}
       if(event==='SIGNED_IN'&&session?.user)setTimeout(()=>finishSupabaseUser(session.user),0);
-      if(event==='SIGNED_OUT'){state.user=null;state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
+      if(event==='SIGNED_OUT'){authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
     });
     const {data}=await supabaseClient.auth.getSession();
     if(data.session?.user){
@@ -1316,7 +1390,7 @@ body.prime-modal-open{overflow:hidden}
       if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
       else await finishSupabaseUser(data.session.user);
     }else{
-      state.user=null;state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
+      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       if(window.location.hash.includes('reset-password'))showRecoveryPanel(true);
     }
   }
