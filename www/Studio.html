@@ -508,6 +508,8 @@
         }
       }
 
+      window.addEventListener('pagehide', () => { if (studioAuthResolved && studioUserId) syncStudioRemoteState(); });
+
       async function hydrateStudioFiles(user) {
         if (!supabaseClient || !user?.id) return false;
         studioUserId = user.id;

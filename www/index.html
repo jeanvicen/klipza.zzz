@@ -1041,7 +1041,7 @@ body.prime-modal-open{overflow:hidden}
     return Object.fromEntries(artifacts.map(([id,artifact])=>[id,{...artifact,name:String(artifact?.name||'Artefato').slice(0,180),preview:String(artifact?.preview||'').slice(0,1200),data:typeof artifact?.data==='string'&&artifact.data.startsWith('data:')?null:artifact?.data}]));
   }
   function remoteStatePatch(){
-    return {chats:compactChatsForRemote(),artifacts:compactArtifactsForRemote(),quota:isObject(state.quota)?state.quota:{},settings:isObject(state.settings)?state.settings:{},active_chat_id:state.activeChatId||activeChatId||null};
+    return {app_initialized:true,chats:compactChatsForRemote(),artifacts:compactArtifactsForRemote(),quota:isObject(state.quota)?state.quota:{},settings:isObject(state.settings)?state.settings:{},active_chat_id:state.activeChatId||activeChatId||null};
   }
   function queueRemoteStateSync(){
     if(remoteSyncSuspended||!authResolved||!state.user?.id||!supabaseClient||anonymousMode)return;
@@ -1064,15 +1064,17 @@ body.prime-modal-open{overflow:hidden}
       if(remoteStatePending){remoteStatePending=false;queueRemoteStateSync();}
     }
   }
+  window.addEventListener('pagehide',()=>{if(!remoteSyncSuspended&&!anonymousMode&&authResolved&&state.user?.id)syncRemoteState();});
+
   async function hydrateRemoteState(user){
     if(!supabaseClient||!user?.id)return false;
     try{
       const result=await Promise.race([
-        supabaseClient.from('app_user_state').select('chats,artifacts,quota,settings,active_chat_id').eq('user_id',user.id).maybeSingle(),
+        supabaseClient.from('app_user_state').select('app_initialized,chats,artifacts,quota,settings,active_chat_id').eq('user_id',user.id).maybeSingle(),
         new Promise((_,reject)=>setTimeout(()=>reject(new Error('hydrate_timeout')),1800))
       ]);
       if(result.error)throw result.error;
-      if(!result.data)return false;
+      if(!result.data||result.data.app_initialized!==true)return false;
       if(isObject(result.data.chats))state.chats=result.data.chats;
       if(isObject(result.data.artifacts))state.artifacts=result.data.artifacts;
       if(isObject(result.data.quota)&&Object.keys(result.data.quota).length)state.quota=result.data.quota;
@@ -1286,7 +1288,6 @@ body.prime-modal-open{overflow:hidden}
       setAuthStatus('Esta conta está bloqueada. Entre em contato com o suporte do Klipza.','error');
       return;
     }
-    await hydrateRemoteState(user);
     state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR',status:profile?.status||'active',restricted:profile?.restricted===true,restrictionReason:profile?.restriction_reason||''};
     state.wallet={...state.wallet,tokenBalance:Number(profile?.token_balance||0),primeStatus:profile?.prime_status||'inactive',primePlanCode:profile?.prime_plan_code||null,primeSubscriptionId:profile?.prime_subscription_id||null,primeCurrentPeriodEnd:profile?.prime_current_period_end||null};
     authResolved=true;
@@ -1295,8 +1296,12 @@ body.prime-modal-open{overflow:hidden}
     enter();
     refreshWallet();
     queueRemoteStateSync();
+    hydrateRemoteState(user).then((loaded)=>{
+      if(loaded){save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();}
+      queueRemoteStateSync();
+    }).catch(()=>{});
     if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
-    await touchSupabaseActivity(true);
+    void touchSupabaseActivity(true);
   }
   async function submitEmailAuth(event){
     event.preventDefault();

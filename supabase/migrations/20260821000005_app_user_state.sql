@@ -7,6 +7,7 @@ begin;
 
 create table if not exists public.app_user_state (
   user_id uuid primary key references auth.users(id) on delete cascade,
+  app_initialized boolean not null default false,
   chats jsonb not null default '{}'::jsonb,
   artifacts jsonb not null default '{}'::jsonb,
   quota jsonb not null default '{}'::jsonb,
@@ -23,6 +24,8 @@ create table if not exists public.app_user_state (
   constraint app_user_state_studio_files_object check (jsonb_typeof(studio_files) = 'object')
 );
 
+alter table public.app_user_state
+  add column if not exists app_initialized boolean not null default false;
 alter table public.app_user_state
   add column if not exists studio_initialized boolean not null default false;
 
@@ -66,9 +69,10 @@ begin
   end if;
 
   insert into public.app_user_state (
-    user_id, chats, artifacts, quota, settings, active_chat_id, studio_files, studio_initialized
+    user_id, app_initialized, chats, artifacts, quota, settings, active_chat_id, studio_files, studio_initialized
   ) values (
     v_user_id,
+    case when jsonb_typeof(p_patch->'app_initialized') = 'boolean' then (p_patch->>'app_initialized')::boolean else false end,
     case when jsonb_typeof(p_patch->'chats') = 'object' then p_patch->'chats' else '{}'::jsonb end,
     case when jsonb_typeof(p_patch->'artifacts') = 'object' then p_patch->'artifacts' else '{}'::jsonb end,
     case when jsonb_typeof(p_patch->'quota') = 'object' then p_patch->'quota' else '{}'::jsonb end,
@@ -78,6 +82,7 @@ begin
     case when jsonb_typeof(p_patch->'studio_initialized') = 'boolean' then (p_patch->>'studio_initialized')::boolean else false end
   )
   on conflict (user_id) do update set
+    app_initialized = case when p_patch ? 'app_initialized' and jsonb_typeof(p_patch->'app_initialized') = 'boolean' then (p_patch->>'app_initialized')::boolean else public.app_user_state.app_initialized end,
     chats = case when p_patch ? 'chats' and jsonb_typeof(p_patch->'chats') = 'object' then p_patch->'chats' else public.app_user_state.chats end,
     artifacts = case when p_patch ? 'artifacts' and jsonb_typeof(p_patch->'artifacts') = 'object' then p_patch->'artifacts' else public.app_user_state.artifacts end,
     quota = case when p_patch ? 'quota' and jsonb_typeof(p_patch->'quota') = 'object' then p_patch->'quota' else public.app_user_state.quota end,
