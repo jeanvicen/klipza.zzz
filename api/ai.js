@@ -249,7 +249,7 @@ function geminiContents(history, parts) {
   return [...previous, { role: 'user', parts }];
 }
 
-async function callGeminiVision({ message, history, attachments }) {
+async function callGeminiVision({ message, history, attachments, systemPrompt = SYSTEM_PROMPT }) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw httpError(503, 'O assistente multimodal ainda não está configurado.');
   const parts = [{ text: message || 'Analise os anexos e explique o que é importante.' }];
@@ -262,7 +262,7 @@ async function callGeminiVision({ message, history, attachments }) {
     method: 'POST',
     headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+      systemInstruction: { parts: [{ text: systemPrompt }] },
       contents: geminiContents(history, parts),
       generationConfig: { temperature: 0.25, maxOutputTokens: 1600 }
     })
@@ -270,7 +270,7 @@ async function callGeminiVision({ message, history, attachments }) {
   return extractGeminiText(payload);
 }
 
-async function callGroqVision({ message, history, attachments }) {
+async function callGroqVision({ message, history, attachments, systemPrompt = SYSTEM_PROMPT }) {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw httpError(503, 'O fallback multimodal ainda não está configurado.');
   const content = [{ type: 'text', text: message || 'Analise os anexos e descreva os pontos mais importantes.' }];
@@ -292,7 +292,7 @@ async function callGroqVision({ message, history, attachments }) {
         headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           model,
-          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...historyForGroq(history), { role: 'user', content }],
+          messages: [{ role: 'system', content: systemPrompt }, ...historyForGroq(history), { role: 'user', content }],
           temperature: 0.25,
           max_completion_tokens: 1600,
           stream: false
@@ -308,7 +308,7 @@ async function callGroqVision({ message, history, attachments }) {
   throw lastError || httpError(502, 'A análise multimodal veio vazia.');
 }
 
-async function callGeminiResearch({ message, history, reference }) {
+async function callGeminiResearch({ message, history, reference, systemPrompt = SYSTEM_PROMPT }) {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw httpError(503, 'O assistente de pesquisa ainda não está configurado.');
   const context = researchText(reference);
@@ -322,7 +322,7 @@ async function callGeminiResearch({ message, history, reference }) {
   const model = await resolveGeminiModel(key);
   const endpoint = `${GEMINI_CONTENT_URL}/${encodeURIComponent(model)}:generateContent`;
   const baseBody = {
-    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    systemInstruction: { parts: [{ text: systemPrompt }] },
     contents: [{ role: 'user', parts: [{ text: input }] }],
     generationConfig: { temperature: 0.2, maxOutputTokens: 1600 }
   };
@@ -397,10 +397,10 @@ export default async function handler(request, response) {
     let answer;
     let provider = 'gemini';
     if (mode === 'research') {
-      answer = await callGeminiResearch({ message: message || 'Analise a referência selecionada.', history, reference: body.researchContext });
+      answer = await callGeminiResearch({ message: message || 'Analise a referência selecionada.', history, reference: body.researchContext, systemPrompt });
     } else if (mode === 'attachments') {
-      answer = await callGeminiVision({ message, history, attachments }).catch(async (geminiError) => {
-        try { return await callGroqVision({ message, history, attachments }); }
+      answer = await callGeminiVision({ message, history, attachments, systemPrompt }).catch(async (geminiError) => {
+        try { return await callGroqVision({ message, history, attachments, systemPrompt }); }
         catch (groqError) {
           const fallbackError = httpError(502, 'Não foi possível analisar o anexo agora.');
           fallbackError.providerMessage = [geminiError?.providerMessage, groqError?.providerMessage].filter(Boolean).join(' | ');
