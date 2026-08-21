@@ -67,3 +67,71 @@ O saldo persistente fica no Supabase e não é apagado por limpar o navegador, t
 6. Executar testes com credenciais de teste.
 7. Só então ativar `is_active=true` para produtos reais.
 8. Ativar somente `prime_monthly` e conferir os documentos legais e o canal de suporte antes de anunciar vendas.
+
+## Pagamento direto pela API Payments
+
+A integração também expõe a ação server-side `create_payment` em `POST /api/mercadopago`. Ela chama internamente `POST https://api.mercadopago.com/v1/payments`; o Access Token nunca é enviado ao navegador. O cliente deve gerar o token do cartão com o SDK oficial do Mercado Pago e enviar somente o token, nunca o número, código de segurança ou validade do cartão.
+
+A requisição precisa conter um `X-Idempotency-Key` em formato UUID. O mesmo valor deve ser reutilizado em uma nova tentativa da mesma operação. O produto e o preço são lidos do catálogo ativo no Supabase; `transaction_amount`, `currency_id` e `external_reference` não são aceitos do navegador.
+
+### Pix
+
+```http
+POST /api/mercadopago
+Authorization: Bearer <SUPABASE_SESSION_TOKEN>
+Content-Type: application/json
+X-Idempotency-Key: 1f8f2d1a-8ae0-4e0d-b4b4-9c7e1d1b1a00
+```
+
+```json
+{
+  "action": "create_payment",
+  "productCode": "tokens_100",
+  "paymentMethodId": "pix",
+  "payer": {
+    "email": "cliente@example.com"
+  }
+}
+```
+
+Quando o pagamento Pix for criado, a resposta pode conter `qrCode`, `qrCodeBase64` e `status`. O crédito só deve ser considerado disponível depois que o webhook autenticado confirmar o pagamento aprovado.
+
+### Cartão
+
+```json
+{
+  "action": "create_payment",
+  "productCode": "tokens_100",
+  "paymentMethodId": "master",
+  "token": "TOKEN_GERADO_PELO_SDK",
+  "installments": 1,
+  "payer": {
+    "email": "cliente@example.com",
+    "identification": { "type": "CPF", "number": "11144477735" }
+  }
+}
+```
+
+O `token` expira e deve ser gerado no cliente com o SDK do Mercado Pago. O backend valida o formato básico, fixa o preço e encaminha o token ao provedor usando o cabeçalho de idempotência.
+
+### Boleto
+
+```json
+{
+  "action": "create_payment",
+  "productCode": "tokens_100",
+  "paymentMethodId": "bolbradesco",
+  "payer": {
+    "email": "cliente@example.com",
+    "identification": { "type": "CPF", "number": "11144477735" }
+  }
+}
+```
+
+O identificador `bolbradesco` deve ser confirmado entre os meios habilitados para a conta Mercado Pago antes de produção. A resposta pode trazer `ticketUrl`; a confirmação do crédito continua dependendo do webhook e da consulta server-side do pagamento.
+
+### Resposta e estados
+
+A resposta interna normaliza os estados para `approved`, `pending`, `rejected`, `cancelled`, `refunded` ou `charged_back` e também expõe o `providerStatus` e `statusDetail`. Pagamentos `approved` recebidos diretamente da criação ainda aguardam o webhook verificado para que a função idempotente do Supabase credite tokens.
+
+A implementação aceita apenas pagamentos de produtos ativos do tipo `token_pack`. O `prime_monthly` continua usando `POST /preapproval`, pois assinatura recorrente não deve ser criada como pagamento único.

@@ -80,7 +80,7 @@ for (const marker of ['SUPABASE_SERVICE_ROLE_KEY', 'auth.admin.listUsers', 'auth
   if (!adminApi.includes(marker)) throw new Error(`Painel administrativo inseguro ou incompleto: ${marker}`);
 }
 
-for (const marker of ['billing_products', 'billing_orders', 'wallet_ledger', 'apply_billing_approval', 'consume_wallet_tokens', 'MERCADOPAGO_ACCESS_TOKEN', 'checkout/preferences', 'prime_monthly']) {
+for (const marker of ['billing_products', 'billing_orders', 'wallet_ledger', 'apply_billing_approval', 'consume_wallet_tokens', 'MERCADOPAGO_ACCESS_TOKEN', 'checkout/preferences', 'create_payment', '/v1/payments', 'prime_monthly']) {
   if (!billingApi.includes(marker) && !billingMigration.includes(marker)) throw new Error(`Billing ausente ou inseguro: ${marker}`);
 }
 for (const marker of ['x-signature', 'createHmac', 'billing_provider_events', 'v1/payments', 'apply_billing_approval', 'mp_payment:']) {

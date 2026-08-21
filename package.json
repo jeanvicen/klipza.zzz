@@ -9,7 +9,8 @@
     "cap:sync": "pnpm build:web && cap sync android",
     "android:debug": "pnpm cap:sync && cd android && ./gradlew assembleDebug",
     "android:release": "pnpm cap:sync && cd android && ./gradlew assembleRelease",
-    "check:html": "node scripts/check-html.mjs"
+    "check:html": "node scripts/check-html.mjs",
+    "test:mercadopago": "node scripts/test-mercadopago-api.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",

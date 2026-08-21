@@ -78,6 +78,92 @@ async function mpFetch(path, options = {}) {
   return data;
 }
 
+function paymentStatus(value) {
+  return ({
+    approved: 'approved',
+    pending: 'pending',
+    in_process: 'pending',
+    in_mediation: 'pending',
+    rejected: 'rejected',
+    cancelled: 'cancelled',
+    refunded: 'refunded',
+    charged_back: 'charged_back'
+  })[value] || 'pending';
+}
+
+function idempotencyKey(request) {
+  const headerValue = request.headers?.['x-idempotency-key'] || request.headers?.['X-Idempotency-Key'];
+  const value = String(headerValue || '').trim();
+  if (!UUID_RE.test(value)) {
+    throw Object.assign(new Error('Envie um X-Idempotency-Key UUID para evitar pagamentos duplicados.'), { status: 400 });
+  }
+  return value;
+}
+
+function paymentMethodId(body) {
+  const value = String(body?.paymentMethodId || body?.payment_method_id || '').trim();
+  if (!/^[a-z0-9_-]{2,40}$/i.test(value)) {
+    throw Object.assign(new Error('Meio de pagamento inválido.'), { status: 400 });
+  }
+  return value;
+}
+
+function payerDTO(user, body) {
+  const payer = body?.payer && typeof body.payer === 'object' ? body.payer : {};
+  const email = String(payer.email || user.email || '').trim().toLowerCase();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw Object.assign(new Error('O comprador precisa ter um e-mail válido.'), { status: 400 });
+  }
+  const result = { email };
+  for (const field of ['first_name', 'last_name']) {
+    const value = String(payer[field] || '').trim().slice(0, 80);
+    if (value) result[field] = value;
+  }
+  if (payer.identification && typeof payer.identification === 'object') {
+    const type = String(payer.identification.type || '').trim().slice(0, 20);
+    const number = String(payer.identification.number || '').replace(/\D/g, '').slice(0, 20);
+    if (type && number) result.identification = { type, number };
+  }
+  return result;
+}
+
+function directPaymentBody(body, user, product, order, request) {
+  const method = paymentMethodId(body);
+  const payer = payerDTO(user, body);
+  const payload = {
+    transaction_amount: amountNumber(product.amountCents),
+    description: product.title,
+    payment_method_id: method,
+    payer,
+    external_reference: order.external_reference,
+    notification_url: `${publicOrigin(request)}/api/mercadopago-webhook`,
+    metadata: { order_id: order.id, user_id: user.id, product_code: product.code }
+  };
+
+  if (method === 'pix') return payload;
+  if (method === 'bolbradesco') {
+    if (!payer.identification?.number) throw Object.assign(new Error('Informe o documento do comprador para gerar o boleto.'), { status: 400 });
+    return payload;
+  }
+
+  const token = String(body?.token || body?.cardToken || '').trim();
+  if (!token || token.length > 500) {
+    throw Object.assign(new Error('Token de cartão inválido. Gere o token no frontend com o SDK do Mercado Pago.'), { status: 400 });
+  }
+  const installments = Number(body?.installments || 1);
+  if (!Number.isInteger(installments) || installments < 1 || installments > 24) {
+    throw Object.assign(new Error('Parcelas inválidas. Use um número inteiro entre 1 e 24.'), { status: 400 });
+  }
+  payload.token = token;
+  payload.installments = installments;
+  const issuerId = String(body?.issuerId || body?.issuer_id || '').trim();
+  if (issuerId) {
+    if (!/^\d{1,20}$/.test(issuerId)) throw Object.assign(new Error('Emissor do cartão inválido.'), { status: 400 });
+    payload.issuer_id = Number(issuerId);
+  }
+  return payload;
+}
+
 function productDTO(product) {
   return {
     code: product.code,
@@ -98,9 +184,9 @@ async function getCatalog(client) {
   return (data || []).filter(product => Number(product.amount_cents) > 0).map(productDTO);
 }
 
-async function createOrder(client, user, product) {
-  const idempotencyKey = randomKey();
-  const { data, error } = await client.from('billing_orders').insert({
+async function createOrder(client, user, product, requestedIdempotencyKey = '') {
+  const idempotencyKey = requestedIdempotencyKey || randomKey();
+  const values = {
     user_id: user.id,
     product_code: product.code,
     kind: product.kind,
@@ -110,9 +196,24 @@ async function createOrder(client, user, product) {
     currency: product.currency,
     idempotency_key: idempotencyKey,
     external_reference: `klipza_${crypto.randomUUID()}`
-  }).select('id,external_reference,idempotency_key,product_code,kind,title,token_amount,amount_cents,currency,status').single();
-  if (error) throw error;
-  return data;
+  };
+  const select = 'id,external_reference,idempotency_key,product_code,kind,title,token_amount,amount_cents,currency,status,provider_payment_id';
+  const { data, error } = await client.from('billing_orders').insert(values).select(select).single();
+  if (!error) return data;
+  if (error.code !== '23505') throw error;
+
+  const { data: existing, error: lookupError } = await client
+    .from('billing_orders')
+    .select(select)
+    .eq('user_id', user.id)
+    .eq('idempotency_key', idempotencyKey)
+    .maybeSingle();
+  if (lookupError) throw lookupError;
+  if (!existing) throw error;
+  if (existing.product_code !== product.code || Number(existing.amount_cents) !== Number(product.amountCents)) {
+    throw Object.assign(new Error('A chave de idempotência já foi usada em outro pedido.'), { status: 409 });
+  }
+  return existing;
 }
 
 async function createTokenCheckout(client, user, product, order, request) {
@@ -172,6 +273,66 @@ async function createPrimeSubscription(client, user, product, order, request) {
   return { orderId: order.id, checkoutUrl: subscription.init_point || subscription.sandbox_init_point || subscription.url || null, sandboxCheckoutUrl: subscription.sandbox_init_point || null, product: productDTO(product) };
 }
 
+function paymentResponseDTO(payment, order, product) {
+  const transactionData = payment?.point_of_interaction?.transaction_data || {};
+  return {
+    orderId: order.id,
+    paymentId: String(payment?.id || order.provider_payment_id || ''),
+    status: paymentStatus(payment?.status || order.status),
+    providerStatus: payment?.status || null,
+    statusDetail: payment?.status_detail || null,
+    paymentMethodId: payment?.payment_method_id || null,
+    transactionAmount: Number(payment?.transaction_amount || amountNumber(product.amountCents)),
+    currency: product.currency,
+    qrCode: transactionData.qr_code || null,
+    qrCodeBase64: transactionData.qr_code_base64 || null,
+    ticketUrl: payment?.transaction_details?.external_resource_url || null,
+    product: productDTO(product)
+  };
+}
+
+async function createDirectPayment(client, user, body, request) {
+  const productCode = cleanCode(body?.productCode);
+  if (!productCode) throw Object.assign(new Error('Informe o produto do pagamento.'), { status: 400 });
+  const { data: row, error } = await client
+    .from('billing_products')
+    .select('code,kind,title,description,token_amount,amount_cents,currency,interval_months,sort_order')
+    .eq('code', productCode)
+    .eq('is_active', true)
+    .maybeSingle();
+  if (error) throw error;
+  if (!row || !row.amount_cents || Number(row.amount_cents) <= 0) {
+    throw Object.assign(new Error('Este produto ainda não está configurado para pagamento direto.'), { status: 503 });
+  }
+  const product = productDTO(row);
+  if (product.kind !== 'token_pack') {
+    throw Object.assign(new Error('Assinaturas devem ser criadas pelo fluxo de assinatura do Klipza.Prime.'), { status: 400 });
+  }
+
+  const key = idempotencyKey(request);
+  const order = await createOrder(client, user, product, key);
+  if (order.provider_payment_id) return paymentResponseDTO({ id: order.provider_payment_id, status: order.status }, order, product);
+
+  const payload = directPaymentBody(body, user, product, order, request);
+  const payment = await mpFetch('/v1/payments', {
+    method: 'POST',
+    headers: { 'X-Idempotency-Key': key },
+    body: JSON.stringify(payload)
+  });
+  const { error: updateError } = await client.from('billing_orders').update({
+    provider_payment_id: String(payment?.id || ''),
+    metadata: {
+      payment_method_id: payment?.payment_method_id || payload.payment_method_id,
+      provider_status: payment?.status || null,
+      status_detail: payment?.status_detail || null,
+      direct_payment: true
+    },
+    updated_at: new Date().toISOString()
+  }).eq('id', order.id);
+  if (updateError) throw updateError;
+  return paymentResponseDTO(payment, { ...order, provider_payment_id: String(payment?.id || '') }, product);
+}
+
 async function createCheckout(client, user, body, request) {
   const productCode = cleanCode(body?.productCode);
   if (!productCode) throw Object.assign(new Error('Escolha o Klipza.Prime.'), { status: 400 });
@@ -221,6 +382,7 @@ export default async function handler(request, response) {
       return json(response, 200, await getAccountData(client, user));
     }
     if (request.body?.action === 'consume_tokens') return json(response, 200, await consumeTokens(client, user, request.body));
+    if (request.body?.action === 'create_payment') return json(response, 201, await createDirectPayment(client, user, request.body, request));
     return json(response, 200, await createCheckout(client, user, request.body || {}, request));
   } catch (error) {
     const status = Number(error?.status) || (error?.message === 'billing_service_not_configured' ? 503 : 500);
@@ -228,3 +390,5 @@ export default async function handler(request, response) {
     return json(response, status, { error: status >= 500 ? (error?.message || 'Serviço de compras indisponível.') : error.message });
   }
 }
+
+export { directPaymentBody, idempotencyKey, paymentResponseDTO, paymentStatus };
