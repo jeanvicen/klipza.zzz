@@ -684,7 +684,7 @@ body.prime-modal-open{overflow:hidden}
 .prime-body{padding:18px 24px 24px}
 .prime-panel{display:none}.prime-panel.active{display:block}
 .prime-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.prime-card{border:1px solid var(--line);border-radius:15px;background:var(--bg);padding:17px;position:relative;overflow:hidden}
+.prime-card{border:1px solid var(--line);border-radius:15px;background:var(--bg);padding:17px;position:relative;overflow:hidden}.prime-benefit-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:17px 0}.prime-benefit{border:1px solid var(--line);border-radius:12px;background:var(--panel);padding:12px}.prime-benefit strong{display:block;font-size:12px}.prime-benefit span{display:block;margin-top:5px;font-size:10px;line-height:1.45;color:var(--muted)}.prime-development-note{padding:12px;border:1px dashed var(--line2);border-radius:11px;background:var(--panel);font-size:10px;line-height:1.5;color:var(--muted);margin:4px 0 15px}.prime-development-note strong{color:var(--text)}
 .prime-card.featured{border-color:var(--black);box-shadow:0 12px 30px rgba(0,0,0,.08)}
 .prime-card-badge{position:absolute;right:14px;top:14px;font-size:9px;padding:4px 7px;border-radius:999px;background:var(--black);color:var(--bg);font-weight:800}
 .prime-card h3{font-size:16px;font-weight:760}.prime-card p{font-size:11px;color:var(--muted);line-height:1.5;margin-top:5px}
@@ -695,7 +695,7 @@ body.prime-modal-open{overflow:hidden}
 .prime-footnote{font-size:10px;line-height:1.5;color:var(--muted);margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 .energy-settings-box{margin-top:12px;border:1px solid var(--line);border-radius:14px;background:var(--bg);padding:15px}.energy-settings-box-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}.energy-settings-box-title{font-size:13px;font-weight:760}.energy-settings-box-desc{font-size:10px;color:var(--muted);line-height:1.45;margin-top:4px}.energy-settings-box-value{font-size:19px;font-weight:800}.energy-settings-box-track{height:7px;background:var(--panel2);border-radius:999px;overflow:hidden;margin-top:12px}.energy-settings-box-track span{display:block;height:100%;background:var(--black);border-radius:999px;transition:width .3s}.energy-settings-box-actions{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:11px;flex-wrap:wrap}.energy-settings-box-meta{font-size:10px;color:var(--muted)}.energy-more-btn{height:34px;padding:0 11px;border-radius:9px;background:var(--black);color:var(--bg);font-size:10px;font-weight:750}.energy-more-btn:hover{background:#222}
 @keyframes primeFadeIn{from{opacity:0}to{opacity:1}}
-@media(max-width:720px){.prime-modal{padding:10px;align-items:flex-end}.prime-dialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px 18px 10px 10px}.prime-head{padding:18px 17px 15px}.prime-title{font-size:21px}.prime-tabs{padding:10px 17px 0;overflow:auto}.prime-body{padding:15px 17px 20px}.prime-grid,.token-grid{grid-template-columns:1fr}.prime-card{padding:15px}.prime-card-badge{position:static;display:inline-block;margin-bottom:7px}.prime-footnote{margin-bottom:4px}}
+@media(max-width:720px){.prime-modal{padding:10px;align-items:flex-end}.prime-dialog{width:100%;max-height:calc(100dvh - 20px);border-radius:18px 18px 10px 10px}.prime-head{padding:18px 17px 15px}.prime-title{font-size:21px}.prime-tabs{padding:10px 17px 0;overflow:auto}.prime-body{padding:15px 17px 20px}.prime-grid,.token-grid,.prime-benefit-grid{grid-template-columns:1fr}.prime-card{padding:15px}.prime-card-badge{position:static;display:inline-block;margin-bottom:7px}.prime-footnote{margin-bottom:4px}}
 
 
 /* VOICE / STREAM CONTROLS */
@@ -775,7 +775,7 @@ body.prime-modal-open{overflow:hidden}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
       <div class="brand-lockup"><img class="brand-symbol" src="/assets/klipza-mark.png" alt="" aria-hidden="true"><div class="brand">Klipza.IA</div></div>
-      <button class="icon-btn" id="headNew" title="Nova conversa">
+      <button class="icon-btn" id="headNew" title="Abrir Klipza.Prime" aria-label="Abrir Klipza.Prime">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
@@ -788,6 +788,13 @@ body.prime-modal-open{overflow:hidden}
       <button class="nav-btn" data-view="artifacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 16h8M8 12h8M8 8h5"/></svg><span class="nav-label">Artefatos</span><span class="nav-count" id="artifactCount">0</span></button>
       <button class="nav-btn" data-view="webklip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="nav-label">web.klip</span></button>
     </nav>
+    <div class="nav-expand nav-more-empty" aria-label="Mais recursos">
+      <button class="nav-btn nav-more" id="webKlipToggle" type="button" aria-expanded="false" aria-label="Mais recursos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="nav-label">Mais</span>
+      </button>
+      <div class="nav-subnav hidden" id="webKlipSubnav" aria-hidden="true"></div>
+    </div>
     <div class="history-head">Histórico</div>
     <div class="history" id="history"></div>
     <div id="sideQuota"></div><div class="side-bottom">
@@ -822,32 +829,30 @@ body.prime-modal-open{overflow:hidden}
   <div class="prime-dialog" role="dialog" aria-modal="true" aria-labelledby="primeModalTitle">
     <div class="prime-head">
       <div>
-        <div class="prime-eyebrow">Klipza</div>
-        <div class="prime-title" id="primeModalTitle">Mais do Klipza</div>
-        <div class="prime-sub" id="primeModalSub">O Klipza.Prime está em desenvolvimento. Os benefícios e a forma de assinatura serão publicados quando o recurso estiver pronto.</div>
+        <div class="prime-eyebrow">Plano pago em desenvolvimento</div>
+        <div class="prime-title" id="primeModalTitle">Klipza.Prime</div>
+        <div class="prime-sub" id="primeModalSub">Veja tudo o que está previsto para o Prime. Nenhuma cobrança ou ativação está disponível nesta versão.</div>
       </div>
       <button class="prime-close" type="button" onclick="window.K.closePrimeModal()" aria-label="Fechar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
-    </div>
-    <div class="prime-tabs" role="tablist">
-      <button class="prime-tab active" type="button" data-prime-tab="prime">Klipza.Prime Mensal</button>
     </div>
     <div class="prime-body">
       <section class="prime-panel active" data-prime-panel="prime">
         <div class="prime-grid">
               <article class="prime-card featured" data-product-card="prime_monthly">
             <span class="prime-card-badge">EM DESENVOLVIMENTO</span>
-            <h3>Klipza.Prime</h3>
-            <p>O plano pago está sendo organizado para oferecer mais recursos com segurança.</p>
-            <div class="prime-price">Em breve <small>· assinatura mensal</small></div>
-            <div class="prime-list">
-              <div><span>•</span><div>Benefícios, limites e condições serão publicados nesta tela.</div></div>
-              <div><span>•</span><div>O saldo gratuito atual não será alterado durante o desenvolvimento.</div></div>
-              <div><span>•</span><div>Nenhuma cobrança é realizada neste momento.</div></div>
-              <div><span>•</span><div>O recurso será ativado somente após testes e documentação.</div></div>
+            <h3>Benefícios previstos</h3>
+            <p>O Prime será um plano mensal para quem quiser mais capacidade e liberdade dentro do Klipza.IA.</p>
+            <div class="prime-price">Disponível em breve <small>· condições serão publicadas antes da ativação</small></div>
+            <div class="prime-benefit-grid">
+              <div class="prime-benefit"><strong>1.500 tokens</strong><span>Quantidade prevista por ciclo mensal ativo.</span></div>
+              <div class="prime-benefit"><strong>Tokens acumuláveis</strong><span>O saldo previsto ficará vinculado à conta e não será apagado por limpar o navegador.</span></div>
+              <div class="prime-benefit"><strong>Anexos ilimitados</strong><span>Fotos e arquivos sem a contagem atual enquanto o benefício estiver ativo.</span></div>
+              <div class="prime-benefit"><strong>Mais liberdade</strong><span>Uso ampliado do Klipza.IA conforme os limites e as regras publicados.</span></div>
             </div>
-            <button class="prime-action secondary" type="button" data-prime-coming-soon>Prime em desenvolvimento</button>
+            <div class="prime-development-note"><strong>Agora:</strong> não existe cobrança, checkout, renovação ou ativação automática. O saldo gratuito e os limites atuais continuam protegidos.</div>
+            <button class="prime-action secondary" type="button" data-prime-coming-soon>Avise quando estiver disponível</button>
           </article>
         </div>
         <div class="prime-footnote" id="primeCatalogStatus">Status atual: <strong>em desenvolvimento</strong>. Não há cobrança, checkout ou ativação de benefícios pagos disponível nesta versão.</div>
@@ -1583,7 +1588,7 @@ body.prime-modal-open{overflow:hidden}
   }
   function useSuggestion(t){$('prompt').value=t;$('prompt').dispatchEvent(new Event('input'));$('prompt').focus()}
 
-  const WEBKLIP_CACHE_KEY='klipza_webklip_daily_v2';
+  const WEBKLIP_CACHE_KEY='klipza_webklip_search_v3';
   const WEBKLIP_ROTATION_MS=25000;
   let welcomeRotatorTimer=null;
   let welcomePromptIndex=0;
@@ -1641,10 +1646,10 @@ body.prime-modal-open{overflow:hidden}
     setTimeout(()=>searchWebKlip(prompt),0);
   }
   function toggleWebKlipMenu(){
-    const button=$('webKlipToggle'), submenu=$('webKlipSubnav');
-    if(!button||!submenu)return;
-    const open=submenu.classList.toggle('hidden')===false;
-    button.classList.toggle('open',open);button.setAttribute('aria-expanded',String(open));
+    const button=$('webKlipToggle');
+    if(!button)return;
+    button.classList.remove('open');
+    button.setAttribute('aria-expanded','false');
   }
   function webKlipCacheRead(){
     try{const raw=localStorage.getItem(WEBKLIP_CACHE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
@@ -2138,7 +2143,7 @@ body.prime-modal-open{overflow:hidden}
   document.querySelectorAll('[data-password-toggle]').forEach(button=>button.addEventListener('click',()=>togglePasswordVisibility(button)));
   $('authPassword')?.addEventListener('input',()=>renderPasswordStrength('authPassword','authPasswordStrength','authPasswordStrengthLabel','authPasswordStrengthBar'));
   $('authRecoveryPassword')?.addEventListener('input',()=>renderPasswordStrength('authRecoveryPassword','authRecoveryPasswordStrength','authRecoveryPasswordStrengthLabel','authRecoveryPasswordStrengthBar'));
-  $('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',createChat);$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
+  $('accountBtn').addEventListener('click',()=>setView('settings'));$('closeSidebar').addEventListener('click',toggleSidebar);$('headNew').addEventListener('click',()=>openPrimeModal('prime'));$('newChatBtn').addEventListener('click',createChat);$('logoutBtn').addEventListener('click',logout);
   $('installPromptAction').addEventListener('click',installApp);$('installPromptDismiss').addEventListener('click',dismissInstallPrompt);
   document.querySelectorAll('.prime-tab').forEach(tab=>tab.addEventListener('click',()=>openPrimeModal(tab.dataset.primeTab)));
   const primeModal=$('primeModal');

@@ -39,6 +39,9 @@ if (manifest.name !== 'Klipza.IA' || manifest.icons.length < 2 || manifest.displ
 }
 
 for (const marker of [
+  'id="headNew"',
+  'nav-more-empty',
+  'id="webKlipSubnav"',
   'data-view="webklip"',
   'id="webKlipSearchInput"',
   'id="webKlipSearchForm"',
@@ -50,6 +53,8 @@ for (const marker of [
   '/api/webklip?check=',
   'Usar no chat',
   'webklip-search-empty',
+  'prime-benefit-grid',
+  'Abrir Klipza.Prime',
   'touch_user_activity',
   'data-password-toggle="authPassword"',
   'data-password-toggle="authPasswordConfirm"',
