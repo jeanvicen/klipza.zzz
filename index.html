@@ -1116,16 +1116,18 @@ body.prime-modal-open{overflow:hidden}
     if(!supabaseClient||!user?.id)return;
     try{
       const result=await Promise.race([
-        supabaseClient.from('message_feedback').select('message_id,feedback_type').eq('user_id',user.id),
+        supabaseClient.from('message_feedback').select('message_id,feedback_type,message_content,chat_id').eq('user_id',user.id),
         new Promise((_,reject)=>setTimeout(()=>reject(new Error('feedback_timeout')),1800))
       ]);
       if(result.error)throw result.error;
-      const feedbackById=Object.fromEntries((result.data||[]).map(item=>[item.message_id,item.feedback_type]));
+      const feedbackRows=result.data||[];
+      const feedbackById=Object.fromEntries(feedbackRows.map(item=>[item.message_id,item.feedback_type]));
+      const feedbackByContent=Object.fromEntries(feedbackRows.filter(item=>item.message_content).map(item=>[`${item.chat_id||''}|${item.message_content}`,item.feedback_type]));
       let changed=false;
-      Object.values(state.chats||{}).forEach(chat=>(chat.messages||[]).forEach(message=>{
+      Object.entries(state.chats||{}).forEach(([chatId,chat])=>(chat.messages||[]).forEach(message=>{
         if(message.role!=='ai')return;
         if(!message.id){message.id=messageId();changed=true;}
-        const type=feedbackById[message.id]||'';
+        const type=feedbackById[message.id]||feedbackByContent[`${chatId}|${message.content}`]||'';
         const liked=type==='like', disliked=type==='dislike';
         if(message.liked!==liked||message.disliked!==disliked){message.liked=liked;message.disliked=disliked;changed=true;}
       }));
