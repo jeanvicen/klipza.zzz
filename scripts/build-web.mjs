@@ -10,6 +10,7 @@ await mkdir(output, { recursive: true });
 await mkdir(vendor, { recursive: true });
 
 await cp(resolve(root, 'index.html'), resolve(output, 'index.html'));
+await cp(resolve(root, 'Studio.html'), resolve(output, 'Studio.html'));
 await cp(resolve(root, 'admin.html'), resolve(output, 'admin.html'));
 await cp(resolve(root, 'manifest.webmanifest'), resolve(output, 'manifest.webmanifest'));
 await cp(resolve(root, 'sw.js'), resolve(output, 'sw.js'));

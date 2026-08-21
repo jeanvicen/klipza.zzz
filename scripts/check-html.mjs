@@ -20,6 +20,7 @@ for (const file of [
   'supabase/migrations/20260820000003_billing.sql',
   'supabase/migrations/20260820000004_prime_only.sql',
   'admin.html',
+  'Studio.html',
   'api/admin-users.js',
   'api/webklip.js',
   'legal/document.css',
@@ -40,7 +41,7 @@ if (manifest.name !== 'Klipza.IA' || manifest.icons.length < 2 || manifest.displ
 
 for (const marker of [
   'id="headNew"',
-  'nav-more-empty',
+  'class="nav-expand"',
   'id="webKlipSubnav"',
   'data-view="webklip"',
   'id="webKlipSearchInput"',
@@ -64,7 +65,9 @@ for (const marker of [
   'uppercase:/[A-Z]/',
   'special:/[^A-Za-z0-9\\s]/',
   'Em desenvolvimento',
-  'Nenhuma cobrança'
+  'Nenhuma cobrança',
+  'href="/Studio.html"',
+  'Studio Klip'
 ]) {
   if (!html.includes(marker)) throw new Error(`Integração ou estado esperado ausente: ${marker}`);
 }
@@ -91,4 +94,4 @@ for (const marker of [
   if (!api.includes(marker)) throw new Error(`Proteção ou pesquisa do endpoint ausente: ${marker}`);
 }
 
-console.log('check:html OK — PWA, web.klip search-first, Auth, ciclo de vida, recursos pagos em desenvolvimento, documentos, endpoint seguro e ícones encontrados.');
+console.log('check:html OK — PWA, web.klip, Studio Klip, Auth, ciclo de vida, recursos pagos em desenvolvimento, documentos, endpoint seguro e ícones encontrados.');

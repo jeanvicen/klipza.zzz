@@ -1,7 +1,8 @@
-const CACHE_NAME = 'klipza-shell-v7';
+const CACHE_NAME = 'klipza-shell-v8';
 const APP_SHELL = [
   '/',
   '/index.html',
+  '/Studio.html',
   '/manifest.webmanifest',
   '/assets/klipza-mark.png',
   '/assets/icon-192.png',

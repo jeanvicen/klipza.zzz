@@ -788,12 +788,17 @@ body.prime-modal-open{overflow:hidden}
       <button class="nav-btn" data-view="webklip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="nav-label">web.klip</span></button>
       <button class="nav-btn" data-view="artifacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 16h8M8 12h8M8 8h5"/></svg><span class="nav-label">Artefatos</span><span class="nav-count" id="artifactCount">0</span></button>
     </nav>
-    <div class="nav-expand nav-more-empty" aria-label="Mais recursos">
+    <div class="nav-expand" aria-label="Mais recursos">
       <button class="nav-btn nav-more" id="webKlipToggle" type="button" aria-expanded="false" aria-label="Mais recursos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
         <span class="nav-label">Mais</span>
       </button>
-      <div class="nav-subnav hidden" id="webKlipSubnav" aria-hidden="true"></div>
+      <div class="nav-subnav hidden" id="webKlipSubnav" aria-hidden="true">
+        <a class="nav-btn nav-subbtn" href="/Studio.html" aria-label="Abrir Studio Klip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v13a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 18.5z"/><path d="m8 9 3 3-3 3M13 15h3"/></svg>
+          <span class="nav-label">Studio Klip</span>
+        </a>
+      </div>
     </div>
     <div class="history-head">Histórico</div>
     <div class="history" id="history"></div>
@@ -1662,9 +1667,13 @@ body.prime-modal-open{overflow:hidden}
   }
   function toggleWebKlipMenu(){
     const button=$('webKlipToggle');
-    if(!button)return;
-    button.classList.remove('open');
-    button.setAttribute('aria-expanded','false');
+    const submenu=$('webKlipSubnav');
+    if(!button||!submenu)return;
+    const willOpen=submenu.classList.contains('hidden');
+    submenu.classList.toggle('hidden',!willOpen);
+    submenu.setAttribute('aria-hidden',String(!willOpen));
+    button.classList.toggle('open',willOpen);
+    button.setAttribute('aria-expanded',String(willOpen));
   }
   function webKlipCacheRead(){
     try{const raw=localStorage.getItem(WEBKLIP_CACHE_KEY);return raw?JSON.parse(raw):null;}catch(e){return null;}
