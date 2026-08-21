@@ -881,6 +881,7 @@ body.prime-modal-open{overflow:hidden}
   let webKlipReturnView = 'chat';
   let activeChatId = state.activeChatId || null;
   let attached = [];
+  let pendingResearchContext = null;
   let anonymousMode = false;
   let previousChatId = null;
   let anonymousChat = null;
@@ -1419,9 +1420,9 @@ body.prime-modal-open{overflow:hidden}
             </button>
             <div class="attach-divider"></div>
             <div class="attach-section-label">Recursos</div>
-            <button class="attach-option upcoming" onclick="window.K.upcoming('Pesquisa na web')">
+            <button class="attach-option" onclick="window.K.openWebKlipModal()">
               <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
-              <span><span class="attach-option-title">Pesquisa na web</span><span class="attach-option-sub">Busca online</span></span><span class="soon-badge">Em breve</span>
+              <span><span class="attach-option-title">Pesquisa na web</span><span class="attach-option-sub">Pesquisar com referências atuais</span></span>
             </button>
             <button class="attach-option upcoming" onclick="window.K.upcoming('Projetos')">
               <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7l2 2h7v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg></span>
@@ -1495,13 +1496,24 @@ body.prime-modal-open{overflow:hidden}
     if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat(); chat.messages.push({role:'ai',content:text,stopped:true}); chat.updated=Date.now(); persistIfNeeded();} row.remove(); renderMessages();}
     setResponseUI(false); showResponseStatus('Você parou a resposta.'); setTimeout(()=>showResponseStatus(''),3200);
   }
-  function fakeReply(prompt){
+  async function requestAIAnswer(message, aiAttachments, mode, researchContext){
+    const sessionResult=await supabaseClient?.auth.getSession();
+    const accessToken=sessionResult?.data?.session?.access_token;
+    if(!accessToken) throw new Error('Sua sessão expirou. Entre novamente para continuar.');
     const chat=currentChat();
-    const reply='Recebi sua mensagem. O Klipza.IA está pronto para conversar assim que a conexão com a inteligência artificial estiver disponível.';
+    const history=chat.messages.slice(0,-1).slice(-16).map(item=>({role:item.role,content:item.content}));
+    const response=await fetch(`${AI_API_BASE}/api/ai`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify({message,history,mode,attachments:aiAttachments,researchContext})});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok) throw new Error(payload?.error||'Não foi possível concluir a resposta agora.');
+    if(!payload?.answer) throw new Error('A resposta veio vazia.');
+    return payload.answer;
+  }
+  function streamReply(reply){
+    const chat=currentChat();
     responseState.stopped=false; setResponseUI(true); showResponseStatus('Klipza está respondendo…');
     let i=0, partial='';
     responseState.timer=setInterval(()=>{
-      if(responseState.stopped){clearInterval(responseState.timer);return;}
+      if(responseState.stopped){clearInterval(responseState.timer);responseState.timer=null;return;}
       partial+=reply[i++]||''; appendStreamingMessage(partial);
       if(i>=reply.length){
         clearInterval(responseState.timer); responseState.timer=null;
@@ -1509,7 +1521,7 @@ body.prime-modal-open{overflow:hidden}
         chat.messages.push({role:'ai',content:reply}); chat.updated=Date.now(); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
         setResponseUI(false); showResponseStatus('');
       }
-    },28);
+    },18);
   }
   function toggleDictation(){
     if(responseState.active)return;
@@ -1590,6 +1602,7 @@ body.prime-modal-open{overflow:hidden}
   }
   function useSuggestion(t){$('prompt').value=t;$('prompt').dispatchEvent(new Event('input'));$('prompt').focus()}
 
+  const AI_API_BASE=(location.protocol==='capacitor:'||location.protocol==='file:'||location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://klipza-zzz.vercel.app':'';
   const WEBKLIP_CACHE_KEY='klipza_webklip_search_v3';
   const WEBKLIP_ROTATION_MS=25000;
   let welcomeRotatorTimer=null;
@@ -1837,6 +1850,7 @@ body.prime-modal-open{overflow:hidden}
     const view=document.querySelector('.webklip-view .webklip-inner');if(!view)return;view.prepend(detail);detail.querySelector('.webklip-back').addEventListener('click',()=>detail.remove());detail.querySelector('#webKlipSendReference')?.addEventListener('click',()=>sendWebKlipToChat(item));detail.querySelector('#webKlipOpenSource')?.addEventListener('click',()=>openWebKlipPage(item.url,item.title));detail.scrollIntoView({behavior:'smooth',block:'start'});
   }
   function sendWebKlipToChat(item){
+    pendingResearchContext={title:item.title,category:item.category,summary:item.summary,source:item.source,url:item.url||''};
     setView('chat');
     const input=$('prompt');if(!input)return;
     input.value=`Quero continuar esta referência do web.klip no chat.\n\nTítulo: ${item.title}\nCategoria: ${webKlipCategoryLabel(item.category)}\nResumo: ${item.summary}\nFonte: ${item.url||item.source||'fonte pública'}`;
@@ -1872,6 +1886,10 @@ body.prime-modal-open{overflow:hidden}
       const chat=currentChat();
       const messageText=text || 'Enviei um anexo.';
       const attachments=attached.map(a=>({name:a.name,type:a.type||'file',data:a.data||null}));
+      const aiAttachments=attached.map(a=>({name:a.name,type:a.type||'file',aiData:a.aiData||null,aiText:a.aiText||''})).filter(a=>a.aiData||a.aiText);
+      const researchContext=pendingResearchContext;
+      const mode=researchContext?'research':attached.length?'attachments':'chat';
+      pendingResearchContext=null;
       chat.messages.push({role:'user',content:messageText,attachments});
       if(chat.title==='Nova conversa'){chat.title=(text || attachments[0]?.name || 'Nova conversa').slice(0,48)+((text || attachments[0]?.name || '').length>48?'…':'')}
       chat.updated=Date.now(); attached=[]; persistIfNeeded(); renderHistory(); renderMessages();
@@ -1879,7 +1897,15 @@ body.prime-modal-open{overflow:hidden}
       renderAttached();
       refreshQuotaUI();
       if(!paidWithTokens)animateEnergyChange(energyBefore,state.quota.energy);
-      fakeReply(messageText);
+      responseState.stopped=false; setResponseUI(true); showResponseStatus('Klipza está respondendo…');
+      try{
+        const reply=await requestAIAnswer(messageText,aiAttachments,mode,researchContext);
+        if(!responseState.stopped)streamReply(reply);
+      }catch(error){
+        if(responseState.stopped)return;
+        const fallback=String(error?.message||'Não foi possível concluir a resposta agora.');
+        streamReply(fallback);
+      }
     }finally{send.busy=false;}
   }
   function openPrimeModal(tab='prime') {
@@ -1945,9 +1971,12 @@ body.prime-modal-open{overflow:hidden}
       const chosen=files.slice(0,available);
       if(!chosen.length)return;
       for(const file of chosen){
-        let data=null;
-        if(file.type && file.type.startsWith('image/')) data=await readImagePreview(file);
-        attached.push({name:file.name,type:file.type||'file',data});
+        let data=null, aiData=null, aiText='';
+        if(file.type && file.type.startsWith('image/')){data=await readImagePreview(file);aiData=data;}
+        else if(file.type==='application/pdf' && file.size<=2200000) aiData=await readFileDataUrl(file);
+        else if(file.type.startsWith('text/') || /\.(md|markdown|txt|csv|json|js|ts|tsx|jsx|html|css|xml|yaml|yml)$/i.test(file.name)) aiText=await readTextForAI(file);
+        else aiText=`O arquivo ${file.name} foi anexado. O formato não pôde ser lido diretamente nesta versão; explique o que deseja fazer com ele.`;
+        attached.push({name:file.name,type:file.type||'file',data,aiData,aiText});
       }
         if(!primeActive())state.quota.attachUsed+=chosen.length;
       save(); renderAttached(); refreshQuotaUI();
@@ -1979,6 +2008,9 @@ body.prime-modal-open{overflow:hidden}
       r.onerror=()=>resolve(null); r.readAsDataURL(file);
     });
   }
+  function readFileDataUrl(file){return new Promise(resolve=>{const r=new FileReader();r.onload=()=>resolve(typeof r.result==='string'?r.result:null);r.onerror=()=>resolve(null);r.readAsDataURL(file);});}
+  async function readTextForAI(file){try{return (await file.text()).slice(0,18000);}catch(error){return '';}}
+
 
   function renderArtifactsCount(){$('artifactCount').textContent=Object.keys(state.artifacts).length}
   function renderArtifactsPage(){
