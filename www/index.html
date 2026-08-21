@@ -1759,7 +1759,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       const cleanCode=code.trim();
       const decodeMarkup=value=>{const area=document.createElement('textarea');area.innerHTML=value;return area.value;};
       const rawCode=decodeMarkup(cleanCode);
-      const languageMatch=rawCode.match(/^(html?|css|javascript|js|typescript|ts|python|py|json|jsx|tsx|sql|bash|sh|java|go|rust|c|cpp|php|ruby)\s*\n/i);
+      const languageMatch=rawCode.match(/^(html?|css|javascript|js|typescript|ts|python|py|json|jsx|tsx|sql|bash|sh|java|go|rust|c|cpp|php|ruby)\b/i);
       const language=(languageMatch?.[1]||'').toLowerCase();
       const artifactCode=(languageMatch?rawCode.slice(languageMatch[0].length):rawCode).trim();
       const isHTML=/^<!doctype\s+html|^<html[\s>]/i.test(artifactCode);
