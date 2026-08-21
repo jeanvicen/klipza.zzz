@@ -4,6 +4,7 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GEMINI_CONTENT_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
 const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';
+const GROQ_VISION_FALLBACK_MODEL = process.env.GROQ_VISION_FALLBACK_MODEL || 'meta-llama/llama-4-scout-17b-16e-instruct';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
 const MAX_MESSAGE_LENGTH = 12000;
 const MAX_HISTORY_ITEMS = 16;
@@ -179,20 +180,29 @@ async function callGroqVision({ message, history, attachments }) {
       content.push({ type: 'text', text: `O arquivo ${attachment.name} foi anexado, mas este fallback só consegue interpretar imagens e texto diretamente.` });
     }
   }
-  const payload = await requestJSON(GROQ_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: GROQ_VISION_MODEL,
-      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...historyForGroq(history), { role: 'user', content }],
-      temperature: 0.25,
-      max_completion_tokens: 1600,
-      stream: false
-    })
-  });
-  const result = text(payload?.choices?.[0]?.message?.content, 24000);
-  if (!result) throw httpError(502, 'A análise multimodal veio vazia.');
-  return result;
+  const models = [...new Set([GROQ_VISION_MODEL, GROQ_VISION_FALLBACK_MODEL].filter(Boolean))];
+  let lastError;
+  for (const model of models) {
+    try {
+      const payload = await requestJSON(GROQ_URL, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...historyForGroq(history), { role: 'user', content }],
+          temperature: 0.25,
+          max_completion_tokens: 1600,
+          stream: false
+        })
+      });
+      const result = text(payload?.choices?.[0]?.message?.content, 24000);
+      if (!result) throw httpError(502, 'A análise multimodal veio vazia.');
+      return result;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError || httpError(502, 'A análise multimodal veio vazia.');
 }
 
 async function callGeminiResearch({ message, history, reference }) {
@@ -221,7 +231,7 @@ async function callGeminiResearch({ message, history, reference }) {
     });
     return extractGeminiText(payload);
   } catch (error) {
-    if (![400, 404].includes(Number(error?.status))) throw error;
+    if (![400, 404, 429].includes(Number(error?.status))) throw error;
     const fallbackPayload = await requestJSON(endpoint, {
       method: 'POST',
       headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
