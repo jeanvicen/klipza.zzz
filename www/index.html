@@ -1740,41 +1740,53 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       </div></section>`;
     bindComposer(); renderMessages();
   }
-  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,regenerateCount:0};
+  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,regenerateCount:0};
   const messageId=()=>`msg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`;
   const codeRequestPattern=/\b(crie|criar|faça|faca|fazer|gere|gerar|escreva|program(e|ar)|código|codigo|arquivo|artefato|html|css|javascript|typescript|python|react|component(e|ar)|script|site|página|pagina|app)\b/i;
   function isCodeRequest(text){return codeRequestPattern.test(String(text||''));}
-  const DEEP_THINKING_STEPS=['Mapeando os tópicos do pedido…','Organizando a lógica e as prioridades…','Verificando riscos e casos-limite…','Conferindo a resposta antes de entregar…'];
+  const DEEP_THINKING_STEPS=['Vou entender o objetivo principal do pedido.','Vou separar os tópicos que precisam ser considerados.','Vou conferir a lógica, os riscos e os pontos que podem gerar erro.','Vou comparar as opções e revisar o resultado antes de entregar.'];
   function deepThinkingList(items, fallback){
     const values=Array.isArray(items)?items.map(item=>String(item||'').trim()).filter(Boolean).slice(0,5):[];
     return values.length?values:[fallback];
   }
-  function renderDeepThinkingProgress(step='Mapeando os tópicos do pedido…',plan=null){
+  function deepOperationText(index,message,plan){
+    const topics=deepThinkingList(plan?.topics,'os tópicos relevantes');
+    const subject=String(message||'o pedido').replace(/\s+/g,' ').trim().slice(0,90);
+    if(index===0)return `Vou entender o objetivo: “${subject}${subject.length>=90?'…':''}”.`;
+    if(index===1)return `Vou separar os tópicos: ${topics.slice(0,2).join(' e ')}.`;
+    if(index===2)return 'Vou conferir a lógica, os riscos e os pontos que podem gerar erro.';
+    if(index===3)return 'Vou comparar as opções e organizar a resposta de forma clara.';
+    if(index===4)return 'Vou revisar o resultado e conferir se ele atende ao que foi pedido.';
+    return 'Resultado pronto: vou entregar a resposta organizada agora.';
+  }
+  function renderDeepThinkingProgress(step='',plan=null,message=responseState.deepMessage,index=responseState.deepStepIndex){
     const el=$('responseStatus');if(!el)return;
     const topics=deepThinkingList(plan?.topics,'Tópicos sendo identificados');
     const checks=deepThinkingList(plan?.checks,'Requisitos, riscos e compatibilidade');
-    const summary=plan?.summary?String(plan.summary).trim():'O resumo seguro aparecerá quando a análise inicial terminar.';
+    const summary=plan?.summary?String(plan.summary).trim():'O resumo das etapas aparecerá quando a análise inicial terminar.';
+    const operation=step||deepOperationText(index,message,plan);
     el.classList.add('show','progress-status');
-    el.innerHTML=`<div class="response-progress deep-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Pensamento profundo <span class="thinking-live-badge">ao vivo</span></span><span class="response-progress-step">${esc(step)}</span><div class="deep-progress-actions"><button class="deep-progress-toggle" type="button" onclick="window.K.toggleThinkingDetails()">Ver resumo seguro</button><span class="response-progress-step">Não exibe raciocínio privado</span></div><div class="deep-progress-details" id="deepThinkingDetails"><div><strong>Tópicos identificados</strong><ul>${topics.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Verificações</strong><ul>${checks.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Resumo da abordagem</strong><div class="deep-progress-summary">${esc(summary)}</div></div></div></div></div>`;
+    el.innerHTML=`<div class="response-progress deep-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Acompanhamento do processo <span class="thinking-live-badge">ao vivo</span></span><span class="response-progress-step">${esc(operation)}</span><div class="deep-progress-actions"><button class="deep-progress-toggle" type="button" onclick="window.K.toggleThinkingDetails()">Ver etapas e verificações</button><span class="response-progress-step">Resumo operacional</span></div><div class="deep-progress-details" id="deepThinkingDetails"><div><strong>O que estou considerando</strong><ul>${topics.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>O que estou conferindo</strong><ul>${checks.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Resultado da análise</strong><div class="deep-progress-summary">${esc(summary)}</div></div></div></div></div>`;
   }
   function toggleThinkingDetails(){
     const details=$('deepThinkingDetails');if(details)details.classList.toggle('open');
   }
-  function startResponseProgress(){
+  function startResponseProgress(message=''){
     const el=$('responseStatus');if(!el)return;
     clearInterval(responseState.progressTimer);
     responseState.codeRequest=true;
     responseState.deepThinking=state.settings.thinkingMode==='deep';
     responseState.deepPlan=null;
+    responseState.deepMessage=String(message||'');
+    responseState.deepStepIndex=0;
     el.classList.add('show','progress-status');
     const steps=responseState.deepThinking?DEEP_THINKING_STEPS:['Analisando o pedido…','Estruturando a solução…','Verificando detalhes do código…','Preparando a resposta…'];
-    let i=0;
-    const render=()=>{if(responseState.deepThinking)renderDeepThinkingProgress(steps[i],responseState.deepPlan);else el.innerHTML=`<div class="response-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Preparando sua resposta</span><span class="response-progress-step">${steps[i]}</span></div></div>`;};
+    const render=()=>{if(responseState.deepThinking)renderDeepThinkingProgress('',responseState.deepPlan,responseState.deepMessage,responseState.deepStepIndex);else el.innerHTML=`<div class="response-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Preparando sua resposta</span><span class="response-progress-step">${steps[responseState.deepStepIndex]}</span></div></div>`;};
     render();
-    responseState.progressTimer=setInterval(()=>{i=(i+1)%steps.length;render();},1050);
+    responseState.progressTimer=setInterval(()=>{responseState.deepStepIndex=(responseState.deepStepIndex+1)%steps.length;render();},1050);
   }
   function stopResponseProgress(){
-    clearInterval(responseState.progressTimer);responseState.progressTimer=null;responseState.codeRequest=false;responseState.deepThinking=false;responseState.deepPlan=null;
+    clearInterval(responseState.progressTimer);responseState.progressTimer=null;responseState.codeRequest=false;responseState.deepThinking=false;responseState.deepPlan=null;responseState.deepMessage='';responseState.deepStepIndex=0;
     $('responseStatus')?.classList.remove('progress-status');
   }
   let recognition=null, dictating=false, dictationSession=0, dictationRestartTimer=null;
@@ -1856,7 +1868,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const chat=currentChat();
     const deepEnabled=meta?.thinkingMode==='deep'||(state.settings.thinkingMode==='deep'&&meta?.thinking!==null);
     const deepPlan=meta?.thinking||null;
-    if(deepEnabled){responseState.deepThinking=true;responseState.deepPlan=deepPlan;clearInterval(responseState.progressTimer);renderDeepThinkingProgress('Plano seguro concluído. Redigindo a resposta…',deepPlan);}else stopResponseProgress();
+    if(deepEnabled){responseState.deepThinking=true;responseState.deepPlan=deepPlan;clearInterval(responseState.progressTimer);responseState.deepStepIndex=4;renderDeepThinkingProgress('',deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else stopResponseProgress();
     responseState.stopped=false;setResponseUI(true);if(!deepEnabled)showResponseStatus('Klipza está respondendo…');
     const regenCount=responseState.regenerateCount||0;
     let i=0, partial='';
@@ -1869,7 +1881,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount}); chat.updated=Date.now(); autoCreateArtifactsFromReply(reply); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
         responseState.regenerateCount=0;
         setResponseUI(false);
-        if(deepEnabled){renderDeepThinkingProgress('Resposta revisada. O resumo seguro continua disponível por alguns segundos.',deepPlan);setTimeout(()=>{stopResponseProgress();showResponseStatus('');},6200);}else showResponseStatus('');
+        if(deepEnabled){responseState.deepStepIndex=5;renderDeepThinkingProgress('',deepPlan,responseState.deepMessage,responseState.deepStepIndex);setTimeout(()=>{stopResponseProgress();showResponseStatus('');},6200);}else showResponseStatus('');
       }
     },18);
   }
@@ -2315,7 +2327,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       refreshQuotaUI();
       if(!paidWithTokens)animateEnergyChange(energyBefore,state.quota.energy);
       responseState.stopped=false; setResponseUI(true);
-      if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(); else showResponseStatus('Klipza está respondendo…');
+      if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(messageText); else showResponseStatus('Klipza está respondendo…');
       const thinkingStartedAt=Date.now();
       try{
         const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext);
