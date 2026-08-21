@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GEMINI_CONTENT_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GEMINI_INTERACTIONS_URL = 'https://generativelanguage.googleapis.com/v1beta/interactions';
-const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_MESSAGE_LENGTH = 12000;
 const MAX_HISTORY_ITEMS = 16;
