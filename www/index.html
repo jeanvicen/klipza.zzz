@@ -222,7 +222,7 @@ img{max-width:100%}
 .webklip-card-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;font-size:9px;color:#999}
 .webklip-source{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .webklip-arrow{font-size:14px;color:var(--text)}
-.webklip-empty{padding:48px 20px;border:1px dashed var(--line2);border-radius:14px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}
+.webklip-empty{padding:48px 20px;border:1px dashed var(--line2);border-radius:14px;text-align:center;color:var(--muted);font-size:12px;line-height:1.5}.webklip-search-empty{min-height:min(52vh,430px);display:grid;place-items:center;align-content:center;gap:8px;padding:42px 22px;border:1px solid var(--line);border-radius:18px;background:var(--panel);text-align:center}.webklip-search-empty-icon{width:54px;height:54px;display:grid;place-items:center;border-radius:16px;background:var(--text);color:var(--bg);font-size:28px;font-weight:700;margin-bottom:4px}.webklip-search-empty .webklip-title{font-size:25px}.webklip-search-empty .webklip-subtitle{margin-top:0}
 .webklip-loading{display:grid;place-items:center;min-height:220px;color:var(--muted);font-size:12px}
 .webklip-detail{margin-bottom:14px;border:1px solid var(--black);border-radius:16px;padding:18px;background:var(--panel)}
 .webklip-detail-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
@@ -786,16 +786,8 @@ body.prime-modal-open{overflow:hidden}
     <nav class="nav">
       <button class="nav-btn active" data-view="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 11.5a8.5 8.5 0 0 1-8.5 8.5 8.7 8.7 0 0 1-3.8-.87L4 20l.87-3.7A8.7 8.7 0 0 1 4 12a8.5 8.5 0 1 1 16 0v-.5Z"/></svg><span class="nav-label">Conversas</span></button>
       <button class="nav-btn" data-view="artifacts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 16h8M8 12h8M8 8h5"/></svg><span class="nav-label">Artefatos</span><span class="nav-count" id="artifactCount">0</span></button>
+      <button class="nav-btn" data-view="webklip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="nav-label">web.klip</span></button>
     </nav>
-    <div class="nav-expand">
-      <button class="nav-btn nav-more" id="webKlipToggle" type="button" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-        <span class="nav-label">Mais</span><span class="nav-chevron">⌄</span>
-      </button>
-      <div class="nav-subnav hidden" id="webKlipSubnav">
-        <button class="nav-btn nav-subbtn" data-view="webklip" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="nav-label">web.klip</span></button>
-      </div>
-    </div>
     <div class="history-head">Histórico</div>
     <div class="history" id="history"></div>
     <div id="sideQuota"></div><div class="side-bottom">
@@ -832,7 +824,7 @@ body.prime-modal-open{overflow:hidden}
       <div>
         <div class="prime-eyebrow">Klipza</div>
         <div class="prime-title" id="primeModalTitle">Mais do Klipza</div>
-        <div class="prime-sub" id="primeModalSub">Assinatura mensal com renovação recorrente, 1.500 tokens por ciclo e anexos/fotos ilimitados.</div>
+        <div class="prime-sub" id="primeModalSub">O Klipza.Prime está em desenvolvimento. Os benefícios e a forma de assinatura serão publicados quando o recurso estiver pronto.</div>
       </div>
       <button class="prime-close" type="button" onclick="window.K.closePrimeModal()" aria-label="Fechar">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg>
@@ -844,21 +836,21 @@ body.prime-modal-open{overflow:hidden}
     <div class="prime-body">
       <section class="prime-panel active" data-prime-panel="prime">
         <div class="prime-grid">
-          <article class="prime-card featured" data-product-card="prime_monthly">
-            <span class="prime-card-badge">ASSINATURA MENSAL</span>
+              <article class="prime-card featured" data-product-card="prime_monthly">
+            <span class="prime-card-badge">EM DESENVOLVIMENTO</span>
             <h3>Klipza.Prime</h3>
-            <p>Mais liberdade para usar o Klipza.IA em todos os ciclos.</p>
-            <div class="prime-price" data-product-price="prime_monthly">R$ 59,90 <small>/mês</small></div>
+            <p>O plano pago está sendo organizado para oferecer mais recursos com segurança.</p>
+            <div class="prime-price">Em breve <small>· assinatura mensal</small></div>
             <div class="prime-list">
-              <div><span>✓</span><div>1.500 tokens liberados a cada cobrança aprovada</div></div>
-              <div><span>✓</span><div>Anexos e fotos ilimitados enquanto a assinatura estiver ativa</div></div>
-              <div><span>✓</span><div>Renovação mensal recorrente pelo Mercado Pago</div></div>
-              <div><span>✓</span><div>Saldo de tokens acumulável e vinculado à conta</div></div>
+              <div><span>•</span><div>Benefícios, limites e condições serão publicados nesta tela.</div></div>
+              <div><span>•</span><div>O saldo gratuito atual não será alterado durante o desenvolvimento.</div></div>
+              <div><span>•</span><div>Nenhuma cobrança é realizada neste momento.</div></div>
+              <div><span>•</span><div>O recurso será ativado somente após testes e documentação.</div></div>
             </div>
-            <button class="prime-action" type="button" data-buy-product="prime_monthly">Assinar por R$ 59,90/mês</button>
+            <button class="prime-action secondary" type="button" data-prime-coming-soon>Prime em desenvolvimento</button>
           </article>
         </div>
-        <div class="prime-footnote" id="primeCatalogStatus">A assinatura e os benefícios só são ativados após confirmação server-side do Mercado Pago. O cancelamento interrompe as próximas cobranças; o saldo já creditado permanece registrado conforme os Termos.</div>
+        <div class="prime-footnote" id="primeCatalogStatus">Status atual: <strong>em desenvolvimento</strong>. Não há cobrança, checkout ou ativação de benefícios pagos disponível nesta versão.</div>
       </section>
     </div>
   </div>
@@ -991,33 +983,15 @@ body.prime-modal-open{overflow:hidden}
   }
 
   state.wallet=state.wallet||{tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
-  let walletSyncPromise=null;
   function primeActive(){return state.wallet?.primeStatus==='active';}
   function attachmentLimit(){return primeActive()?Infinity:FREE_ATTACH_LIMIT;}
   function attachmentLabel(){return primeActive()?'Ilimitado':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} disponíveis`;}
-  async function supabaseAccessToken(){
-    if(!supabaseClient)return '';
-    try{const {data}=await supabaseClient.auth.getSession();return data?.session?.access_token||'';}catch{return '';}
-  }
-  async function billingFetch(path='',options={}){
-    const token=await supabaseAccessToken();
-    if(!token)throw new Error('Sessão de compras indisponível.');
-    const response=await fetch(`/api/mercadopago${path}`,{...options,headers:{Accept:'application/json','Content-Type':'application/json',Authorization:`Bearer ${token}`,...(options.headers||{})}});
-    const data=await response.json().catch(()=>({}));
-    if(!response.ok)throw new Error(data?.error||'Não foi possível acessar as compras.');
-    return data;
-  }
   async function refreshWallet(){
-    if(!state.user||walletSyncPromise)return walletSyncPromise;
-    walletSyncPromise=billingFetch().then(data=>{state.wallet={...state.wallet,...(data.wallet||{}),orders:data.orders||[],ledger:data.ledger||[]};save();refreshQuotaUI();if(currentView==='settings')renderSettingsPage();return state.wallet;}).catch(error=>{console.warn('Saldo ainda não sincronizado.',error);return state.wallet;}).finally(()=>{walletSyncPromise=null;});
-    return walletSyncPromise;
+    return state.wallet;
   }
   async function consumePurchasedTokens(){
-    try{
-      const result=await billingFetch('',{method:'POST',body:JSON.stringify({action:'consume_tokens',amount:TOKEN_COST})});
-      if(result.consumed){state.wallet.tokenBalance=Number(result.tokenBalance||0);save();refreshQuotaUI();return true;}
-      return false;
-    }catch(error){showResponseStatus(error.message||'Não foi possível usar seus tokens agora.');return false;}
+    showResponseStatus('O uso de tokens pagos está em desenvolvimento. Aguarde a ativação do Klipza.Prime.');
+    return false;
   }
   function ensureQuota(){
     state.quota=state.quota||{energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
@@ -1822,9 +1796,8 @@ body.prime-modal-open{overflow:hidden}
   function renderWebKlipPage(){
     const mount=$('main');if(!mount)return;
     const locale=currentWebKlipLocale();
-    const feedItems=webKlipFilteredItems();
     const searching=Boolean(webKlipState.query);
-    const items=searching?webKlipState.searchResults:feedItems;
+    const items=searching?webKlipState.searchResults:[];
     if(webKlipState.page){
       const page=webKlipState.page;
       mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">Navegação interna</span></div></header><section class="webklip-view webklip-page-view"><div class="webklip-inner"><div class="webklip-browser-toolbar"><button class="webklip-toolbar-button" id="webKlipPageBack" type="button">‹ Voltar</button><div class="webklip-address" title="${esc(page.url)}">${esc(page.title)}</div><button class="webklip-toolbar-button" id="webKlipPageHome" type="button">Início</button></div>${webKlipPageStateHTML(page)}</div></section>`;
@@ -1839,25 +1812,21 @@ body.prime-modal-open{overflow:hidden}
     }
     const visibleItems=items.slice(0,webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE);
     const moreItems=items.length>visibleItems.length;
-    const aiLinks=WEBKLIP_AI_LINKS.map(link=>`<button class="webklip-ai-link" type="button" data-open-webklip-url="${esc(link.url)}" data-open-webklip-title="${esc(link.name)}">${esc(link.name)} <span aria-hidden="true">↗</span></button>`).join('');
-    mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">${esc(locale.label)} · ${esc(locale.language)}</span></div></header><section class="webklip-view"><div class="webklip-inner"><div class="webklip-browser-bar"><form class="webklip-search-form" id="webKlipSearchForm" role="search"><span class="webklip-search-icon" aria-hidden="true">⌕</span><input id="webKlipSearchInput" value="${esc(webKlipState.query)}" maxlength="180" autocomplete="off" placeholder="Pesquisar na web…" aria-label="Pesquisar na web"><button type="submit">Pesquisar</button></form>${searching?'<button class="webklip-clear-search" type="button" id="webKlipClearSearch">Ver feed diário</button>':''}</div><div class="webklip-ai-row"><span class="webklip-ai-label">Abrir dentro do Klipza</span>${aiLinks}</div><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · pesquisa diária</div><h1 class="webklip-title">${searching?'Resultados da pesquisa':'web.klip'}</h1><p class="webklip-subtitle">${searching?'Resultados públicos filtrados para navegar sem sair do app.':'Pesquise e explore notícias, jogos, código e design sem sair do Klipza.'}</p></div><button class="webklip-refresh" id="webKlipRefresh" type="button">Atualizar</button></div><div class="webklip-meta">${searching?(webKlipState.searchLoading?'Pesquisando fontes públicas…':`${items.length} resultado(s) · exibindo ${visibleItems.length} · limite de 50`):(webKlipState.loading?'Buscando fontes públicas…':`${items.length} item(ns) disponíveis · exibindo ${visibleItems.length} · ${locale.label}`)}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div>${searching?'':`<div class="webklip-tabs">${['all','news','games','code','design'].map(category=>`<button class="webklip-tab ${webKlipState.category===category?'active':''}" type="button" data-webklip-category="${category}">${webKlipCategoryLabel(category)}</button>`).join('')}</div>`}${(webKlipState.loading||webKlipState.searchLoading)?'<div class="webklip-loading">Consultando o web.klip…</div>':items.length?`<div class="webklip-grid">${visibleItems.map(webKlipItemHTML).join('')}</div>${moreItems?`<button class="webklip-load-more" id="webKlipLoadMore" type="button">Carregar mais ${Math.min(WEBKLIP_PAGE_SIZE,items.length-visibleItems.length)}</button>`:''}`:`<div class="webklip-empty">${esc(webKlipState.error||'Nenhum resultado encontrado para essa busca. Tente outros termos.')}</div>`}</div></section>`;
+    const body=webKlipState.searchLoading?'<div class="webklip-loading">Pesquisando fontes públicas…</div>':searching?(items.length?`<div class="webklip-grid">${visibleItems.map(webKlipItemHTML).join('')}</div>${moreItems?`<button class="webklip-load-more" id="webKlipLoadMore" type="button">Carregar mais ${Math.min(WEBKLIP_PAGE_SIZE,items.length-visibleItems.length)}</button>`:''}`:`<div class="webklip-empty">${esc(webKlipState.error||'Nenhum resultado encontrado para essa busca. Tente outros termos.')}</div>`):'<div class="webklip-search-empty"><div class="webklip-search-empty-icon">⌕</div><h1 class="webklip-title">Pesquise na web</h1><p class="webklip-subtitle">Digite uma pergunta, assunto, ferramenta, jogo ou referência. Os resultados aparecem aqui sem sair do Klipza.</p></div>';
+    mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">${esc(locale.label)} · ${esc(locale.language)}</span></div></header><section class="webklip-view"><div class="webklip-inner"><div class="webklip-browser-bar"><form class="webklip-search-form" id="webKlipSearchForm" role="search"><span class="webklip-search-icon" aria-hidden="true">⌕</span><input id="webKlipSearchInput" value="${esc(webKlipState.query)}" maxlength="180" autocomplete="off" placeholder="Pesquisar na web…" aria-label="Pesquisar na web"><button type="submit">Pesquisar</button></form></div><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · busca interna</div><h2 class="webklip-title">${searching?'Resultados da pesquisa':'Comece uma pesquisa'}</h2><p class="webklip-subtitle">${searching?'Abra uma fonte dentro do Klipza ou envie a referência ao chat para continuar criando.':'O web.klip pesquisa fontes públicas e mantém você dentro do aplicativo.'}</p></div>${searching?'<button class="webklip-refresh" id="webKlipRefresh" type="button">Limpar</button>':''}</div>${searching&&webKlipState.searchLoading?'':`<div class="webklip-meta">${searching?`${items.length} resultado(s) · exibindo ${visibleItems.length} · limite de 50`:'A pesquisa só começa quando você enviar uma consulta.'}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div>`}${body}</div></section>`;
     mount.querySelector('#webKlipBack')?.addEventListener('click',()=>setView('chat'));
     const form=mount.querySelector('#webKlipSearchForm');
     form?.addEventListener('submit',event=>{event.preventDefault();searchWebKlip(mount.querySelector('#webKlipSearchInput')?.value||'');});
-    mount.querySelector('#webKlipClearSearch')?.addEventListener('click',()=>{webKlipState={...webKlipState,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,error:null};renderWebKlipPage();});
     mount.querySelector('#webKlipRefresh')?.addEventListener('click',refreshWebKlip);
     mount.querySelector('#webKlipLoadMore')?.addEventListener('click',()=>{webKlipState.visibleLimit=(webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE)+WEBKLIP_PAGE_SIZE;renderWebKlipPage();});
-    mount.querySelectorAll('[data-webklip-category]').forEach(button=>button.addEventListener('click',()=>{webKlipState.category=button.dataset.webklipCategory;webKlipState.visibleLimit=WEBKLIP_PAGE_SIZE;renderWebKlipPage();}));
     mount.querySelectorAll('[data-webklip-id]').forEach(card=>card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId)));
-    mount.querySelectorAll('[data-open-webklip-url]').forEach(button=>button.addEventListener('click',()=>openWebKlipPage(button.dataset.openWebklipUrl,button.dataset.openWebklipTitle)));
-    if(!webKlipState.items.length&&!webKlipState.loading&&!searching)fetchWebKlipItems();
   }
   function openWebKlipItem(id){
     const item=[...webKlipState.items,...webKlipState.searchResults].find(entry=>entry.id===id);if(!item)return;
     webKlipState.selected=item;
     const card=document.querySelector(`[data-webklip-id="${CSS.escape(id)}"]`);if(card)card.scrollIntoView({block:'center',behavior:'smooth'});
     const summary=`${item.summary}${item.meta?`\n\n${item.meta}`:''}`;
-    const detail=document.createElement('section');detail.className='webklip-detail';detail.innerHTML=`<div class="webklip-detail-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))} · ${esc(item.source||'Fonte pública')}</span><button class="webklip-back" type="button">Fechar</button></div><h2 class="webklip-detail-title">${esc(item.title)}</h2><p class="webklip-detail-summary">${esc(summary)}</p><div class="webklip-detail-actions"><button class="webklip-action" type="button" id="webKlipSendReference">Codar com referência</button>${item.url?`<button class="webklip-action secondary" type="button" id="webKlipOpenSource">Abrir dentro do Klipza</button>`:''}</div>`;
+    const detail=document.createElement('section');detail.className='webklip-detail';detail.innerHTML=`<div class="webklip-detail-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))} · ${esc(item.source||'Fonte pública')}</span><button class="webklip-back" type="button">Fechar</button></div><h2 class="webklip-detail-title">${esc(item.title)}</h2><p class="webklip-detail-summary">${esc(summary)}</p><div class="webklip-detail-actions"><button class="webklip-action" type="button" id="webKlipSendReference">Usar no chat</button>${item.url?`<button class="webklip-action secondary" type="button" id="webKlipOpenSource">Abrir dentro do Klipza</button>`:''}</div>`;
     const view=document.querySelector('.webklip-view .webklip-inner');if(!view)return;view.prepend(detail);detail.querySelector('.webklip-back').addEventListener('click',()=>detail.remove());detail.querySelector('#webKlipSendReference')?.addEventListener('click',()=>sendWebKlipToChat(item));detail.querySelector('#webKlipOpenSource')?.addEventListener('click',()=>openWebKlipPage(item.url,item.title));detail.scrollIntoView({behavior:'smooth',block:'start'});
   }
   function sendWebKlipToChat(item){
@@ -1906,35 +1875,15 @@ body.prime-modal-open{overflow:hidden}
       fakeReply(messageText);
     }finally{send.busy=false;}
   }
-  let billingCatalog=[];
-  function formatBillingAmount(cents,currency='BRL'){
-    try{return new Intl.NumberFormat('pt-BR',{style:'currency',currency}).format(Number(cents||0)/100);}catch{return `${currency} ${(Number(cents||0)/100).toFixed(2)}`;}
-  }
-  function updateBillingCatalog(){
-    const byCode=new Map(billingCatalog.map(product=>[product.code,product]));
-    document.querySelectorAll('[data-product-card]').forEach(card=>{const product=byCode.get(card.dataset.productCard);card.classList.toggle('billing-unavailable',!product);});
-    document.querySelectorAll('[data-product-price]').forEach(node=>{const product=byCode.get(node.dataset.productPrice);if(!product){node.innerHTML=node.dataset.productPrice==='prime_monthly'?'R$ 59,90 <small>/mês</small>':'Indisponível no momento';return;}const suffix=product.kind==='prime_subscription'?'/mês':'';node.innerHTML=`${esc(formatBillingAmount(product.amountCents,product.currency))}${suffix?` <small>${suffix}</small>`:''}`;});
-    document.querySelectorAll('[data-buy-product]').forEach(button=>{const product=byCode.get(button.dataset.buyProduct);button.disabled=!product;button.textContent=product?(product.kind==='prime_subscription'?'Assinar por R$ 59,90/mês':'Assinar'):'Ativação pendente';});
-  }
-  async function loadBillingCatalog(){
-    const status=$('primeCatalogStatus');
-    try{const data=await billingFetch('?catalog=1');billingCatalog=Array.isArray(data.products)?data.products:[];updateBillingCatalog();if(status)status.textContent=billingCatalog.length?'Prime configurado. A assinatura será ativada somente após confirmação do Mercado Pago.':'O Prime está pronto na interface, mas a cobrança permanece bloqueada até configurar credenciais e ativar o catálogo no servidor.';return billingCatalog;}
-    catch(error){billingCatalog=[];updateBillingCatalog();if(status)status.textContent='A assinatura ainda não está disponível. Configure o ambiente seguro do Mercado Pago antes de ativar cobranças.';return [];}
-  }
-  async function startPurchase(productCode){
-    if(!state.user){alert('Entre na sua conta antes de comprar.');return;}
-    const button=document.querySelector(`[data-buy-product="${CSS.escape(productCode)}"]`);if(button)button.disabled=true;
-    try{const result=await billingFetch('',{method:'POST',body:JSON.stringify({productCode})});if(!result.checkoutUrl)throw new Error('O Mercado Pago não retornou uma URL de checkout.');window.location.assign(result.checkoutUrl);}
-    catch(error){if(button)button.disabled=false;showResponseStatus(error.message||'Não foi possível iniciar a compra.');}
-  }
   function openPrimeModal(tab='prime') {
     const modal=$('primeModal'); if(!modal)return;
     modal.classList.add('open'); modal.setAttribute('aria-hidden','false');
     document.querySelectorAll('.prime-tab').forEach(b=>b.classList.toggle('active',b.dataset.primeTab===tab));
     document.querySelectorAll('.prime-panel').forEach(p=>p.classList.toggle('active',p.dataset.primePanel===tab));
-    document.querySelectorAll('[data-buy-product]').forEach(button=>{if(!button.dataset.bound){button.dataset.bound='1';button.addEventListener('click',()=>startPurchase(button.dataset.buyProduct));}});
+    document.querySelectorAll('[data-prime-coming-soon]').forEach(button=>{if(!button.dataset.bound){button.dataset.bound='1';button.addEventListener('click',()=>primeComingSoon('Klipza.Prime'));}});
     document.body.classList.add('prime-modal-open');
-    loadBillingCatalog();
+    const status=$('primeCatalogStatus');
+    if(status)status.innerHTML='Status atual: <strong>em desenvolvimento</strong>. Nenhuma cobrança ou checkout está disponível nesta versão.';
   }
   function closePrimeModal(){
     const modal=$('primeModal'); if(!modal)return;
@@ -1942,7 +1891,7 @@ body.prime-modal-open{overflow:hidden}
     document.body.classList.remove('prime-modal-open');
   }
   function primeComingSoon(label){
-    alert(label+' ainda está em desenvolvimento. O pagamento e a ativação serão conectados aqui quando estiverem disponíveis.');
+    alert(label+' ainda está em desenvolvimento. Nenhuma cobrança ou ativação está disponível nesta versão.');
   }
   function upcoming(label){
     if(label==='Klipza.Prime') openPrimeModal('prime');
@@ -2037,8 +1986,7 @@ body.prime-modal-open{overflow:hidden}
     const items=[
       ['geral','Geral','M4 5h16M4 12h16M4 19h16'],
       ['conta','Conta','M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0'],
-      ['compras','Saldo e cobrança','M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2M8 13h8'],
-      ['prime','Klipza.Prime','M12 3l2.8 5.7L21 9.6l-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z'],
+      ['recursos','Recursos pagos','M12 3l2.8 5.7L21 9.6l-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z'],
       ['dados','Dados e privacidade','M6 4h12v16H6zM9 8h6M9 12h6M9 16h4'],
       ['documentos','Termos e documentos','M6 3h9l3 3v15H6zM9 12h6M9 16h6M9 8h3'],
       ['notificacoes','Notificações','M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4'],
@@ -2062,18 +2010,16 @@ body.prime-modal-open{overflow:hidden}
       </div>`;
     let content='';
     if(active==='geral'){
-      const tokenBalance=Number(state.wallet?.tokenBalance||0);
-      const primeStatus=state.wallet?.primeStatus||'Não ativo';
       content=`
-        <div class="settings-hero"><div class="settings-hero-kicker">Klipza.IA · central da conta</div><div class="settings-hero-title">Tudo em um só lugar</div><div class="settings-hero-copy">Aqui você controla sua conta, saldo, assinatura, dados e documentos oficiais. Cada recurso aparece uma única vez para evitar caminhos repetidos.</div></div>
+        <div class="settings-hero"><div class="settings-hero-kicker">Klipza.IA · central da conta</div><div class="settings-hero-title">Tudo em um só lugar</div><div class="settings-hero-copy">Aqui você controla sua conta, preferências, dados, segurança e documentos oficiais. Cada recurso aparece uma única vez para evitar caminhos repetidos.</div></div>
         <div class="settings-card-grid">
-          <article class="settings-feature-card"><strong>Saldo de tokens</strong><span>Os 1.500 tokens de cada cobrança aprovada ficam acumulados e vinculados à sua conta.</span><div class="settings-card-value">${tokenBalance.toLocaleString('pt-BR')}</div><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('compras')">Ver compras</button></article>
-          <article class="settings-feature-card"><strong>Klipza.Prime</strong><span>Plano e benefícios da sua assinatura.</span><div class="settings-card-value" style="font-size:16px">${esc(primeStatus)}</div><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('prime')">Ver Prime</button></article>
+          <article class="settings-feature-card"><strong>Recursos pagos</strong><span>Tokens adicionais e Klipza.Prime ainda estão em desenvolvimento. Nenhuma cobrança está ativa.</span><div class="settings-card-value" style="font-size:16px">Em desenvolvimento</div><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('recursos')">Ver status</button></article>
+          <article class="settings-feature-card"><strong>Conta conectada</strong><span>Perfil, acesso e ciclo de vida da sua conta Klipza.IA.</span><div class="settings-card-value" style="font-size:16px">${esc(state.user?.email||'Conectada')}</div><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('conta')">Ver conta</button></article>
         </div>
         <div class="settings-panel">
           <div class="settings-group-title">Preferências essenciais</div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Aparência</div><div class="settings-line-desc">Escolha entre a interface clara e o modo cinza confortável.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('${state.theme==='dark'?'light':'dark'}')">${state.theme==='dark'?'Cinza':'Claro'} · trocar</button></div></div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">País e idioma do web.klip</div><div class="settings-line-desc">Escolha a região das notícias e o idioma das fontes públicas.</div></div><div class="settings-line-value"><select class="webklip-country-select" aria-label="País e idioma do web.klip" onchange="window.K.setWebKlipCountry(this.value)">${webKlipCountryOptions()}</select></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">País e idioma do web.klip</div><div class="settings-line-desc">Escolha a região e o idioma usados nos resultados da pesquisa pública.</div></div><div class="settings-line-value"><select class="webklip-country-select" aria-label="País e idioma do web.klip" onchange="window.K.setWebKlipCountry(this.value)">${webKlipCountryOptions()}</select></div></div>
         </div>`;
     } else if(active==='dados'){
       content=`
@@ -2102,20 +2048,13 @@ body.prime-modal-open{overflow:hidden}
           <div class="settings-account-card"><div class="settings-account-row"><div class="settings-account-avatar">${esc(ini)}</div><div class="settings-account-meta"><strong>${esc(state.user?.name||'Usuário')}</strong><div>${esc(state.user?.email||'')}</div></div></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Autenticação</div><div class="settings-line-desc">Sua conta usa e-mail e senha protegidos pelo Supabase Auth.</div></div><div class="settings-line-value"><span class="settings-status-pill">● Conectada</span></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Atividade da conta</div><div class="settings-line-desc">${inactivity}</div></div><div class="settings-line-value"><span class="settings-badge">Política ativa</span></div></div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Saldo e cobrança</div><div class="settings-line-desc">Consulte tokens, pedidos, cobranças e status do Prime em uma única seção.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('compras')">Abrir saldo</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Recursos pagos</div><div class="settings-line-desc">Tokens adicionais e Klipza.Prime estão em desenvolvimento e aparecem em uma única seção.</div></div><div class="settings-line-value"><button class="settings-badge" type="button" onclick="window.K.setSettingsSection('recursos')">Ver status</button></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Encerrar sessão</div><div class="settings-line-desc">Sai da conta neste navegador.</div></div><div class="settings-line-value"><button class="settings-badge danger" onclick="window.K.logout()">Sair</button></div></div>
         </div>`;
-    } else if(active==='compras'){
-      ensureQuota();
-      const tokenBalance=Number(state.wallet?.tokenBalance||0);
-      content=`<div class="settings-titlebar"><h1>Saldo e cobrança</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Klipza.Prime mensal</div><div class="settings-hero-title">${tokenBalance.toLocaleString('pt-BR')} tokens disponíveis</div><div class="settings-hero-copy">O Prime custa R$ 59,90 por mês. Cada cobrança aprovada libera 1.500 tokens, que ficam acumulados na conta. Anexos e fotos ficam ilimitados enquanto a assinatura estiver ativa.</div><button class="prime-action" type="button" onclick="window.K.openPrimeModal('prime')">Assinar Klipza.Prime · R$ 59,90/mês</button></div><div class="settings-panel"><div class="settings-group-title">Uso atual</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Energia diária</div><div class="settings-line-desc">Ciclo gratuito de 24 horas para uso normal do chat.</div></div><div class="settings-line-value"><span class="settings-badge">${Math.round(state.quota.energy)} disponíveis</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Anexos e fotos</div><div class="settings-line-desc">O limite fica ilimitado enquanto o status do Prime estiver ativo.</div></div><div class="settings-line-value"><span class="settings-badge">${primeActive()?'Ilimitado':'3 por ciclo'}</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Histórico de cobrança</div><div class="settings-line-desc">Pedidos, status, valor, renovação e eventos de assinatura são sincronizados com a conta.</div></div><div class="settings-line-value"><span class="settings-badge">${state.wallet?.orders?.length?'Sincronizado':'Aguardando'}</span></div></div></div>`;
-    } else if(active==='prime'){
-      const primeStatus=state.wallet?.primeStatus||'inactive';
-      const primeLabel=primeStatus==='active'?'Ativo':primeStatus==='pending'?'Aguardando confirmação':primeStatus==='cancelled'?'Cancelado':'Não ativo';
-      const periodEnd=state.wallet?.primeCurrentPeriodEnd?new Date(state.wallet.primeCurrentPeriodEnd).toLocaleDateString('pt-BR'):'';
-      content=`<div class="settings-titlebar"><h1>Klipza.Prime</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Assinatura mensal</div><div class="settings-hero-title">${esc(primeLabel)}</div><div class="settings-hero-copy">R$ 59,90 por mês, com renovação recorrente no Mercado Pago. A cada cobrança aprovada, o servidor libera 1.500 tokens. O saldo é acumulável e os anexos/fotos ficam ilimitados enquanto a assinatura estiver ativa.</div><button class="prime-action" type="button" onclick="window.K.openPrimeModal('prime')">${primeStatus==='active'?'Ver assinatura':'Assinar por R$ 59,90/mês'}</button></div><div class="settings-panel"><div class="settings-group-title">Benefícios confirmados</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tokens por ciclo</div><div class="settings-line-desc">1.500 tokens em cada cobrança mensal aprovada, com acúmulo no saldo da conta.</div></div><div class="settings-line-value"><span class="settings-badge">1.500</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Anexos e fotos</div><div class="settings-line-desc">Sem contagem por ciclo enquanto o Prime estiver ativo.</div></div><div class="settings-line-value"><span class="settings-badge">Ilimitado</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Próxima renovação</div><div class="settings-line-desc">A data é atualizada pelo webhook oficial do Mercado Pago.</div></div><div class="settings-line-value"><span class="settings-badge">${periodEnd||'Após ativação'}</span></div></div></div>`;
+    } else if(active==='recursos'||active==='compras'||active==='prime'){
+      content=`<div class="settings-titlebar"><h1>Recursos pagos</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Klipza.Prime e tokens</div><div class="settings-hero-title">Em desenvolvimento</div><div class="settings-hero-copy">A área de recursos pagos ainda está sendo estruturada. Nesta versão não existe checkout, cobrança ou ativação de benefícios pagos.</div><button class="prime-action secondary" type="button" onclick="window.K.openPrimeModal('prime')">Ver apresentação do Prime</button></div><div class="settings-panel"><div class="settings-group-title">O que será definido aqui</div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Klipza.Prime</div><div class="settings-line-desc">Plano, benefícios, limites, preço e condições serão publicados antes da ativação.</div></div><div class="settings-line-value"><span class="settings-badge">Em desenvolvimento</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tokens adicionais</div><div class="settings-line-desc">O saldo atual permanece protegido; nenhuma compra avulsa ou cobrança está disponível.</div></div><div class="settings-line-value"><span class="settings-badge">Indisponível</span></div></div><div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Anexos e fotos</div><div class="settings-line-desc">Os limites atuais continuam valendo até a publicação oficial dos benefícios.</div></div><div class="settings-line-value"><span class="settings-badge">Limites atuais</span></div></div></div>`;
     } else if(active==='documentos'){
-      content=`<div class="settings-titlebar"><h1>Termos e documentos</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Documentação oficial</div><div class="settings-hero-title">Leia como o Klipza funciona</div><div class="settings-hero-copy">Explicamos dados coletados, segurança, compras, tokens, Prime, inatividade e exclusão de conta em linguagem clara. Os documentos podem ser lidos no app ou baixados para consulta.</div></div><div class="settings-document-list"><article class="settings-document-card"><div class="settings-document-copy"><strong>Termos de Uso</strong><span>Regras de utilização do Klipza.IA, conta, conteúdo, compras e cancelamentos.</span></div><div class="settings-document-actions"><a href="/legal/termos-de-uso.html" target="_blank" rel="noopener">Ler</a><a href="/legal/termos-de-uso.html" download="klipza-termos-de-uso.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Política de Privacidade</strong><span>O que é coletado, por que é usado, onde fica armazenado e como solicitar direitos.</span></div><div class="settings-document-actions"><a href="/legal/politica-de-privacidade.html" target="_blank" rel="noopener">Ler</a><a href="/legal/politica-de-privacidade.html" download="klipza-politica-de-privacidade.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Compras, tokens e Klipza.Prime</strong><span>Como o pagamento é confirmado, quando os tokens são creditados e como funcionam reembolsos, estornos e assinaturas.</span></div><div class="settings-document-actions"><a href="/legal/compras-e-prime.html" target="_blank" rel="noopener">Ler</a><a href="/legal/compras-e-prime.html" download="klipza-compras-e-prime.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Retenção e inatividade</strong><span>Contas sem atividade por 24 meses recebem avisos em 90, 30 e 7 dias antes da exclusão definitiva.</span></div><div class="settings-document-actions"><a href="/legal/retencao-e-inatividade.html" target="_blank" rel="noopener">Ler</a><a href="/legal/retencao-e-inatividade.html" download="klipza-retencao-e-inatividade.html">Baixar</a></div></article></div>`;
+      content=`<div class="settings-titlebar"><h1>Termos e documentos</h1></div><div class="settings-hero"><div class="settings-hero-kicker">Documentação oficial</div><div class="settings-hero-title">Leia como o Klipza funciona</div><div class="settings-hero-copy">Explicamos conta, chat, histórico, artefatos, web.klip, dados, segurança, recursos em desenvolvimento, inatividade e exclusão em linguagem clara. Os documentos podem ser lidos no app ou baixados para consulta.</div></div><div class="settings-document-list"><article class="settings-document-card"><div class="settings-document-copy"><strong>Guia de uso do Klipza.IA</strong><span>Como usar conta, conversas, artefatos, anexos, web.klip, configurações e segurança.</span></div><div class="settings-document-actions"><a href="/legal/guia-do-klipza.html" target="_blank" rel="noopener">Ler</a><a href="/legal/guia-do-klipza.html" download="klipza-guia-oficial.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Termos de Uso</strong><span>Regras de utilização do Klipza.IA, conta, conteúdo, segurança e recursos em desenvolvimento.</span></div><div class="settings-document-actions"><a href="/legal/termos-de-uso.html" target="_blank" rel="noopener">Ler</a><a href="/legal/termos-de-uso.html" download="klipza-termos-de-uso.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Política de Privacidade</strong><span>O que é coletado, por que é usado, onde fica armazenado e como solicitar direitos.</span></div><div class="settings-document-actions"><a href="/legal/politica-de-privacidade.html" target="_blank" rel="noopener">Ler</a><a href="/legal/politica-de-privacidade.html" download="klipza-politica-de-privacidade.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Recursos pagos e Klipza.Prime</strong><span>Como os recursos pagos funcionarão, quais benefícios serão oferecidos e como serão publicados antes da ativação.</span></div><div class="settings-document-actions"><a href="/legal/compras-e-prime.html" target="_blank" rel="noopener">Ler</a><a href="/legal/compras-e-prime.html" download="klipza-compras-e-prime.html">Baixar</a></div></article><article class="settings-document-card"><div class="settings-document-copy"><strong>Retenção e inatividade</strong><span>Contas sem atividade por 24 meses recebem avisos em 90, 30 e 7 dias antes da exclusão definitiva.</span></div><div class="settings-document-actions"><a href="/legal/retencao-e-inatividade.html" target="_blank" rel="noopener">Ler</a><a href="/legal/retencao-e-inatividade.html" download="klipza-retencao-e-inatividade.html">Baixar</a></div></article></div>`;
     } else if(active==='notificacoes'){
       content=`<div class="settings-titlebar"><h1>Notificações</h1></div><div class="settings-panel"><div class="settings-group-title">Preferências</div>
         <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Notificações do navegador</div><div class="settings-line-desc">Receba um aviso quando uma resposta do Klipza.IA terminar.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.toggleNotifications()">${state.settings.notifications?'Ativas':'Ativar'}</button></div></div>
@@ -2191,7 +2130,7 @@ body.prime-modal-open{overflow:hidden}
     renderSettingsPage();
   }
   window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,
-    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,startPurchase,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal};
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal};
   $('authEmailForm')?.addEventListener('submit',submitEmailAuth);
   $('authRecoveryForm')?.addEventListener('submit',updateRecoveredPassword);
   $('authModeToggle')?.addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));

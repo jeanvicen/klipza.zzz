@@ -1,4 +1,4 @@
--- Klipza.IA — saldo persistente, compras Mercado Pago e Klipza.Prime
+-- Klipza.IA — saldo persistente, recursos pagos e Klipza.Prime
 -- Pré-requisitos: 20260820000001_security_lifecycle.sql e 20260820000002_cron.sql.
 -- Valores de catálogo devem ser preenchidos pelo proprietário antes de ativar cobrança real.
 
@@ -51,7 +51,7 @@ create table if not exists public.billing_orders (
   amount_cents integer not null check (amount_cents > 0),
   currency text not null check (currency ~ '^[A-Z]{3}$'),
   status text not null default 'pending' check (status in ('pending','approved','rejected','cancelled','expired','refunded','charged_back')),
-  provider text not null default 'mercadopago',
+  provider text not null default 'unconfigured',
   provider_preference_id text,
   provider_payment_id text,
   provider_subscription_id text,
@@ -177,7 +177,7 @@ begin
   select token_balance into v_balance from public.profiles where id=v_order.user_id for update;
   v_balance := coalesce(v_balance,0) + v_order.token_amount;
   insert into public.wallet_ledger(user_id,order_id,entry_type,token_amount,balance_after,event_key,description,metadata)
-  values(v_order.user_id,v_order.id,'purchase_credit',v_order.token_amount,v_balance,p_event_key,'Compra confirmada pelo Mercado Pago',jsonb_build_object('provider_payment_id',p_provider_payment_id))
+  values(v_order.user_id,v_order.id,'purchase_credit',v_order.token_amount,v_balance,p_event_key,'Compra confirmada pelo processador configurado',jsonb_build_object('provider_payment_id',p_provider_payment_id))
   on conflict(event_key) do nothing;
   get diagnostics v_inserted = row_count;
   if v_inserted > 0 then

@@ -1,6 +1,6 @@
 -- Klipza.IA — somente Klipza.Prime mensal
 -- Pré-requisito: 20260820000003_billing.sql aplicada.
--- A ativação de cobrança deve ocorrer somente depois de configurar o Mercado Pago.
+-- A ativação de cobrança deve ocorrer somente depois de escolher, configurar e testar um processador.
 
 begin;
 
@@ -40,7 +40,7 @@ declare
     when p_status = 'expired' then 'expired'
     else 'pending'
   end;
-  v_grant_tokens boolean := (v_status = 'active' and p_event_key like 'mp_payment:%');
+  v_grant_tokens boolean := (v_status = 'active' and p_event_key like 'payment:%');
   v_balance bigint;
   v_inserted integer := 0;
 begin

@@ -21,16 +21,14 @@ for (const file of [
   'supabase/migrations/20260820000004_prime_only.sql',
   'admin.html',
   'api/admin-users.js',
-  'api/mercadopago.js',
-  'api/mercadopago-webhook.js',
+  'api/webklip.js',
   'legal/document.css',
+  'legal/guia-do-klipza.html',
   'legal/termos-de-uso.html',
   'legal/politica-de-privacidade.html',
   'legal/compras-e-prime.html',
   'legal/retencao-e-inatividade.html',
-  'docs/mercadopago-production-setup.md',
-  'docs/purchases-architecture-notes.md',
-  'docs/mercadopago-production-setup.md'
+  'docs/refactor-audit-20260821.md'
 ]) {
   await access(resolve(root, file));
 }
@@ -41,20 +39,17 @@ if (manifest.name !== 'Klipza.IA' || manifest.icons.length < 2 || manifest.displ
 }
 
 for (const marker of [
-  'id="webKlipToggle"',
-  'webKlipSearchInput',
-  'id="webKlipBack"',
-  'webklip-iframe',
+  'data-view="webklip"',
+  'id="webKlipSearchInput"',
+  'id="webKlipSearchForm"',
   'webKlipOpenExternal',
   'nativeInAppBrowser',
   'capacitor-inappbrowser.js',
   'WEBKLIP_PAGE_SIZE=18',
-  'WEBKLIP_ROTATION_MS=25000',
-  'WEBKLIP_CACHE_KEY=\'klipza_webklip_daily_v2\'',
-  '/api/webklip?date=',
   '/api/webklip?q=',
   '/api/webklip?check=',
-  'Codar com referência',
+  'Usar no chat',
+  'webklip-search-empty',
   'touch_user_activity',
   'data-password-toggle="authPassword"',
   'data-password-toggle="authPasswordConfirm"',
@@ -63,34 +58,22 @@ for (const marker of [
   'passwordIsStrong',
   'uppercase:/[A-Z]/',
   'special:/[^A-Za-z0-9\\s]/',
-  'R$ 59,90',
-  '1.500 tokens',
-  'anexos ilimitados',
-  "data-buy-product=\"prime_monthly\""
+  'Em desenvolvimento',
+  'Nenhuma cobrança'
 ]) {
-  if (!html.includes(marker)) throw new Error(`Integração web.klip ausente: ${marker}`);
+  if (!html.includes(marker)) throw new Error(`Integração ou estado esperado ausente: ${marker}`);
 }
 
 const api = await readFile(resolve(root, 'api/webklip.js'), 'utf8');
 const adminApi = await readFile(resolve(root, 'api/admin-users.js'), 'utf8');
-const billingApi = await readFile(resolve(root, 'api/mercadopago.js'), 'utf8');
-const webhookApi = await readFile(resolve(root, 'api/mercadopago-webhook.js'), 'utf8');
-const billingMigration = await readFile(resolve(root, 'supabase/migrations/20260820000003_billing.sql'), 'utf8');
 for (const marker of ['SUPABASE_SERVICE_ROLE_KEY', 'auth.admin.listUsers', 'auth.admin.deleteUser', 'admin_audit_log', 'is_admin']) {
   if (!adminApi.includes(marker)) throw new Error(`Painel administrativo inseguro ou incompleto: ${marker}`);
-}
-
-for (const marker of ['billing_products', 'billing_orders', 'wallet_ledger', 'apply_billing_approval', 'consume_wallet_tokens', 'MERCADOPAGO_ACCESS_TOKEN', 'checkout/preferences', 'create_payment', '/v1/payments', 'prime_monthly']) {
-  if (!billingApi.includes(marker) && !billingMigration.includes(marker)) throw new Error(`Billing ausente ou inseguro: ${marker}`);
-}
-for (const marker of ['x-signature', 'createHmac', 'billing_provider_events', 'v1/payments', 'apply_billing_approval', 'mp_payment:']) {
-  if (!webhookApi.includes(marker) && !billingMigration.includes(marker)) throw new Error(`Webhook de billing incompleto: ${marker}`);
 }
 
 for (const marker of [
   'news.google.com/rss/search',
   'country',
-  '.slice(0, 50)',
+  'q=',
   'inspectFramePolicy',
   'frame-ancestors',
   'celebrity',
@@ -100,7 +83,7 @@ for (const marker of [
   'MAX_FRAME_REDIRECTS',
   'node:dns/promises'
 ]) {
-  if (!api.includes(marker)) throw new Error(`Proteção do endpoint ausente: ${marker}`);
+  if (!api.includes(marker)) throw new Error(`Proteção ou pesquisa do endpoint ausente: ${marker}`);
 }
 
-console.log('check:html OK — PWA, web.klip, Auth, ciclo de vida, billing, documentos, endpoint seguro e ícones encontrados.');
+console.log('check:html OK — PWA, web.klip search-first, Auth, ciclo de vida, recursos pagos em desenvolvimento, documentos, endpoint seguro e ícones encontrados.');

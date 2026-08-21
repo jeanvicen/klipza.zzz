@@ -1,1 +1,49 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Compras e Klipza.Prime — Klipza.IA</title><link rel="stylesheet" href="/legal/document.css"></head><body><main class="document"><header class="brand"><img src="/assets/klipza-mark.png" alt=""><div><strong>Klipza Studio · Klipza.IA</strong><span>Documento oficial de referência · versão 1.1 · 20 de agosto de 2026</span></div></header><div class="eyebrow">Assinatura mensal</div><h1>Como funciona o Klipza.Prime</h1><p class="meta">Este documento explica a cobrança recorrente do Klipza.Prime, a entrega mensal de créditos e o tratamento de anexos e fotos.</p><div class="actions"><button type="button" onclick="window.print()">Imprimir / salvar em PDF</button><a href="/legal/compras-e-prime.html" download="klipza-compras-e-prime.html">Baixar documento</a></div><div class="notice"><strong>Plano publicado:</strong> Klipza.Prime mensal por <strong>R$ 59,90</strong>, sujeito à configuração e aprovação da aplicação no Mercado Pago. O checkout só deve ser ativado depois de configurar as credenciais server-side, os webhooks e os testes de produção.</div><h2>1. O que o Prime oferece</h2><div class="table-wrap"><table><thead><tr><th>Benefício</th><th>Regra</th></tr></thead><tbody><tr><td>Preço</td><td>R$ 59,90 por mês, com cobrança recorrente.</td></tr><tr><td>Tokens</td><td>1.500 tokens são liberados a cada cobrança mensal aprovada e validada pelo servidor.</td></tr><tr><td>Acúmulo</td><td>Os tokens são somados ao saldo existente da conta. O ciclo seguinte não apaga o saldo anterior.</td></tr><tr><td>Anexos e fotos</td><td>Ilimitados enquanto o status da assinatura estiver ativo. A política de uso aceitável continua válida.</td></tr><tr><td>Pagamento</td><td>Processado no ambiente do Mercado Pago; o Klipza não recebe a senha nem os dados completos do cartão.</td></tr></tbody></table></div><h2>2. Fluxo de assinatura</h2><ol><li>O usuário escolhe o Klipza.Prime no app e vê preço, periodicidade e benefícios.</li><li>O servidor cria um pedido interno com o usuário, o plano, o preço fixado no catálogo e uma chave de idempotência.</li><li>O servidor cria a assinatura recorrente no Mercado Pago com periodicidade mensal e valor de R$ 59,90.</li><li>O usuário conclui o consentimento no ambiente do Mercado Pago.</li><li>O Mercado Pago envia eventos para o endpoint server-side do Klipza.</li><li>O servidor valida `x-signature`, consulta a assinatura ou o pagamento, confirma o valor e identifica o pedido.</li><li>Somente a função transacional do Supabase ativa o Prime e credita os 1.500 tokens. A página de retorno não libera benefícios.</li></ol><h2>3. Renovações e idempotência</h2><p>Cada cobrança mensal aprovada gera um evento único no ledger. Se o Mercado Pago reenviar a mesma notificação, o identificador do evento impede um segundo crédito. Uma nova cobrança aprovada em um mês posterior gera um novo lançamento de 1.500 tokens.</p><div class="definition"><strong>Exemplo</strong><span>Se a conta possui 100 tokens e a primeira cobrança do Prime é aprovada, o saldo passa a 1.600. Se a renovação seguinte for aprovada, passa a 3.100, descontando apenas o uso efetivamente realizado.</span></div><h2>4. Estados da assinatura</h2><div class="table-wrap"><table><thead><tr><th>Estado</th><th>Benefícios</th><th>Tratamento</th></tr></thead><tbody><tr><td>Ativa</td><td>1.500 tokens após cada cobrança aprovada e anexos/fotos ilimitados</td><td>Uso normal do Prime.</td></tr><tr><td>Pendente</td><td>Não libera novos benefícios</td><td>Aguardando confirmação do Mercado Pago.</td></tr><tr><td>Pausada, cancelada ou expirada</td><td>Não libera novos créditos e encerra a franquia ilimitada após o período válido</td><td>O saldo já registrado permanece no histórico da conta, sujeito às regras de estorno.</td></tr><tr><td>Reembolsada ou estornada</td><td>Pode gerar ajuste conforme o caso</td><td>O evento fica registrado e o saldo pode ser debitado ou congelado para evitar benefício indevido.</td></tr></tbody></table></div><h2>5. Cancelamento</h2><p>O usuário pode cancelar a renovação recorrente pelos meios oferecidos pelo Mercado Pago ou pelo canal indicado no app. O cancelamento interrompe cobranças futuras conforme o estado informado pelo provedor. O período já pago segue a política comercial e a legislação aplicável.</p><h2>6. Exclusão e inatividade</h2><p>A conta pode ser marcada para exclusão após 24 meses sem atividade, com avisos previstos em 90, 30 e 7 dias. Na exclusão definitiva, o saldo e os benefícios deixam de estar disponíveis, enquanto registros mínimos de compra podem ser mantidos pelo prazo legal, com acesso restrito e finalidade de auditoria, atendimento ou obrigação legal.</p><h2>7. Proteção do comprador</h2><p>O suporte nunca solicitará senha, Access Token, código de segurança ou foto completa de cartão. Para investigar uma cobrança, o usuário deve fornecer somente o e-mail da conta, o identificador do pedido e as informações estritamente necessárias do comprovante.</p><footer class="footer">Klipza Studio · Klipza.IA · Compras e Prime · Revisão recomendada antes da ativação comercial.</footer></main></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Recursos pagos e Klipza.Prime — Klipza.IA</title>
+  <link rel="stylesheet" href="/legal/document.css">
+</head>
+<body>
+  <main class="document">
+    <header class="brand"><img src="/assets/klipza-mark.png" alt=""><div><strong>Klipza Studio · Klipza.IA</strong><span>Documento oficial de referência · versão 1.2 · 21 de agosto de 2026</span></div></header>
+    <div class="eyebrow">Recursos em desenvolvimento</div>
+    <h1>Como funcionarão os recursos pagos</h1>
+    <p class="meta">Este documento explica o estado atual do Klipza.Prime, dos tokens adicionais e das regras que serão publicadas antes de qualquer ativação comercial.</p>
+    <div class="actions"><button type="button" onclick="window.print()">Imprimir / salvar em PDF</button><a href="/legal/compras-e-prime.html" download="klipza-recursos-pagos-e-prime.html">Baixar documento</a></div>
+    <div class="notice"><strong>Status atual:</strong> o módulo de recursos pagos está em desenvolvimento. Nesta versão não existe checkout, cobrança ativa, compra avulsa de tokens nem ativação automática de benefícios pagos.</div>
+    <h2>1. O que é o Klipza.Prime</h2>
+    <p>O Klipza.Prime é o nome reservado para um plano pago do Klipza.IA. A proposta, os benefícios, os limites, a periodicidade, o preço e as condições serão definidos e exibidos de maneira clara antes da abertura das assinaturas.</p>
+    <h2>2. O que não está disponível agora</h2>
+    <div class="table-wrap"><table><thead><tr><th>Recurso</th><th>Estado atual</th></tr></thead><tbody>
+      <tr><td>Checkout ou link de pagamento</td><td>Indisponível nesta versão.</td></tr>
+      <tr><td>Assinatura mensal</td><td>Em desenvolvimento; nenhuma renovação é criada.</td></tr>
+      <tr><td>Compra avulsa de tokens</td><td>Indisponível e não apresentada como opção ativa.</td></tr>
+      <tr><td>Crédito automático de tokens</td><td>Não ocorre sem um fluxo oficial, documentado e testado.</td></tr>
+      <tr><td>Anexos e fotos ilimitados</td><td>Benefício futuro; os limites atuais continuam valendo.</td></tr>
+    </tbody></table></div>
+    <h2>3. Como será a ativação futura</h2>
+    <ol>
+      <li>O Klipza publicará o plano, o preço, os benefícios, os limites, o ciclo de renovação e as regras de cancelamento.</li>
+      <li>O usuário verá essas informações dentro do aplicativo antes de escolher continuar.</li>
+      <li>O pagamento ocorrerá em uma página segura do processador que for oficialmente escolhido e divulgado na versão ativada.</li>
+      <li>O Klipza confirmará o resultado no servidor, sem confiar apenas na tela de retorno do navegador.</li>
+      <li>Somente depois da confirmação válida o sistema poderá alterar o status da assinatura ou creditar benefícios.</li>
+    </ol>
+    <h2>4. Tokens</h2>
+    <p>Tokens são unidades internas de uso do aplicativo. Não são dinheiro, investimento, depósito, valor mobiliário ou promessa de conversão em reais. Caso o recurso seja ativado, a quantidade, a validade, o acúmulo, o consumo e os ajustes serão explicados antes da compra e registrados na conta autenticada.</p>
+    <p>O saldo de uma conta não será alterado por limpar o navegador, trocar de aparelho ou reinstalar o APK. Ajustes excepcionais deverão ter motivo registrado e respeitar os documentos publicados na data da contratação.</p>
+    <h2>5. Cancelamento, reembolso e falhas</h2>
+    <p>Como não há cobrança ativa nesta versão, não existe assinatura a cancelar pelo aplicativo neste momento. Quando o recurso for ativado, as regras de cancelamento, reembolso, estorno, falha de cobrança e atendimento serão mostradas antes da confirmação e descritas na versão atualizada deste documento.</p>
+    <h2>6. Segurança</h2>
+    <p>O Klipza não solicita senhas, códigos de segurança, tokens secretos ou dados completos de cartão por chat, e-mail ou suporte. Nenhuma credencial privada deve ser colocada no navegador, no GitHub, no APK ou nesta documentação.</p>
+    <h2>7. Inatividade e exclusão</h2>
+    <p>A política de inatividade de 24 meses continua válida. Avisos podem ser enviados aproximadamente 90, 30 e 7 dias antes da exclusão definitiva. A conta, os dados e eventuais recursos associados são tratados conforme os <a href="/legal/retencao-e-inatividade.html">documentos de retenção</a> e a <a href="/legal/politica-de-privacidade.html">Política de Privacidade</a>.</p>
+    <h2>8. Atualizações</h2>
+    <p>Este documento será atualizado antes da ativação comercial e sempre que houver mudança relevante. A versão e a data no cabeçalho indicam qual texto está sendo exibido no aplicativo.</p>
+    <footer class="footer">Klipza Studio · Klipza.IA · Recursos pagos e Klipza.Prime · Status: em desenvolvimento.</footer>
+  </main>
+</body>
+</html>
