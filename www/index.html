@@ -1102,8 +1102,21 @@ body.prime-modal-open{overflow:hidden}
       ]);
       if(result.error)throw result.error;
       if(!result.data||result.data.app_initialized!==true)return false;
-      if(isObject(result.data.chats))state.chats=result.data.chats;
-      if(isObject(result.data.artifacts))state.artifacts=result.data.artifacts;
+      if(isObject(result.data.chats)){
+        const localChats=state.chats||{};
+        const remoteChats=result.data.chats;
+        Object.entries(remoteChats).forEach(([chatId,remoteChat])=>{
+          const localMessages=Array.isArray(localChats[chatId]?.messages)?localChats[chatId].messages:[];
+          const byId=new Map(localMessages.filter(message=>message?.id).map(message=>[message.id,message]));
+          const byContent=new Map(localMessages.map(message=>[`${message?.role||''}|${message?.content||''}`,message]));
+          remoteChat.messages=(remoteChat.messages||[]).map(message=>{
+            const local=byId.get(message.id)||byContent.get(`${message.role||''}|${message.content||''}`);
+            return local?{...message,id:message.id||local.id,liked:message.liked||local.liked,disliked:message.disliked||local.disliked,regenCount:Math.max(Number(message.regenCount)||0,Number(local.regenCount)||0)}:message;
+          });
+        });
+        state.chats=remoteChats;
+      }
+      if(isObject(result.data.artifacts))state.artifacts={...state.artifacts,...result.data.artifacts};
       if(isObject(result.data.quota)&&Object.keys(result.data.quota).length)state.quota=result.data.quota;
       if(isObject(result.data.settings))state.settings={...state.settings,...result.data.settings};
       state.activeChatId=result.data.active_chat_id||null;
