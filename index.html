@@ -834,7 +834,7 @@ body.prime-modal-open{overflow:hidden}
         </a>
         <button class="nav-btn nav-subbtn" type="button" onclick="window.K.toggleDeepThinking()" aria-label="Alternar pensamento profundo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 22h4M8 14a6 6 0 1 1 8 0c-1.2 1-2 2.1-2 4h-4c0-1.9-.8-3-2-4Z"/><path d="M12 2v1M4.9 4.9l.7.7M19.1 4.9l-.7.7"/></svg>
-          <span class="nav-label">Pensamento profundo <small class="nav-substatus" id="deepThinkingStatus">${state.settings.thinkingMode==='deep'?'Ativo':'Desativado'}</small></span>
+          <span class="nav-label">Pensamento profundo <small class="nav-substatus" id="deepThinkingStatus">Desativado</small></span>
         </button>
       </div>
     </div>
@@ -1539,6 +1539,7 @@ body.prime-modal-open{overflow:hidden}
     $('accountName').textContent=state.user.name;
     $('accountEmail').textContent=state.user.email;
     $('avatar').textContent=initials(state.user.name);
+    const deepStatus=$('deepThinkingStatus');if(deepStatus)deepStatus.textContent=state.settings.thinkingMode==='deep'?'Ativo':'Desativado';
     renderHistory(); renderArtifactsCount();
     if(!Object.keys(state.chats).length) createChat();
     else { activeChatId=state.activeChatId || Object.keys(state.chats)[0]; save(); renderChat(); }
