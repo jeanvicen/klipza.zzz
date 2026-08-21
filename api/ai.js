@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const GEMINI_CONTENT_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-20b';
+const GROQ_VISION_MODEL = process.env.GROQ_VISION_MODEL || 'qwen/qwen3.6-27b';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const MAX_MESSAGE_LENGTH = 12000;
 const MAX_HISTORY_ITEMS = 16;
@@ -113,6 +114,21 @@ function historyForGroq(history) {
   return history.map((item) => ({ role: item.role, content: item.content }));
 }
 
+async function resolveGeminiModel(key) {
+  if (process.env.GEMINI_MODEL) return process.env.GEMINI_MODEL;
+  try {
+    const payload = await requestJSON(GEMINI_CONTENT_URL, {
+      headers: { 'x-goog-api-key': key, Accept: 'application/json' }
+    });
+    const models = Array.isArray(payload?.models) ? payload.models : [];
+    const compatible = models.filter((model) => Array.isArray(model?.supportedGenerationMethods) && model.supportedGenerationMethods.includes('generateContent'));
+    const preferred = compatible.find((model) => /gemini-2\.5-flash|gemini-2\.0-flash|gemini-1\.5-flash/i.test(model.name || '')) || compatible.find((model) => /flash/i.test(model.name || '')) || compatible[0];
+    return String(preferred?.name || '').replace(/^models\//, '') || GEMINI_MODEL;
+  } catch {
+    return GEMINI_MODEL;
+  }
+}
+
 async function callGroq({ message, history }) {
   const key = process.env.GROQ_API_KEY;
   if (!key) throw httpError(503, 'O assistente de texto ainda não está configurado.');
@@ -148,7 +164,8 @@ async function callGeminiVision({ message, history, attachments }) {
     if (attachment.content) parts.push({ text: `Conteúdo do arquivo ${attachment.name}:\n${attachment.content}` });
     if (attachment.data) parts.push({ inline_data: attachment.data });
   }
-  const payload = await requestJSON(`${GEMINI_CONTENT_URL}/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
+  const model = await resolveGeminiModel(key);
+  const payload = await requestJSON(`${GEMINI_CONTENT_URL}/${encodeURIComponent(model)}:generateContent`, {
     method: 'POST',
     headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -158,6 +175,35 @@ async function callGeminiVision({ message, history, attachments }) {
     })
   });
   return extractGeminiText(payload);
+}
+
+async function callGroqVision({ message, history, attachments }) {
+  const key = process.env.GROQ_API_KEY;
+  if (!key) throw httpError(503, 'O fallback multimodal ainda não está configurado.');
+  const content = [{ type: 'text', text: message || 'Analise os anexos e descreva os pontos mais importantes.' }];
+  for (const attachment of attachments) {
+    if (attachment.data?.mime_type?.startsWith('image/') && attachment.data?.data) {
+      content.push({ type: 'image_url', image_url: { url: `data:${attachment.data.mime_type};base64,${attachment.data.data}` } });
+    } else if (attachment.content) {
+      content.push({ type: 'text', text: `Conteúdo do arquivo ${attachment.name}:\n${attachment.content}` });
+    } else {
+      content.push({ type: 'text', text: `O arquivo ${attachment.name} foi anexado, mas este fallback só consegue interpretar imagens e texto diretamente.` });
+    }
+  }
+  const payload = await requestJSON(GROQ_URL, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: GROQ_VISION_MODEL,
+      messages: [{ role: 'system', content: SYSTEM_PROMPT }, ...historyForGroq(history), { role: 'user', content }],
+      temperature: 0.25,
+      max_completion_tokens: 1600,
+      stream: false
+    })
+  });
+  const result = text(payload?.choices?.[0]?.message?.content, 24000);
+  if (!result) throw httpError(502, 'A análise multimodal veio vazia.');
+  return result;
 }
 
 async function callGeminiResearch({ message, history, reference }) {
@@ -171,17 +217,32 @@ async function callGeminiResearch({ message, history, reference }) {
     previous ? `Contexto recente:\n${previous}` : '',
     `Pergunta atual:\n${message}`
   ].filter(Boolean).join('\n\n');
-  const payload = await requestJSON(`${GEMINI_CONTENT_URL}/${encodeURIComponent(GEMINI_MODEL)}:generateContent`, {
-    method: 'POST',
-    headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-      contents: [{ role: 'user', parts: [{ text: input }] }],
-      tools: [{ googleSearch: {} }],
-      generationConfig: { temperature: 0.2, maxOutputTokens: 1600 }
-    })
-  });
-  return extractGeminiText(payload);
+  const model = await resolveGeminiModel(key);
+  const endpoint = `${GEMINI_CONTENT_URL}/${encodeURIComponent(model)}:generateContent`;
+  const baseBody = {
+    systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
+    contents: [{ role: 'user', parts: [{ text: input }] }],
+    generationConfig: { temperature: 0.2, maxOutputTokens: 1600 }
+  };
+  try {
+    const payload = await requestJSON(endpoint, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...baseBody, tools: [{ googleSearch: {} }] })
+    });
+    return extractGeminiText(payload);
+  } catch (error) {
+    if (![400, 404].includes(Number(error?.status))) throw error;
+    const fallbackPayload = await requestJSON(endpoint, {
+      method: 'POST',
+      headers: { 'x-goog-api-key': key, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...baseBody,
+        contents: [{ role: 'user', parts: [{ text: `${input}\n\nUse também as referências públicas já fornecidas pelo web.klip e não invente fontes.` }] }]
+      })
+    });
+    return extractGeminiText(fallbackPayload);
+  }
 }
 
 function json(response, status, body) {
@@ -207,12 +268,19 @@ export default async function handler(request, response) {
     const answer = mode === 'research'
       ? await callGeminiResearch({ message: message || 'Analise a referência selecionada.', history, reference: body.researchContext })
       : mode === 'attachments'
-        ? await callGeminiVision({ message, history, attachments })
+        ? await callGeminiVision({ message, history, attachments }).catch(async (geminiError) => {
+            try { return await callGroqVision({ message, history, attachments }); }
+            catch (groqError) {
+              const fallbackError = httpError(502, 'Não foi possível analisar o anexo agora.');
+              fallbackError.providerMessage = [geminiError?.providerMessage, groqError?.providerMessage].filter(Boolean).join(' | ');
+              throw fallbackError;
+            }
+          })
         : await callGroq({ message, history });
     json(response, 200, { answer, mode });
   } catch (error) {
     const status = Number(error?.status) || 500;
-    if (status >= 500) console.error('ai_request_failed', error?.message || error);
+    if (status >= 400) console.error('ai_request_failed', error?.message || error, error?.providerMessage || '');
     json(response, status, { error: status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message });
   }
 }
