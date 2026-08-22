@@ -154,5 +154,3 @@ grant execute on function public.refund_user_energy(integer, text) to authentica
 grant execute on function public.consume_wallet_tokens(uuid, bigint, text) to service_role;
 
 commit;
-EOF
-wc -l /home/ubuntu/klipza.zzz/supabase/migrations/20260821000011_quota_idempotency_hardening.sql

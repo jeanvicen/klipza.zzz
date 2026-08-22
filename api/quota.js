@@ -22,7 +22,7 @@ export default async function handler(request, response) {
   cors(response);
   if (request.method === 'OPTIONS') { response.status(204).end(); return; }
   try {
-    const { client, admin, user } = await requireUser(request);
+    const { client } = await requireUser(request);
     if (request.method === 'GET') {
       const { data, error } = await client.rpc('get_user_quota');
       if (error) throw error;
@@ -34,7 +34,8 @@ export default async function handler(request, response) {
     const eventKey = text(body.eventKey, 180);
     if (action === 'consume_artifact' || action === 'refund_artifact') {
       if (eventKey.length < 8) throw httpError(400, 'Consumo inválido.');
-      const rpcName = action === 'consume_artifact' ? 'consume_user_energy' : 'refund_user_energy';
+      if (action === 'refund_artifact' && !eventKey.startsWith('artifact:')) throw httpError(400, 'Evento de artefato inválido.');
+      const rpcName = action === 'consume_artifact' ? 'consume_user_energy' : 'refund_user_artifact_energy';
       const { data, error } = await client.rpc(rpcName, { p_amount: 15, p_event_key: `artifact:${eventKey}` });
       if (error) throw error;
       return json(response, 200, { result: normalizeQuota(data), consumed: data?.consumed === true, refunded: data?.refunded === true, alreadyProcessed: data?.already_processed === true, artifactCharged: action === 'consume_artifact', artifactRefunded: action === 'refund_artifact' });
@@ -42,12 +43,14 @@ export default async function handler(request, response) {
     const amount = Number(body.amount);
     const maxAmount = action === 'consume_attachments' ? 3 : 100;
     if (!Number.isInteger(amount) || amount <= 0 || amount > maxAmount || eventKey.length < 8) throw httpError(400, 'Consumo inválido.');
-    if (action === 'consume_tokens') {
-      const { data, error } = await admin.rpc('consume_wallet_tokens', { p_user_id: user.id, p_amount: amount, p_event_key: eventKey });
+    if (action === 'consume_tokens' || action === 'refund_tokens') {
+      if (action === 'refund_tokens') throw httpError(403, 'Estorno de tokens não é uma operação pública.');
+      const rpcName = 'consume_user_tokens';
+      const { data, error } = await client.rpc(rpcName, { p_amount: amount, p_event_key: eventKey });
       if (error) throw error;
       const quota = await client.rpc('get_user_quota');
       if (quota.error) throw quota.error;
-      return json(response, 200, { result: normalizeQuota({ ...(quota.data || {}), token_balance: data?.token_balance }), consumed: data?.consumed === true, alreadyProcessed: data?.already_processed === true });
+      return json(response, 200, { result: normalizeQuota({ ...(quota.data || {}), token_balance: data?.token_balance }), consumed: data?.consumed === true, refunded: data?.refunded === true, alreadyProcessed: data?.already_processed === true });
     }
     if (action === 'consume_attachments') {
       const { data, error } = await client.rpc('consume_user_attachments', { p_amount: amount, p_event_key: eventKey });
@@ -56,13 +59,7 @@ export default async function handler(request, response) {
       if (quota.error) throw quota.error;
       return json(response, 200, { result: normalizeQuota(quota.data), consumed: data?.consumed === true, alreadyProcessed: data?.already_processed === true });
     }
-    if (action === 'refund') {
-      const { data, error } = await client.rpc('refund_user_energy', { p_amount: amount, p_event_key: eventKey });
-      if (error) throw error;
-      const quota = await client.rpc('get_user_quota');
-      if (quota.error) throw quota.error;
-      return json(response, 200, { result: normalizeQuota(quota.data), refunded: data?.refunded === true, alreadyProcessed: data?.already_processed === true });
-    }
+    if (action === 'refund' || action === 'refund_internal') throw httpError(403, 'Estorno de energia não é uma operação pública.');
     if (action !== 'consume') throw httpError(400, 'Ação de quota desconhecida.');
     const { data, error } = await client.rpc('consume_user_energy', { p_amount: amount, p_event_key: eventKey });
     if (error) throw error;

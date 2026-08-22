@@ -22,6 +22,8 @@ const DEEP_PLANNER_MAX_OUTPUT = 2200;
 const EXPERT_PLAN_MAX_TEXT = 12000;
 const EXPERT_PLAN_MAX_OUTPUT = 5200;
 const EXPERT_STEP_MAX_OUTPUT = 6200;
+const AI_STANDARD_COST = 2;
+const AI_DEEP_COST = 7;
 
 const SYSTEM_PROMPT = [
   'Você é o Klipza.IA, um assistente útil, claro e profissional.',
@@ -717,7 +719,73 @@ function sendEvent(response, type, payload = {}) {
   response.write(`data: ${JSON.stringify({ type, ...payload })}\n\n`);
 }
 
-export async function processAiRequest({ user, client, memoryClient = client, body = {}, onProgress = null }) {
+function billingInput(body, thinkingMode, internalBilling = false, attachmentCount = 0) {
+  const eventKey = text(body.quotaEventKey, 120);
+  const energyAmount = Number(body.quotaEnergyAmount ?? (thinkingMode === 'deep' ? AI_DEEP_COST : AI_STANDARD_COST));
+  const tokenAmount = Number(body.quotaTokenAmount ?? energyAmount);
+  if (!eventKey || eventKey.length < 8 || eventKey.length > 160) throw httpError(400, 'Identificador de cobrança inválido.');
+  if (!Number.isInteger(energyAmount) || energyAmount <= 0 || energyAmount > 100 || !Number.isInteger(tokenAmount) || tokenAmount <= 0 || tokenAmount > 100) throw httpError(400, 'Custo de mensagem inválido.');
+  const attachmentAmount = Math.max(0, Math.min(3, Number(attachmentCount) || 0));
+  return { eventKey, energyAmount, tokenAmount, attachmentAmount, serviceRole: internalBilling, refundOnError: true };
+}
+
+async function consumeAiQuota({ client, user, billing }) {
+  let attachment = null;
+  const attachmentEventKey = `ai:attachments:${user.id}:${billing.eventKey}`.slice(0, 180);
+  if (billing.attachmentAmount > 0) {
+    const { data, error } = await client.rpc('consume_user_attachments', { p_amount: billing.attachmentAmount, p_event_key: attachmentEventKey });
+    if (error) throw error;
+    attachment = data && typeof data === 'object' ? data : {};
+    if (attachment.consumed !== true && attachment.already_processed !== true) {
+      const denied = httpError(402, 'O limite de anexos desta conta foi atingido.');
+      denied.quotaDenied = true;
+      throw denied;
+    }
+  }
+  const rpc = billing.serviceRole ? 'consume_ai_usage_for_user' : 'consume_user_ai_usage';
+  const params = billing.serviceRole
+    ? { p_user_id: user.id, p_energy_amount: billing.energyAmount, p_token_amount: billing.tokenAmount, p_event_key: billing.eventKey }
+    : { p_energy_amount: billing.energyAmount, p_token_amount: billing.tokenAmount, p_event_key: billing.eventKey };
+  let result;
+  try {
+    const response = await client.rpc(rpc, params);
+    if (response.error) throw response.error;
+    result = response.data && typeof response.data === 'object' ? response.data : {};
+  } catch (error) {
+    if (attachment?.consumed === true || attachment?.already_processed === true) {
+      try { await client.rpc('refund_user_attachments', { p_amount: billing.attachmentAmount, p_event_key: attachmentEventKey }); }
+      catch (refundError) { console.error('ai_attachment_refund_failed', refundError?.message || refundError); }
+    }
+    throw error;
+  }
+  if (result.consumed !== true && result.already_processed !== true) {
+    if (attachment?.consumed === true || attachment?.already_processed === true) {
+      try { await client.rpc('refund_user_attachments', { p_amount: billing.attachmentAmount, p_event_key: attachmentEventKey }); }
+      catch (refundError) { console.error('ai_attachment_refund_failed', refundError?.message || refundError); }
+    }
+    const denied = httpError(402, 'Sua energia e seus tokens não são suficientes para esta mensagem.');
+    denied.quotaDenied = true;
+    throw denied;
+  }
+  return { ...result, attachment: attachment || null, attachmentEventKey };
+}
+
+async function refundAiQuota({ client, user, billing }) {
+  const rpc = billing.serviceRole ? 'refund_ai_usage_for_user' : 'refund_user_ai_usage';
+  const params = billing.serviceRole
+    ? { p_user_id: user.id, p_energy_amount: billing.energyAmount, p_token_amount: billing.tokenAmount, p_event_key: billing.eventKey }
+    : { p_energy_amount: billing.energyAmount, p_token_amount: billing.tokenAmount, p_event_key: billing.eventKey };
+  const { data, error } = await client.rpc(rpc, params);
+  if (error) throw error;
+  if (billing.attachmentAmount > 0) {
+    const attachmentEventKey = `ai:attachments:${user.id}:${billing.eventKey}`.slice(0, 180);
+    const attachmentResult = await client.rpc('refund_user_attachments', { p_amount: billing.attachmentAmount, p_event_key: attachmentEventKey });
+    if (attachmentResult.error) throw attachmentResult.error;
+  }
+  return data && typeof data === 'object' ? data : {};
+}
+
+export async function processAiRequest({ user, client, memoryClient = client, body = {}, onProgress = null, internalBilling = false }) {
   const message = text(body.message, EXPERT_PLAN_MAX_TEXT);
   const history = safeHistory(body.history);
   const attachments = safeAttachments(body.attachments);
@@ -729,12 +797,18 @@ export async function processAiRequest({ user, client, memoryClient = client, bo
     return {answer:'',mode:'expert_plan',provider:expertPlan.provider||'fallback',thinkingMode:'deep',expertPlan:safeExpertPlan(expertPlan),thinking:null,memoryUsed:memoryState.count,memoriesCaptured:0};
   }
   if (requestedMode === 'expert_step') {
+    if (!internalBilling) throw httpError(403, 'A etapa Especialista só pode ser executada por uma tarefa iniciada.');
     const step = await executeExpertStep({message,history,plan:body.expertPlan,state:body.expertState,resumeAnswer:body.resumeAnswer,requestedProvider:body.provider});
     return {answer:step.answer||'',mode:'expert_step',provider:step.provider||'fallback',thinkingMode:'deep',expertStep:{...step,plan:step.plan||safeExpertPlan(body.expertPlan)},thinking:null,memoryUsed:memoryState.count,memoriesCaptured:0};
   }
   const mode = requestedMode === 'research' ? 'research' : attachments.length ? 'attachments' : 'chat';
   const thinkingMode = body.thinkingMode === 'deep' ? 'deep' : 'standard';
-  const deepPlan = thinkingMode === 'deep' ? await createDeepPlan({ message: message || 'Analise os anexos recebidos.', history, requestedProvider: body.provider, onProgress }) : null;
+  const billing = billingInput(body, thinkingMode, internalBilling, attachments.length);
+  billing.eventKey = `${user.id}:${billing.eventKey}`.slice(0, 160);
+  let quota = null;
+  try {
+    quota = await consumeAiQuota({ client, user, billing });
+    const deepPlan = thinkingMode === 'deep' ? await createDeepPlan({ message: message || 'Analise os anexos recebidos.', history, requestedProvider: body.provider, onProgress }) : null;
   if (onProgress && thinkingMode === 'deep') await onProgress({ phase: 'answering', pass: deepPlan?.passes || 2, totalPasses: deepPlan?.passes || 2, label: 'Plano concluído; agora estou escrevendo e revisando a resposta final.', updates: deepPlan?.updates || [] });
   const systemPrompt = buildSystemPrompt(memoryState.context, thinkingMode, deepPlan);
   const captured = message ? await captureMemories(memoryClient, user.id, memoryState.settings, message).catch(() => 0) : 0;
@@ -764,8 +838,16 @@ export async function processAiRequest({ user, client, memoryClient = client, bo
     thinkingMode,
     thinking: thinkingMode === 'deep' && deepPlan ? { enabled: true, topics: deepPlan.topics, checks: deepPlan.checks, alternatives: deepPlan.alternatives || [], solutions: deepPlan.solutions || [], decisions: deepPlan.decisions || [], updates: deepPlan.updates || [], summary: deepPlan.summary, complexity: deepPlan.complexity || 'standard', passes: deepPlan.passes || 2 } : null,
     memoryUsed: memoryState.count,
-    memoriesCaptured: captured
+    memoriesCaptured: captured,
+    quota: quota ? { consumed: quota.consumed === true, alreadyProcessed: quota.already_processed === true, source: quota.source || null, energy: quota.energy, tokenBalance: quota.token_balance, resetAt: quota.reset_at || null, attachmentsUsed: quota.attachment?.attachments_used, attachmentsRemaining: quota.attachment?.attachments_remaining } : null
   };
+  } catch (error) {
+    if (quota?.consumed === true && billing?.refundOnError) {
+      try { await refundAiQuota({ client, user, billing }); }
+      catch (refundError) { console.error('ai_quota_refund_failed', refundError?.message || refundError); }
+    }
+    throw error;
+  }
 }
 
 export default async function handler(request, response) {
@@ -784,9 +866,12 @@ export default async function handler(request, response) {
         const result = await processAiRequest({ user, client, body, onProgress: async (progress) => sendEvent(response, 'progress', { progress }) });
         sendEvent(response, 'complete', { result });
       } catch (error) {
-        const status = Number(error?.status) || 500;
+        const rawMessage = String(error?.message || '');
+        const quotaSchemaMissing = /consume_user_ai_usage|refund_user_ai_usage|consume_ai_usage_for_user|refund_ai_usage_for_user|schema cache/i.test(rawMessage);
+        const status = quotaSchemaMissing ? 503 : Number(error?.status) || 500;
+        const publicMessage = quotaSchemaMissing ? 'A cobrança por conta ainda precisa ser ativada no banco do Klipza.' : status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message;
         if (status >= 400) console.error('ai_stream_failed', error?.message || error, error?.providerMessage || '');
-        sendEvent(response, 'error', { error: status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message });
+        sendEvent(response, 'error', { error: publicMessage });
       } finally {
         response.end();
       }
@@ -794,8 +879,11 @@ export default async function handler(request, response) {
     }
     json(response, 200, await processAiRequest({ user, client, body }));
   } catch (error) {
-    const status = Number(error?.status) || 500;
+    const rawMessage = String(error?.message || '');
+    const quotaSchemaMissing = /consume_user_ai_usage|refund_user_ai_usage|consume_ai_usage_for_user|refund_ai_usage_for_user|schema cache/i.test(rawMessage);
+    const status = quotaSchemaMissing ? 503 : Number(error?.status) || 500;
+    const publicMessage = quotaSchemaMissing ? 'A cobrança por conta ainda precisa ser ativada no banco do Klipza.' : status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message;
     if (status >= 400) console.error('ai_request_failed', error?.message || error, error?.providerMessage || '');
-    json(response, status, { error: status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message });
+    json(response, status, { error: publicMessage });
   }
 }

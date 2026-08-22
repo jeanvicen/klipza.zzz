@@ -124,12 +124,16 @@ export async function processClaimedJob({ admin, running, resumeAnswer = '' }) {
         history: Array.isArray(running.history) ? running.history : [],
         mode: isExpert ? 'expert_step' : 'chat',
         provider: running.provider || 'auto',
-        thinkingMode: isExpert ? 'deep' : 'deep',
+        thinkingMode: 'deep',
+        quotaEventKey: isExpert ? undefined : `message:${running.message_id}`,
+        quotaEnergyAmount: isExpert ? undefined : 7,
+        quotaTokenAmount: isExpert ? undefined : 7,
         expertPlan: isExpert ? initialProgress.plan : undefined,
         expertState: isExpert ? (initialProgress.expertState || { stepIndex: 0, completedSteps: [], updates: [] }) : undefined,
         resumeAnswer: isExpert ? text(resumeAnswer || initialProgress.resumeAnswer, 1200) : undefined
       },
-      onProgress: isExpert ? async (progress) => updateProgress(progress) : async (progress) => updateProgress(progress)
+      onProgress: isExpert ? async (progress) => updateProgress(progress) : async (progress) => updateProgress(progress),
+      internalBilling: !isExpert
     });
 
     if (isExpert) {
@@ -288,7 +292,10 @@ export default async function handler(request, response) {
     }
     return json(response, 201, { job: safeJob(data) });
   } catch (error) {
-    const status = Number(error?.status) || 500;
-    return json(response, status, { error: status === 500 ? 'Não foi possível acessar a tarefa agora.' : error.message });
+    const rawMessage = String(error?.message || '');
+    const expertSchemaMissing = /deep_jobs_(mode|status)_check|awaiting_confirmation|consume_expert_mode|schema cache|does not exist/i.test(rawMessage);
+    const status = expertSchemaMissing ? 503 : Number(error?.status) || 500;
+    const message = expertSchemaMissing ? 'O Modo Especialista ainda precisa ser ativado no banco da conta.' : status === 500 ? 'Não foi possível acessar a tarefa agora.' : error.message;
+    return json(response, status, { error: message });
   }
 }

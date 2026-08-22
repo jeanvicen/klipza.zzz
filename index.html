@@ -307,11 +307,30 @@ body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-
 .composer-box{position:relative;z-index:6;border:1px solid var(--black);border-radius:16px;background:var(--bg);box-shadow:0 2px 16px rgba(0,0,0,.05)}
 .attach-strip{display:none;padding:10px 11px;border-bottom:1px solid var(--line);gap:7px;flex-wrap:wrap}
 .attach-strip.open{display:flex}
+.composer-active-modes{display:none;align-items:center;gap:6px;padding:8px 10px 2px;flex-wrap:wrap}
+.composer-active-modes.open{display:flex}
+.composer-mode-chip{display:inline-flex;align-items:center;gap:6px;max-width:min(100%,280px);padding:5px 8px;border:1px solid var(--line2);border-radius:9px;background:var(--panel2);color:var(--text);font-size:10px;font-weight:700;line-height:1.2}
+.composer-mode-chip.active-deep{border-color:#9a9a9a;background:#f4f4f4}
+.composer-mode-chip.active-expert{border-color:#8c78bd;background:#f2effa}
+.composer-mode-chip.active-research{border-color:#7c9fbd;background:#eef5fa}
+.composer-mode-icon{width:18px;height:18px;display:grid;place-items:center;border-radius:6px;background:var(--black);color:var(--bg);flex:0 0 auto}
+.composer-mode-icon svg{width:11px;height:11px}
+.composer-mode-copy{min-width:0;display:flex;flex-direction:column;gap:1px}
+.composer-mode-label{white-space:nowrap}
+.composer-mode-detail{max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted);font-size:9px;font-weight:550}
+.composer-mode-close{width:18px;height:18px;margin-left:auto;display:grid;place-items:center;border:0;border-radius:50%;background:transparent;color:var(--muted);font-size:14px;line-height:1}
+.composer-mode-close:hover{background:var(--line);color:var(--text)}
 .attach-chip{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;background:#f0f0f0;font-size:11px}
 .attach-chip.attach-preview{padding:4px 7px 4px 4px}.attach-preview img{width:28px;height:28px;object-fit:cover;border-radius:6px}.attach-preview span{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .attach-chip button{font-size:15px;color:#666}
 .attach-menu{position:absolute;left:7px;bottom:58px;width:min(320px,calc(100vw - 24px));display:none;flex-direction:column;gap:2px;padding:7px;background:var(--panel);border:1px solid var(--line2);border-radius:17px;box-shadow:0 20px 55px rgba(0,0,0,.18);z-index:50;max-height:min(420px,64vh);overflow:auto}
 .attach-menu.open{display:flex;animation:menuUp .15s cubic-bezier(.2,.8,.2,1)}
+.attach-menu-handle{display:none;width:42px;height:4px;margin:1px auto 3px;border-radius:999px;background:var(--line2)}
+.attach-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 8px 9px;border-bottom:1px solid var(--line)}
+.attach-menu-title{display:block;font-size:14px;line-height:1.1;letter-spacing:-.02em}
+.attach-menu-subtitle{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.2}
+.attach-menu-close{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:22px;line-height:1}
+.attach-menu-close:hover{background:var(--hover);color:var(--text)}
 @keyframes menuUp{from{opacity:0;transform:translateY(10px) scale(.97);transform-origin:bottom left}to{opacity:1;transform:translateY(0) scale(1);transform-origin:bottom left}}
 .attach-menu::after{content:"";position:absolute;left:18px;bottom:-6px;width:11px;height:11px;background:var(--panel);border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);transform:rotate(45deg)}
 .attach-option{width:100%;flex:0 0 auto;border:0;border-radius:11px;padding:9px 10px;display:flex;align-items:center;gap:11px;text-align:left;background:transparent;color:var(--text);min-height:50px}
@@ -387,6 +406,10 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   .artifact-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:720px){
+  .attach-menu{left:0;right:0;bottom:58px;width:auto;max-height:min(70dvh,560px);padding:8px 10px 12px;border-radius:20px 20px 15px 15px}
+  .attach-menu-handle{display:block}
+  .attach-menu::after{display:none}
+  .attach-menu-head{padding:7px 8px 10px}
   #app{grid-template-columns:1fr}
   body{overflow:hidden}
   .sidebar{position:fixed;z-index:100;left:0;top:0;bottom:0;width:min(88vw,300px);height:100dvh;box-shadow:14px 0 30px rgba(0,0,0,.18);will-change:transform}
@@ -772,7 +795,7 @@ body.prime-modal-open{overflow:hidden}
 /* VOICE / STREAM CONTROLS */
   .response-status{display:none;align-items:center;justify-content:center;gap:8px;max-width:760px;margin:0 auto 8px;padding:0 16px;font-size:11px;color:#777;text-align:center}
   .msg-thinking{margin:0 0 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);overflow:hidden;color:var(--text)}.msg-thinking summary{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;list-style:none;user-select:none}.msg-thinking summary::-webkit-details-marker{display:none}.msg-thinking summary:focus-visible{outline:2px solid var(--text);outline-offset:-2px}.msg-thinking-chevron{font-size:12px;color:var(--muted);transition:transform .18s}.msg-thinking[open] .msg-thinking-chevron{transform:rotate(90deg)}.msg-thinking-title{font-size:11px;font-weight:750;flex:1}.msg-thinking-meta{font-size:9px;color:var(--muted);white-space:nowrap}.msg-thinking-live{display:flex;align-items:center;gap:7px;padding:0 12px 10px;color:var(--muted);font-size:10px;line-height:1.4}.msg-thinking-live-dot{width:6px;height:6px;border-radius:50%;background:var(--text);animation:responsePulse 1.1s ease-in-out infinite;flex:0 0 auto}.msg-thinking-body{display:grid;gap:10px;margin:0 12px 12px;padding:10px 0 0;border-top:1px solid var(--line);font-size:10px;color:var(--muted);line-height:1.45}.msg-thinking-body strong{display:block;color:var(--text);font-size:9px;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}.msg-thinking-body ul{margin:0;padding-left:16px}.msg-thinking-body li+li{margin-top:3px}.msg-thinking-summary{color:var(--text)}.msg-thinking-note{font-size:9px;color:var(--muted);padding-top:2px}  .msg-thinking-journal{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:color-mix(in srgb,var(--panel) 78%,transparent)}.msg-thinking-journal ol{margin:6px 0 0;padding-left:18px}.msg-thinking-journal li+li{margin-top:5px}.msg-thinking-pass{font-size:9px;color:var(--muted);margin-top:-1px}.msg-thinking-dialogue{display:grid;gap:7px;margin-top:7px}.msg-thinking-turn{display:grid;grid-template-columns:auto 1fr;gap:7px;align-items:start;padding:7px 8px;border:1px solid transparent;border-radius:9px;background:rgba(255,255,255,.025);transition:border-color .18s,background .18s}.msg-thinking-turn.active{border-color:color-mix(in srgb,var(--text) 28%,transparent);background:color-mix(in srgb,var(--text) 7%,transparent)}.msg-thinking-turn-dot{width:6px;height:6px;margin-top:4px;border-radius:50%;background:var(--muted)}.msg-thinking-turn.active .msg-thinking-turn-dot{background:var(--text);animation:responsePulse 1.1s ease-in-out infinite}.msg-thinking-turn-copy{min-width:0;display:grid;gap:2px}.msg-thinking-turn-speaker{font-size:9px;font-weight:800;color:var(--text)}.msg-thinking-turn-text{font-size:10px;color:var(--muted);line-height:1.45}.msg-thinking-extra{margin-top:2px;border-top:1px solid var(--line);padding-top:8px}.msg-thinking-extra>summary{padding:0;color:var(--muted);font-size:9px;font-weight:750}.msg-thinking-extra-body{display:grid;gap:10px;margin-top:9px}  .expert-plan-card{margin:0 0 12px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(145deg,color-mix(in srgb,var(--panel) 92%,transparent),color-mix(in srgb,var(--hover) 58%,transparent));overflow:hidden;box-shadow:0 10px 28px rgba(20,18,38,.06);animation:expertCardIn .24s cubic-bezier(.23,1,.32,1)}.expert-plan-head{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;border-bottom:1px solid var(--line)}.expert-plan-badge{width:27px;height:27px;display:grid;place-items:center;border-radius:9px;background:var(--black);color:var(--bg);font-size:12px;font-weight:800;flex:0 0 auto}.expert-plan-copy{min-width:0;flex:1}.expert-plan-kicker{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:800}.expert-plan-title{display:block;margin-top:3px;font-size:13px;font-weight:800;color:var(--text)}.expert-plan-objective{display:block;margin-top:4px;font-size:10px;line-height:1.45;color:var(--muted)}.expert-plan-state{font-size:9px;color:var(--muted);white-space:nowrap}.expert-plan-body{padding:12px 14px}.expert-plan-updates{display:grid;gap:5px;margin-bottom:10px;padding:8px 9px;border-radius:10px;background:color-mix(in srgb,var(--black) 5%,transparent);font-size:9px;line-height:1.4;color:var(--muted)}.expert-plan-update{display:flex;gap:6px;align-items:flex-start}.expert-plan-update:before{content:'·';color:var(--text);font-weight:900}.expert-plan-steps{display:grid;gap:7px}.expert-step{display:grid;grid-template-columns:20px 1fr;gap:9px;align-items:start;padding:8px;border:1px solid transparent;border-radius:10px;transition:background .18s,border-color .18s,transform .18s}.expert-step.running{border-color:color-mix(in srgb,var(--text) 20%,transparent);background:color-mix(in srgb,var(--text) 5%,transparent)}.expert-step.question{border-color:color-mix(in srgb,var(--accent-strong) 45%,var(--line));background:color-mix(in srgb,var(--accent) 36%,transparent)}.expert-step.done{opacity:.76}.expert-step-dot{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;border:1px solid var(--line2);font-size:9px;color:var(--muted);font-weight:800}.expert-step.running .expert-step-dot{border-color:var(--text);color:var(--text);animation:responsePulse 1.1s ease-in-out infinite}.expert-step.done .expert-step-dot{background:var(--black);border-color:var(--black);color:var(--bg)}.expert-step-copy{min-width:0}.expert-step-title{font-size:10px;font-weight:800;color:var(--text)}.expert-step-detail{display:block;margin-top:3px;font-size:10px;line-height:1.45;color:var(--muted)}.expert-step-checks{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}.expert-step-check{padding:3px 6px;border-radius:999px;background:var(--hover);font-size:8px;color:var(--muted)}.expert-plan-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px;padding-top:10px;border-top:1px solid var(--line)}.expert-plan-summary{font-size:9px;line-height:1.4;color:var(--muted);flex:1}.expert-plan-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.expert-plan-button{min-height:30px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--black);color:var(--bg);font-size:9px;font-weight:800;cursor:pointer;transition:transform .16s,background .16s,opacity .16s}.expert-plan-button.secondary{background:transparent;color:var(--text)}.expert-plan-button:hover{background:var(--text);transform:translateY(-1px)}.expert-plan-button:active{transform:scale(.97)}.expert-plan-button:disabled{opacity:.45;cursor:not-allowed;transform:none}.expert-question{margin-top:11px;padding:11px;border:1px solid color-mix(in srgb,var(--accent-strong) 44%,var(--line));border-radius:11px;background:color-mix(in srgb,var(--accent) 24%,transparent)}.expert-question-title{font-size:10px;font-weight:800;color:var(--text)}.expert-question-copy{margin-top:4px;font-size:10px;line-height:1.45;color:var(--muted)}.expert-question-options{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.expert-question-option{min-height:29px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--text);font-size:9px;font-weight:750;cursor:pointer}.expert-question-option:hover{border-color:var(--text);background:var(--hover)}.expert-question-form{display:flex;gap:6px;margin-top:8px}.expert-question-form textarea{min-height:32px;max-height:90px;flex:1;resize:vertical;padding:8px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--text);font:inherit;font-size:10px;outline:none}.expert-question-form textarea:focus{border-color:var(--text);box-shadow:0 0 0 3px color-mix(in srgb,var(--text) 8%,transparent)}.expert-question-form button{align-self:flex-end;min-height:32px;padding:0 10px;border:0;border-radius:8px;background:var(--black);color:var(--bg);font-size:9px;font-weight:800;cursor:pointer}@keyframes expertCardIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-  .expert-mode-option{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 46%,transparent),transparent);border-color:color-mix(in srgb,var(--accent-strong) 30%,var(--line))}.expert-mode-option:hover{border-color:var(--accent-strong);background:color-mix(in srgb,var(--accent) 62%,transparent)}.expert-menu-pill{margin-left:auto;padding:4px 7px;border-radius:999px;background:var(--black);color:var(--bg);font-size:8px;font-weight:800;white-space:nowrap}.expert-mode-option .attach-option-icon{color:var(--accent-strong)}
+  .expert-mode-option{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 46%,transparent),transparent);border-color:color-mix(in srgb,var(--accent-strong) 30%,var(--line))}.expert-mode-option:hover{border-color:var(--accent-strong);background:color-mix(in srgb,var(--accent) 62%,transparent)}.expert-mode-option.enabled{background:color-mix(in srgb,var(--accent) 72%,transparent);border-color:var(--accent-strong);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent-strong) 14%,transparent)}.expert-menu-pill{margin-left:auto;padding:4px 7px;border-radius:999px;background:var(--black);color:var(--bg);font-size:8px;font-weight:800;white-space:nowrap}.expert-mode-option .attach-option-icon{color:var(--accent-strong)}
   .background-response-banner{display:none;align-items:center;gap:9px;width:min(var(--content),100%);margin:0 auto 10px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--muted);font-size:10px;line-height:1.35}.background-response-banner.show{display:flex}.background-response-dot{width:7px;height:7px;border-radius:50%;background:#111;animation:responsePulse 1.1s ease-in-out infinite;flex:0 0 auto}.background-response-copy{min-width:0;flex:1;display:grid;gap:2px}.background-response-title{font-weight:750;color:var(--text)}.background-response-step{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.background-response-open{border:0;background:transparent;color:var(--text);font-size:10px;font-weight:700;cursor:pointer;padding:4px}.chat-pending-dot{display:inline-block;width:6px;height:6px;margin-left:7px;border-radius:50%;background:#111;vertical-align:2px;animation:responsePulse 1.1s ease-in-out infinite}
 
 
@@ -1155,7 +1178,7 @@ body.prime-modal-open{overflow:hidden}
     return Object.fromEntries(artifacts.map(([id,artifact])=>[id,{...artifact,name:String(artifact?.name||'Artefato').slice(0,180),preview:String(artifact?.preview||'').slice(0,1200),data:typeof artifact?.data==='string'&&artifact.data.startsWith('data:')?null:artifact?.data}]));
   }
   function remoteStatePatch(){
-    return {app_initialized:true,chats:compactChatsForRemote(),artifacts:compactArtifactsForRemote(),quota:isObject(state.quota)?state.quota:{},settings:isObject(state.settings)?state.settings:{},active_chat_id:state.activeChatId||activeChatId||null};
+    return {app_initialized:true,chats:compactChatsForRemote(),artifacts:compactArtifactsForRemote(),settings:isObject(state.settings)?state.settings:{},active_chat_id:state.activeChatId||activeChatId||null};
   }
   function queueRemoteStateSync(){
     if(remoteSyncSuspended||!authResolved||!state.user?.id||!supabaseClient||anonymousMode)return;
@@ -1184,7 +1207,7 @@ body.prime-modal-open{overflow:hidden}
     if(!supabaseClient||!user?.id)return false;
     try{
       const result=await Promise.race([
-        supabaseClient.from('app_user_state').select('app_initialized,chats,artifacts,quota,settings,active_chat_id').eq('user_id',user.id).maybeSingle(),
+        supabaseClient.from('app_user_state').select('app_initialized,chats,artifacts,settings,active_chat_id').eq('user_id',user.id).maybeSingle(),
         new Promise((_,reject)=>setTimeout(()=>reject(new Error('hydrate_timeout')),1800))
       ]);
       if(result.error)throw result.error;
@@ -1204,7 +1227,6 @@ body.prime-modal-open{overflow:hidden}
         state.chats=remoteChats;
       }
       if(isObject(result.data.artifacts))state.artifacts={...state.artifacts,...result.data.artifacts};
-      if(isObject(result.data.quota)&&Object.keys(result.data.quota).length)state.quota=result.data.quota;
       if(isObject(result.data.settings))state.settings={...state.settings,...result.data.settings};
       state.activeChatId=result.data.active_chat_id||null;
       activeChatId=state.activeChatId||Object.keys(state.chats)[0]||null;
@@ -1252,8 +1274,10 @@ body.prime-modal-open{overflow:hidden}
   function applyServerQuota(value){
     const row=value&&typeof value==='object'?value:{};
     const resetAt=Number(row.resetAt)||Date.parse(row.resetAt||'')||Date.now()+CYCLE_MS;
-    const attachUsed=Math.max(0,Math.min(FREE_ATTACH_LIMIT,Number(row.attachmentsUsed??row.attachUsed)||0));
-    state.quota={...(state.quota||{}),energy:Math.max(0,Math.min(ENERGY_MAX,Number(row.energy)||0)),resetAt,attachUsed};
+    const nextQuota={...(state.quota||{}),energy:Math.max(0,Math.min(ENERGY_MAX,Number(row.energy)||0)),resetAt};
+    const attachmentValue=row.attachmentsUsed??row.attachUsed;
+    if(attachmentValue!==undefined&&attachmentValue!==null)nextQuota.attachUsed=Math.max(0,Math.min(FREE_ATTACH_LIMIT,Number(attachmentValue)||0));
+    state.quota=nextQuota;
     state.wallet={...(state.wallet||{}),tokenBalance:Math.max(0,Number(row.tokenBalance)||0),primeStatus:row.primeStatus||state.wallet?.primeStatus||'inactive'};
     return state.quota;
   }
@@ -1268,30 +1292,11 @@ body.prime-modal-open{overflow:hidden}
     catch(error){console.warn('Não foi possível sincronizar a energia da conta.',error);return false;}
     finally{serverQuotaSyncBusy=false;}
   }
-  async function consumeAccountEnergy(amount,eventKey){
-    const payload=await quotaRequest({action:'consume',amount,eventKey});
-    if(payload?.result)applyServerQuota(payload.result);
-    refreshQuotaUI();
-    return payload?.consumed===true||payload?.alreadyProcessed===true;
-  }
   async function consumeArtifactEnergy(eventKey){
     const payload=await quotaRequest({action:'consume_artifact',eventKey});
     if(payload?.result)applyServerQuota(payload.result);
     refreshQuotaUI();
     return payload?.artifactCharged===true&&(payload?.consumed===true||payload?.alreadyProcessed===true);
-  }
-  async function refundAccountEnergy(amount,eventKey){
-    if(!state.user?.id||!Number.isInteger(amount)||amount<=0)return false;
-    try{
-      const payload=await quotaRequest({action:'refund',amount,eventKey});
-      if(payload?.result)applyServerQuota(payload.result);
-      refreshQuotaUI();
-      return payload?.refunded===true||payload?.alreadyProcessed===true;
-    }catch(error){
-      console.warn('Não foi possível estornar a energia desta tentativa.',error);
-      await syncServerQuota(true);
-      return false;
-    }
   }
   async function refundArtifactEnergy(eventKey){
     if(!state.user?.id)return false;
@@ -1309,15 +1314,6 @@ body.prime-modal-open{overflow:hidden}
   async function refreshWallet(){
     await syncServerQuota();
     return state.wallet;
-  }
-  async function consumePurchasedTokens(requiredCost=TOKEN_COST,eventKey=messageId()){
-    if(!state.user?.id)return false;
-    try{
-      const payload=await quotaRequest({action:'consume_tokens',amount:requiredCost,eventKey:`tokens:${eventKey}`});
-      if(payload?.result)applyServerQuota(payload.result);
-      refreshQuotaUI();
-      return payload?.consumed===true;
-    }catch(error){showResponseStatus(error?.message||'Não foi possível usar seus tokens agora.');return false;}
   }
   function ensureQuota(){
     const initialEnergy=state.user?.id?0:ENERGY_MAX;
@@ -1557,7 +1553,7 @@ body.prime-modal-open{overflow:hidden}
     const payload=await deepJobsRequest({action:'create',chatId,messageId:messageIdValue,message,history,complexity:plan.complexity||'standard',provider:'auto',mode:'expert',plan});
     const job=payload?.job;if(!job?.id)throw new Error('O plano Especialista não pôde ser iniciado.');
     state.backgroundJobs[job.id]=job;renderHistory();renderBackgroundResponseBanner();
-    if(start){startDeepJobPolling();void deepJobsRequest({action:'start',jobId:job.id,eventKey:eventKey||undefined}).then(()=>refreshDeepJobs()).catch(error=>{console.warn('O Modo Especialista não iniciou agora.',error);refreshDeepJobs();});}
+    if(start){startDeepJobPolling();const startEventKey=eventKey||`expert:${state.user?.id||'user'}:${job.messageId}`;void deepJobsRequest({action:'start',jobId:job.id,eventKey:startEventKey}).then(()=>refreshDeepJobs()).catch(error=>{console.warn('O Modo Especialista não iniciou agora.',error);refreshDeepJobs();});}
     return job;
   }
   function hasActiveExpertPlan(){
@@ -1572,16 +1568,18 @@ body.prime-modal-open{overflow:hidden}
     const input=$('prompt');
     if(input){input.placeholder=expertModeArmed?'Descreva o projeto ou problema ambicioso para eu montar o plano…':'Envie uma mensagem para o Klipza.IA';input.focus();}
     showResponseStatus(expertModeArmed?'Modo Especialista ativado para esta tarefa. Descreva o que você quer construir ou resolver.':'Modo Especialista desativado.');
-    if(expertModeArmed)void expertModeRequest().then(payload=>{refreshExpertMenuPill(payload?.quota||{});if(expertModeArmed)showResponseStatus(`Modo Especialista ativado. ${expertQuotaCopy(payload?.quota||{})}`);}).catch(()=>{});
+    if(expertModeArmed)void expertModeRequest().then(payload=>{refreshExpertMenuPill(payload?.quota||{});if(expertModeArmed)showResponseStatus(`Modo Especialista ativado. ${expertQuotaCopy(payload?.quota||{})}`);}).catch(error=>{if(expertModeArmed)showResponseStatus(error?.message||'O Modo Especialista ainda não está disponível nesta conta.');});
+    renderActiveModes();
     setTimeout(()=>showResponseStatus(''),2800);
   }
   async function startExpertPlanning(message,chatId){
     if(expertPlanBusy)return;
-    expertPlanBusy=true;expertModeArmed=false;
+    expertPlanBusy=true;expertModeArmed=false;renderActiveModes();
     const input=$('prompt');if(input){input.placeholder='Envie uma mensagem para o Klipza.IA';input.value='';input.style.height='37px';}
     try{
-      const quotaPayload=await expertModeRequest();
-      const quota=quotaPayload?.quota||{};refreshExpertMenuPill(quota);
+      let quota={limit:3,used:0,remaining:3,windowHours:48};
+      try{const quotaPayload=await expertModeRequest();quota=quotaPayload?.quota||quota;refreshExpertMenuPill(quota);}
+      catch(error){console.warn('A leitura preliminar da quota Especialista falhou; a confirmação continuará protegida pelo servidor.',error);}
       if(Number(quota.remaining||0)<=0){showResponseStatus(expertQuotaCopy(quota));setTimeout(()=>showResponseStatus(''),5200);return;}
       const originChatId=chatId||activeChatId;const chat=state.chats?.[originChatId];if(!chat)throw new Error('Conversa inválida.');
       const requestId=messageId();
@@ -1655,7 +1653,7 @@ body.prime-modal-open{overflow:hidden}
       const jobs=Array.isArray(payload?.jobs)?payload.jobs:[];
       let changed=false;
       for(const job of jobs){
-        if(['queued','processing','awaiting_user'].includes(job.status)){state.backgroundJobs[job.id]=job;changed=true;if(job.mode==='expert'&&job.status==='queued'&&!document.hidden&&!expertPlanBusy)void deepJobsRequest({action:'start',jobId:job.id}).then(()=>refreshDeepJobs()).catch(()=>{});}
+        if(['queued','processing','awaiting_user'].includes(job.status)){state.backgroundJobs[job.id]=job;changed=true;if(job.mode==='expert'&&job.status==='queued'&&!document.hidden&&!expertPlanBusy){const eventKey=`expert:${state.user.id}:${job.messageId}`;void deepJobsRequest({action:'start',jobId:job.id,eventKey}).then(()=>refreshDeepJobs()).catch(error=>{console.warn('Não foi possível avançar a etapa Especialista.',error);});}}
         if(job.status==='completed'){
           changed=(await applyCompletedDeepJob(job))||changed;
           delete state.backgroundJobs[job.id];
@@ -1729,12 +1727,31 @@ body.prime-modal-open{overflow:hidden}
     if(state.user){void syncServerQuota(true);void refreshDeepJobs();}
   }
 
+  function renderActiveModes(){
+    const holder=$('composerActiveModes');if(!holder)return;
+    const modes=[];
+    if(pendingResearchContext)modes.push({id:'research',className:'active-research',label:'Pesquisa na web',detail:String(pendingResearchContext.title||'Fonte preparada para esta mensagem'),icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>'});
+    if(state.settings.thinkingMode==='deep')modes.push({id:'deep',className:'active-deep',label:'Pensamento profundo',detail:'Planejamento e verificações ativos',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 22h4M8 14a6 6 0 1 1 8 0c-1.2 1-2 2.1-2 4h-4c0-1.9-.8-3-2-4Z"/><path d="M12 2v1M4.9 4.9l.7.7M19.1 4.9l-.7-.7"/></svg>'});
+    if(expertModeArmed)modes.push({id:'expert',className:'active-expert',label:'Modo Especialista',detail:'Plano desta tarefa pronto para começar',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v5M5.6 6.2l3.5 3.5M3 13h5M5.6 19.8l3.5-3.5M12 23v-5M18.9 19.8l-3.5-3.5M21 13h-5M18.9 6.2l-3.5 3.5"/><circle cx="12" cy="13" r="3.2"/></svg>'});
+    holder.classList.toggle('open',modes.length>0);
+    const expertOption=document.querySelector('.expert-mode-option');
+    if(expertOption){expertOption.classList.toggle('enabled',expertModeArmed);expertOption.setAttribute('aria-pressed',String(expertModeArmed));}
+    holder.innerHTML=modes.map(mode=>`<span class="composer-mode-chip ${mode.className}" data-active-mode="${mode.id}"><span class="composer-mode-icon" aria-hidden="true">${mode.icon}</span><span class="composer-mode-copy"><span class="composer-mode-label">${mode.label}</span><span class="composer-mode-detail">${esc(mode.detail)}</span></span><button class="composer-mode-close" type="button" data-remove-active-mode="${mode.id}" aria-label="Desativar ${mode.label}">×</button></span>`).join('');
+    holder.querySelectorAll('[data-remove-active-mode]').forEach(button=>button.addEventListener('click',()=>{
+      const mode=button.dataset.removeActiveMode;
+      if(mode==='deep')setThinkingMode('standard');
+      if(mode==='expert'){expertModeArmed=false;const input=$('prompt');if(input)input.placeholder='Envie uma mensagem para o Klipza.IA';showResponseStatus('Modo Especialista desativado.');setTimeout(()=>showResponseStatus(''),2200);}
+      if(mode==='research'){pendingResearchContext=null;showResponseStatus('Referência removida desta mensagem.');setTimeout(()=>showResponseStatus(''),2200);}
+      renderActiveModes();
+    }));
+  }
   function updateThinkingControls(){
     const enabled=state.settings.thinkingMode==='deep';
     const status=$('deepThinkingMenuStatus'), pill=$('deepThinkingMenuPill'), option=document.querySelector('.thinking-option');
     if(status)status.textContent=enabled?'Planejamento e verificações ativos':'Ative tópicos, lógica e verificações';
     if(pill)pill.textContent=enabled?'Ativo':'Desativado';
     if(option){option.classList.toggle('enabled',enabled);option.setAttribute('aria-pressed',String(enabled));}
+    renderActiveModes();
   }
   function setThinkingMode(mode){
     state.settings.thinkingMode=mode==='deep'?'deep':'standard';save();updateThinkingControls();
@@ -1854,6 +1871,7 @@ body.prime-modal-open{overflow:hidden}
     }
     state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR',status:profile?.status||'active',restricted:profile?.restricted===true,restrictionReason:profile?.restriction_reason||''};
     state.localOwnerId=user.id;
+    state.quota={energy:0,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
     state.wallet={...state.wallet,tokenBalance:Number(profile?.token_balance||0),primeStatus:profile?.prime_status||'inactive',primePlanCode:profile?.prime_plan_code||null,primeSubscriptionId:profile?.prime_subscription_id||null,primeCurrentPeriodEnd:profile?.prime_current_period_end||null};
     save();
     showRecoveryPanel(false);
@@ -1954,14 +1972,14 @@ body.prime-modal-open{overflow:hidden}
     stopDeepJobPolling();expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;
     authResolved=false; clearTimeout(remoteStateTimer); remoteStateTimer=null;
     if(supabaseClient) await supabaseClient.auth.signOut();
-    state.user=null; state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]}; save(); location.reload();
+    state.user=null; state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS}; state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]}; save(); location.reload();
   }
   async function bootstrapAuth(){
     if(!supabaseClient){setAuthStatus('Não foi possível carregar o serviço de contas. Atualize a página.','error');return;}
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       if(event==='PASSWORD_RECOVERY'){showRecoveryPanel(true);return;}
       if(event==='SIGNED_IN'&&session?.user)setTimeout(()=>finishSupabaseUser(session.user),0);
-      if(event==='SIGNED_OUT'){expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
+      if(event==='SIGNED_OUT'){expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
     });
     const {data}=await supabaseClient.auth.getSession();
     if(data.session?.user){
@@ -1969,7 +1987,7 @@ body.prime-modal-open{overflow:hidden}
       if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
       else await finishSupabaseUser(data.session.user);
     }else{
-      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.memory={memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
+      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.memory={memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
 save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       if(window.location.hash.includes('reset-password'))showRecoveryPanel(true);
     }
@@ -2119,7 +2137,9 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         <div class="composer-box">
           <div class="attach-strip" id="attachStrip"></div>
           <div class="attach-menu" id="attachMenu">
-            <div class="attach-section-label">Adicionar ao chat</div>
+            <div class="attach-menu-handle" aria-hidden="true"></div>
+            <div class="attach-menu-head"><div><strong class="attach-menu-title">Adicionar</strong><span class="attach-menu-subtitle">Recursos disponíveis nesta conversa</span></div><button class="attach-menu-close" type="button" onclick="window.K.closeAttach()" aria-label="Fechar menu">×</button></div>
+            <div class="attach-section-label">Anexar ao chat</div>
             <button class="attach-option" onclick="window.K.pick('camera')">
               <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
               <span><span class="attach-option-title">Câmera</span><span class="attach-option-sub">Tirar uma foto</span></span>
@@ -2142,24 +2162,12 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
               <span class="attach-option-icon thinking-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18h6M10 22h4M8 14a6 6 0 1 1 8 0c-1.2 1-2 2.1-2 4h-4c0-1.9-.8-3-2-4Z"/><path d="M12 2v1M4.9 4.9l.7.7M19.1 4.9l-.7-.7"/></svg></span>
               <span><span class="attach-option-title">Pensamento profundo</span><span class="attach-option-sub" id="deepThinkingMenuStatus">${state.settings.thinkingMode==='deep'?'Planejamento e verificações ativos':'Ative tópicos, lógica e verificações'}</span></span><span class="thinking-pill" id="deepThinkingMenuPill">${state.settings.thinkingMode==='deep'?'Ativo':'Desativado'}</span>
             </button>
-            <button class="attach-option expert-mode-option" type="button" onclick="window.K.startExpertMode()">
+            <button class="attach-option expert-mode-option ${expertModeArmed?'enabled':''}" type="button" onclick="window.K.startExpertMode()" aria-pressed="${expertModeArmed?'true':'false'}">
               <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v5M5.6 6.2l3.5 3.5M3 13h5M5.6 19.8l3.5-3.5M12 23v-5M18.9 19.8l-3.5-3.5M21 13h-5M18.9 6.2l-3.5 3.5"/><circle cx="12" cy="13" r="3.2"/></svg></span>
               <span><span class="attach-option-title">Modo Especialista</span><span class="attach-option-sub">Plano, execução e revisão por etapas</span></span><span class="expert-menu-pill">3 usos / 48h</span>
             </button>
-            <button class="attach-option upcoming" onclick="window.K.upcoming('Projetos')">
-              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h7l2 2h7v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/></svg></span>
-              <span><span class="attach-option-title">Projetos</span><span class="attach-option-sub">Conteúdo de projetos</span></span><span class="soon-badge">Em breve</span>
-            </button>
-            <button class="attach-option upcoming" onclick="window.K.upcoming('Conexões')">
-              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.1.1l2.1-2.1a5 5 0 0 0-7.1-7.1L11 4.9"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2.1 2.1a5 5 0 0 0 7.1 7.1l1.1-1"/></svg></span>
-              <span><span class="attach-option-title">Conexões</span><span class="attach-option-sub">Serviços conectados</span></span><span class="soon-badge">Em breve</span>
-            </button>
-            <button class="attach-option upcoming" onclick="window.K.upcoming('Voz')">
-              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></span>
-              <span><span class="attach-option-title">Voz</span><span class="attach-option-sub">Conversar por voz</span></span><span class="soon-badge">Em breve</span>
-            </button>
-
           </div>
+          <div class="composer-active-modes" id="composerActiveModes" aria-live="polite" aria-label="Modos ativos"></div>
           <div class="composer-row">
             <button class="plus ${anonymousMode?'anonymous-disabled':''}" id="plusBtn" onclick="window.K.toggleAttach()" title="Adicionar" ${anonymousMode?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
             <textarea id="prompt" rows="1" placeholder="Envie uma mensagem para o Klipza.IA"></textarea>
@@ -2171,7 +2179,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         </div>
         <div class="composer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
       </div></section>`;
-    bindComposer(); renderMessages(); renderForegroundResponseView(); renderBackgroundResponseBanner(); setResponseUI(responseState.active && responseOwnsActiveChat(),true);
+    bindComposer(); renderActiveModes(); renderMessages(); renderForegroundResponseView(); renderBackgroundResponseBanner(); setResponseUI(responseState.active && responseOwnsActiveChat(),true);
   }
   let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0,chatId:null,chatRef:null,messageId:null,requestMessage:'',partial:'',manualScrollLock:false};
   let foregroundResponse=null;
@@ -2392,7 +2400,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(!result?.answer)throw new Error('A resposta veio vazia.');
     return result;
   }
-  async function requestAIAnswer(message, aiAttachments, mode, researchContext,targetChatId=responseState.chatId){
+  async function requestAIAnswer(message, aiAttachments, mode, researchContext,targetChatId=responseState.chatId,billing=null){
     const sessionResult=await supabaseClient?.auth.getSession();
     const accessToken=sessionResult?.data?.session?.access_token;
     if(!accessToken) throw new Error('Sua sessão expirou. Entre novamente para continuar.');
@@ -2400,8 +2408,8 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const history=chat.messages.slice(0,-1).slice(-16).map(item=>({role:item.role,content:item.content}));
     const thinkingMode=state.settings.thinkingMode==='deep'?'deep':'standard';
     const provider=['auto','groq','qwen','hermes'].includes(state.settings.provider)?state.settings.provider:'auto';
-    const response=await fetch(`${AI_API_BASE}/api/ai`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:thinkingMode==='deep'?'text/event-stream':'application/json'},body:JSON.stringify({message,history,mode,attachments:aiAttachments,researchContext,thinkingMode,provider,stream:thinkingMode==='deep'})});
-    if(!response.ok){const payload=await response.json().catch(()=>({}));throw new Error(payload?.error||'Não foi possível concluir a resposta agora.');}
+    const response=await fetch(`${AI_API_BASE}/api/ai`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:thinkingMode==='deep'?'text/event-stream':'application/json'},body:JSON.stringify({message,history,mode,attachments:aiAttachments,researchContext,thinkingMode,provider,stream:thinkingMode==='deep',quotaEventKey:billing?.eventKey||'',quotaEnergyAmount:billing?.energyAmount,quotaTokenAmount:billing?.tokenAmount})});
+    if(!response.ok){const payload=await response.json().catch(()=>({}));const error=new Error(payload?.error||'Não foi possível concluir a resposta agora.');error.status=response.status;error.quotaDenied=response.status===402;throw error;}
     if(thinkingMode==='deep'){
       const contentType=response.headers.get('content-type')||'';
       if(contentType.includes('text/event-stream'))return await readDeepAnswerStream(response);
@@ -3029,6 +3037,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   }
   function sendWebKlipToChat(item){
     pendingResearchContext={title:item.title,category:item.category,summary:item.summary,source:item.source,url:item.url||''};
+    renderActiveModes();
     setView('chat');
     const input=$('prompt');if(!input)return;
     input.value=`Quero continuar esta referência do web.klip no chat.\n\nTítulo: ${item.title}\nCategoria: ${webKlipCategoryLabel(item.category)}\nResumo: ${item.summary}\nFonte: ${item.url||item.source||'fonte pública'}`;
@@ -3069,21 +3078,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         if(!synced){showResponseStatus('Não foi possível sincronizar a energia da sua conta. Tente novamente.');return;}
       }
       const energyBefore=state.quota.energy;
-      if(state.quota.energy<requiredEnergy){
-        if(Number(state.wallet?.tokenBalance||0)<requiredTokens){refreshQuotaUI();updateEnergyBanner();openPrimeModal('prime');return;}
-        paidWithTokens=await consumePurchasedTokens(requiredTokens,outboundMessageId);
-        if(!paidWithTokens){refreshQuotaUI();return;}
-      }else if(state.user?.id){
-        serverEnergyConsumed=await consumeAccountEnergy(requiredEnergy,energyEventKey);
-        if(!serverEnergyConsumed){
-          await syncServerQuota();
-          if(Number(state.wallet?.tokenBalance||0)<requiredTokens){refreshQuotaUI();updateEnergyBanner();openPrimeModal('prime');return;}
-          paidWithTokens=await consumePurchasedTokens(requiredTokens,outboundMessageId);
-          if(!paidWithTokens){refreshQuotaUI();return;}
-        }
-      }else{
-        state.quota.energy-=requiredEnergy;
-      }
+      const billing={eventKey:`message:${outboundMessageId}`,energyAmount:requiredEnergy,tokenAmount:requiredTokens};
+      if(!state.user?.id)state.quota.energy-=requiredEnergy;
       const chat=anonymousMode?anonymousChat:(state.chats?.[originChatId]||currentChat());
       const targetChatId=anonymousMode?'anonymous':(chat?.id||originChatId);
       responseState.chatId=targetChatId;responseState.chatRef=chat;responseState.messageId=outboundMessageId;responseState.requestMessage='';responseState.partial='';responseState.manualScrollLock=false;
@@ -3094,8 +3090,9 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       const aiAttachments=attached.map(a=>({name:a.name,type:a.type||'file',aiData:a.aiData||null,aiText:a.aiText||''})).filter(a=>a.aiData||a.aiText);
       const researchContext=pendingResearchContext;
       const mode=researchContext?'research':attached.length?'attachments':'chat';
-      pendingResearchContext=null;
-      chat.messages.push({id:outboundMessageId,role:'user',content:messageText,attachments});
+    pendingResearchContext=null;
+    renderActiveModes();
+    chat.messages.push({id:outboundMessageId,role:'user',content:messageText,attachments});
       if(chat.title==='Nova conversa'){chat.title=(text || attachments[0]?.name || 'Nova conversa').slice(0,48)+((text || attachments[0]?.name || '').length>48?'…':'')}
       chat.updated=Date.now(); attached=[]; persistIfNeeded(); renderHistory(); renderMessages();
       input.value='';input.style.height='37px';$('sendBtn').disabled=true;
@@ -3107,11 +3104,15 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       else foregroundResponse=null;
       if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(messageText,targetChatId); else showResponseStatus('Klipza está respondendo…');
       try{
-        const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext,targetChatId);
+        const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext,targetChatId,billing);
+        if(payload?.quota&&state.user?.id){applyServerQuota(payload.quota);refreshQuotaUI();animateEnergyChange(energyBefore,state.quota.energy);}
         if(!responseState.stopped)await streamReply(payload.answer,payload);
       }catch(error){
         if(responseState.stopped)return;
-        if(serverEnergyConsumed)await refundAccountEnergy(requiredEnergy,energyEventKey);
+        if(state.user?.id)await syncServerQuota(true);
+        if(error?.quotaDenied||error?.status===402||error?.status===503){
+          setResponseUI(false);showResponseStatus(error?.message||'Não há saldo suficiente para esta mensagem.');setTimeout(()=>showResponseStatus(''),4600);return;
+        }
         const fallback=String(error?.message||'Não foi possível concluir a resposta agora.');
         await streamReply(fallback,{thinkingMode:state.settings.thinkingMode,thinking:null});
       }
@@ -3195,17 +3196,9 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         if(!synced){showResponseStatus('Não foi possível sincronizar o limite de anexos da sua conta. Tente novamente.');return;}
       }
       ensureQuota();
-      const available=primeActive()?files.length:Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed);
+      const available=primeActive()?files.length:Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed-attached.length);
       const chosen=files.slice(0,available);
       if(!chosen.length){alert('Você já usou os 3 anexos deste ciclo de 24 horas. Assine o Klipza.Prime para anexos ilimitados.');openPrimeModal('prime');return;}
-      if(state.user?.id&&!primeActive()){
-        const attachmentEventKey=`attachments:${state.user.id}:${messageId()}`;
-        try{
-          const payload=await quotaRequest({action:'consume_attachments',amount:chosen.length,eventKey:attachmentEventKey});
-          if(payload?.result)applyServerQuota(payload.result);
-          if(payload?.consumed!==true){refreshQuotaUI();alert('O limite de 3 anexos deste ciclo já foi atingido. Assine o Klipza.Prime para anexos ilimitados.');openPrimeModal('prime');return;}
-        }catch(error){await syncServerQuota(true);showResponseStatus(error?.message||'Não foi possível reservar os anexos agora.');return;}
-      }
       for(const file of chosen){
         const fileType=file.type||'';
         let data=null, aiData=null, aiText='';
@@ -3215,7 +3208,6 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         else aiText=`O arquivo ${file.name} foi anexado. O formato não pôde ser lido diretamente nesta versão; explique o que deseja fazer com ele.`;
         attached.push({name:file.name,type:fileType||'file',data,aiData,aiText});
       }
-        if(!primeActive()&&!state.user?.id)state.quota.attachUsed+=chosen.length;
       save(); renderAttached(); refreshQuotaUI();
       $('sendBtn').disabled=!$('prompt').value.trim()&&!attached.length;
       if(!primeActive() && files.length>chosen.length) alert(`Foram adicionados ${chosen.length} arquivo(s), o máximo disponível neste ciclo. Assine o Klipza.Prime para anexos ilimitados.`);
@@ -3462,7 +3454,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     window.__klipzaSettingsMobileDetail=false;
     renderSettingsPage();
   }
-  window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,openArtifact,openArtifactCanvas,downloadArtifact,closeArtifact,
+  window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,closeAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,openArtifact,openArtifactCanvas,downloadArtifact,closeArtifact,
     upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal,hydrateMemoryData,exportAllData,deleteMemory,toggleThinkingDetails,toggleDeepThinking,refreshDeepJobs,jumpToLatest,startExpertMode,confirmExpertPlan,cancelExpertPlan,resumeExpertJob,cancelDeepJob};
   $('authEmailForm')?.addEventListener('submit',submitEmailAuth);
   $('authRecoveryForm')?.addEventListener('submit',updateRecoveredPassword);

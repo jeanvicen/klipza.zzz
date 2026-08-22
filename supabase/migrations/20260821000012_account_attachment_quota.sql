@@ -218,5 +218,3 @@ grant execute on function public.consume_user_energy(integer, text) to authentic
 grant execute on function public.consume_user_attachments(integer, text) to authenticated;
 
 commit;
-EOF
-wc -l /home/ubuntu/klipza.zzz/supabase/migrations/20260821000012_account_attachment_quota.sql

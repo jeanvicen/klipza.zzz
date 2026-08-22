@@ -36,7 +36,10 @@ export default async function handler(request, response) {
     if (error) throw error;
     return json(response, 200, { quota: normalizeQuota(data), allowed: data?.allowed === true, consumed: data?.consumed === true, alreadyProcessed: data?.alreadyProcessed === true });
   } catch (error) {
-    const status = Number(error?.status) || 500;
-    return json(response, status, { error: status === 500 ? 'Não foi possível verificar o Modo Especialista agora.' : error.message });
+    const rawMessage = String(error?.message || '');
+    const migrationMissing = /get_expert_mode_quota|consume_expert_mode|does not exist|schema cache/i.test(rawMessage);
+    const status = migrationMissing ? 503 : Number(error?.status) || 500;
+    const message = migrationMissing ? 'O Modo Especialista ainda precisa ser ativado no banco da conta.' : status === 500 ? 'Não foi possível verificar o Modo Especialista agora.' : error.message;
+    return json(response, status, { error: message });
   }
 }
