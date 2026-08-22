@@ -1448,11 +1448,15 @@ body.prime-modal-open{overflow:hidden}
   function toggleSounds(){
     state.settings.sounds=!state.settings.sounds; save(); renderSettingsPage();
   }
+  function clearLocalAccountResidue(userId){
+    try{localStorage.removeItem(KEY);localStorage.removeItem('klipza-studio-workspace-v2');if(userId)localStorage.removeItem(notificationDeliveryKey(userId));}catch(error){console.warn('Não foi possível limpar todo o cache local da conta.',error);}
+    attached=[];pendingResearchContext=null;anonymousChat=null;
+  }
+  function emptyLocalAccountState(user=null){return {user,chats:{},artifacts:{},activeChatId:null,quota:null,localOwnerId:user?.id||null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR',thinkingMode:'standard',provider:'auto',memoryEnabled:true,memoryCaptureMode:'automatic',memoryMax:500,inactivityNotifications:true},memory:{memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]}};}
   function clearAllLocalData(){
     openConfirmModal('Limpar dados locais?', 'Conversas, artefatos, energia e preferências deste navegador serão removidos. Os dados sincronizados na sua conta permanecerão intactos.', ()=>{
-      const user=state.user; remoteSyncSuspended=true; localStorage.removeItem(KEY);
-      state={user,chats:{},artifacts:{},activeChatId:null,quota:null,theme:'light',settings:{notifications:false,sounds:false,language:'pt-BR',country:'BR',thinkingMode:'standard',provider:'auto',memoryEnabled:true,memoryCaptureMode:'automatic',memoryMax:500,inactivityNotifications:true},memory:{memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]}};
-      applyTheme(); ensureQuota(); if(currentView==='settings') renderSettingsPage(); enter(); remoteSyncSuspended=false;
+      const user=state.user;remoteSyncSuspended=true;clearLocalAccountResidue(user?.id);state=emptyLocalAccountState(user);activeChatId=null;
+      applyTheme();ensureQuota();if(currentView==='settings')renderSettingsPage();enter();remoteSyncSuspended=false;
     });
   }
   function browserNotification(title,body){
@@ -1470,11 +1474,34 @@ body.prime-modal-open{overflow:hidden}
     if(!response.ok)throw new Error(payload?.error||'Não foi possível acessar a memória da conta.');
     return payload;
   }
+  let accountNotificationPollTimer=null;
+  let notificationRealtimeChannel=null;
+  function notificationDeliveryKey(userId){return `klipza-notification-delivery-v1:${userId}`;}
+  function readDeliveredNotificationIds(userId){try{const value=JSON.parse(localStorage.getItem(notificationDeliveryKey(userId))||'[]');return new Set(Array.isArray(value)?value.filter(id=>typeof id==='string').slice(-120):[]);}catch(error){return new Set();}}
+  function writeDeliveredNotificationIds(userId,ids){try{localStorage.setItem(notificationDeliveryKey(userId),JSON.stringify([...ids].slice(-120)));}catch(error){}}
+  function announceAccountNotifications(user,notifications,previousNotifications=[]){
+    if(!user?.id)return;
+    const delivered=readDeliveredNotificationIds(user.id);
+    const fresh=(Array.isArray(notifications)?notifications:[]).filter(item=>item?.id&&!item.read_at&&!delivered.has(item.id)&&['inactivity_warning','memory_limit'].includes(item.notification_type));
+    if(!fresh.length)return;
+    fresh.forEach(item=>delivered.add(item.id));writeDeliveredNotificationIds(user.id,delivered);
+    const summary=fresh.map(item=>`${item.title}: ${item.body}`).join(' · ');
+    showResponseStatus(summary);setTimeout(()=>{if(state.user?.id===user.id)showResponseStatus('');},Math.max(3200,Math.min(9000,fresh.length*3200)));
+    fresh.forEach((item,index)=>setTimeout(()=>{if(state.user?.id===user.id)browserNotification(`Klipza — ${item.title}`,item.body);},index*260));
+  }
+  function stopAccountNotificationSync(){if(accountNotificationPollTimer){clearInterval(accountNotificationPollTimer);accountNotificationPollTimer=null;}if(notificationRealtimeChannel&&supabaseClient){const channel=notificationRealtimeChannel;notificationRealtimeChannel=null;void supabaseClient.removeChannel(channel).catch(()=>{});}else notificationRealtimeChannel=null;}
+  function startAccountNotificationSync(userId){
+    stopAccountNotificationSync();if(!supabaseClient||!userId)return;
+    accountNotificationPollTimer=setInterval(()=>{if(state.user?.id===userId&&!document.hidden)void hydrateMemoryData({id:userId});},60000);
+    try{notificationRealtimeChannel=supabaseClient.channel(`notifications-${userId}`).on('postgres_changes',{event:'INSERT',schema:'public',table:'user_notifications',filter:`user_id=eq.${userId}`},()=>{if(state.user?.id===userId)void hydrateMemoryData({id:userId});}).subscribe();}catch(error){console.warn('Realtime de notificações indisponível; usando consulta periódica.',error);notificationRealtimeChannel=null;}
+  }
   async function hydrateMemoryData(user=state.user){
     if(!user?.id)return false;
     try{
+      const previousNotifications=Array.isArray(state.memory?.notifications)?state.memory.notifications:[];
       const payload=await memoryRequest(null,'all');
       state.memory={memories:Array.isArray(payload?.memories)?payload.memories:[],settings:payload?.settings||state.memory.settings,notifications:Array.isArray(payload?.notifications)?payload.notifications:[],backups:Array.isArray(payload?.backups)?payload.backups:[]};
+      announceAccountNotifications(user,state.memory.notifications,previousNotifications);
       const settings=state.memory.settings||{};
       state.settings.memoryEnabled=true;
       state.settings.memoryCaptureMode='automatic';
@@ -1921,6 +1948,7 @@ body.prime-modal-open{overflow:hidden}
       save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();
       await hydrateMessageFeedback(user);
       await hydrateMemoryData(user);
+      startAccountNotificationSync(user.id);
       await syncServerQuota();
       await refreshDeepJobs();
       startDeepJobPolling();
@@ -2006,19 +2034,20 @@ body.prime-modal-open{overflow:hidden}
     adaptSidebar();
   }
   async function logout(){
-    stopDeepJobPolling();expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;
+    const oldUserId=state.user?.id||state.localOwnerId||null;
+    stopDeepJobPolling();stopAccountNotificationSync();expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;
     quotaSyncSerial++;serverQuotaSyncBusy=false;serverQuotaSyncUserId=null;
-    authResolved=false; clearTimeout(remoteStateTimer); remoteStateTimer=null;
-    stopQuotaRealtime();
-    if(supabaseClient) await supabaseClient.auth.signOut();
-    state.user=null; state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS}; state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]}; save(); location.reload();
+    authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;
+    stopQuotaRealtime();clearLocalAccountResidue(oldUserId);
+    if(supabaseClient)await supabaseClient.auth.signOut();
+    state=emptyLocalAccountState(null);save();location.reload();
   }
   async function bootstrapAuth(){
     if(!supabaseClient){setAuthStatus('Não foi possível carregar o serviço de contas. Atualize a página.','error');return;}
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       if(event==='PASSWORD_RECOVERY'){showRecoveryPanel(true);return;}
       if(event==='SIGNED_IN'&&session?.user)setTimeout(()=>finishSupabaseUser(session.user),0);
-      if(event==='SIGNED_OUT'){stopQuotaRealtime();expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
+      if(event==='SIGNED_OUT'){const oldUserId=state.user?.id||state.localOwnerId||null;stopQuotaRealtime();stopAccountNotificationSync();clearLocalAccountResidue(oldUserId);expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state=emptyLocalAccountState(null);state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
     });
     const {data}=await supabaseClient.auth.getSession();
     if(data.session?.user){
@@ -2026,9 +2055,9 @@ body.prime-modal-open{overflow:hidden}
       if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
       else await finishSupabaseUser(data.session.user);
     }else{
-      stopQuotaRealtime();
-      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.memory={memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
-save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
+      const oldUserId=state.user?.id||state.localOwnerId||null;stopQuotaRealtime();stopAccountNotificationSync();clearLocalAccountResidue(oldUserId);
+      authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state=emptyLocalAccountState(null);state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null};
+  save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       if(window.location.hash.includes('reset-password'))showRecoveryPanel(true);
     }
   }
