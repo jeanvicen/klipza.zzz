@@ -208,7 +208,52 @@ img{max-width:100%}
 .nav-subnav.hidden{display:none!important}
 .nav-subbtn{height:36px!important;font-size:12px!important}
 .nav-subbtn.active{background:var(--black);color:var(--bg)}
-.webklip-view{height:100%;overflow:auto;padding:24px 20px 48px;background:var(--bg);overscroll-behavior:contain}
+.webklip-view{height:100%;overflow:auto;padding:26px 20px 54px;background:radial-gradient(circle at 12% 0%,rgba(111,88,255,.10),transparent 28%),radial-gradient(circle at 88% 12%,rgba(35,196,255,.07),transparent 24%),var(--bg);overscroll-behavior:contain;position:relative}
+.webklip-view:before{content:'';position:absolute;inset:0;pointer-events:none;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.035) 45%,transparent 62%);opacity:.65;animation:webklipSheen 14s ease-in-out infinite}
+.webklip-inner{position:relative;z-index:1}
+.webklip-search-hero{min-height:min(58vh,560px);display:grid;place-items:center;align-content:center;text-align:center;padding:36px 12px 44px;animation:webklipRise .28s cubic-bezier(.23,1,.32,1) both}
+.webklip-search-hero .webklip-eyebrow{display:inline-flex;align-items:center;gap:7px;margin-bottom:13px;color:var(--accent-strong)}
+.webklip-search-hero .webklip-eyebrow:before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 0 5px color-mix(in srgb,currentColor 14%,transparent)}
+.webklip-search-hero .webklip-title{font-size:clamp(34px,5vw,62px);line-height:.98;letter-spacing:-2.5px;max-width:740px;margin:0}
+.webklip-search-hero .webklip-subtitle{max-width:560px;margin:16px auto 0;font-size:13px}
+.webklip-search-hero .webklip-search-form{width:min(720px,100%);height:62px;margin-top:28px;padding:0 9px 0 19px;border-radius:18px;background:color-mix(in srgb,var(--panel) 88%,transparent);box-shadow:0 16px 44px rgba(17,14,45,.11),inset 0 1px 0 rgba(255,255,255,.18);transition:transform .18s cubic-bezier(.23,1,.32,1),border-color .18s,box-shadow .18s}
+.webklip-search-hero .webklip-search-form:focus-within{transform:translateY(-2px);border-color:var(--accent-strong);box-shadow:0 19px 52px rgba(79,61,180,.18),0 0 0 4px color-mix(in srgb,var(--accent-strong) 13%,transparent)}
+.webklip-search-hero .webklip-search-form input{height:48px;font-size:15px}
+.webklip-search-hero .webklip-search-form input::placeholder{color:var(--muted);opacity:.78}
+.webklip-search-hero .webklip-search-form button{height:44px;min-width:112px;border:0;border-radius:13px;background:linear-gradient(135deg,#242238,#5c4df0);color:#fff;box-shadow:0 8px 18px rgba(66,54,180,.22);transition:transform .16s cubic-bezier(.23,1,.32,1),filter .16s}
+.webklip-search-hero .webklip-search-form button:hover{filter:brightness(1.1);transform:translateY(-1px)}
+.webklip-search-hero .webklip-search-form button:active,.webklip-action:active,.webklip-tab:active{transform:scale(.97)}
+.webklip-search-hints{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin-top:16px}
+.webklip-search-hint{border:1px solid var(--line);border-radius:999px;padding:7px 10px;background:color-mix(in srgb,var(--panel) 68%,transparent);color:var(--muted);font-size:10px;transition:background .16s,border-color .16s,transform .16s}
+.webklip-search-hint:hover{background:var(--panel);border-color:var(--accent-strong);transform:translateY(-1px)}
+.webklip-results-header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:16px 0 14px;animation:webklipRise .24s cubic-bezier(.23,1,.32,1) both}
+.webklip-results-header .webklip-title{margin-top:4px;font-size:30px}
+.webklip-results-count{font-size:10px;color:var(--muted);white-space:nowrap}
+.webklip-tabs{background:color-mix(in srgb,var(--panel) 82%,transparent);box-shadow:0 8px 22px rgba(17,14,45,.05);backdrop-filter:blur(14px)}
+.webklip-tab{position:relative;transition:background .16s,color .16s,transform .16s}
+.webklip-tab.active{background:linear-gradient(135deg,#25233b,#5b4cea);box-shadow:0 6px 15px rgba(75,60,190,.2)}
+.webklip-tab-count{display:inline-grid;place-items:center;min-width:17px;height:17px;margin-left:5px;padding:0 4px;border-radius:99px;background:color-mix(in srgb,currentColor 14%,transparent);font-size:9px}
+.webklip-grid{gap:13px}
+.webklip-card{position:relative;overflow:hidden;background:color-mix(in srgb,var(--panel) 77%,transparent);box-shadow:0 9px 24px rgba(17,14,45,.055);transition:border-color .18s,transform .18s,box-shadow .18s,background .18s;animation:webklipCardIn .3s cubic-bezier(.23,1,.32,1) both}
+.webklip-card:before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(115,99,255,.08),transparent 40%,rgba(42,196,255,.045));opacity:0;transition:opacity .18s;pointer-events:none}
+.webklip-card:hover{border-color:var(--accent-strong);transform:translateY(-4px);box-shadow:0 18px 32px rgba(35,25,91,.12);background:var(--panel)}
+.webklip-card:hover:before{opacity:1}
+.webklip-card-media{position:relative;margin:-2px 0 1px}.webklip-card-image{width:100%;height:128px;object-fit:cover;border-radius:10px;background:var(--hover);border:1px solid var(--line);display:block;transition:transform .3s cubic-bezier(.23,1,.32,1),filter .3s}.webklip-card:hover .webklip-card-image{transform:scale(1.025);filter:saturate(1.06)}.webklip-card-media-fallback{position:absolute;inset:0;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,rgba(75,62,160,.16),rgba(33,199,236,.08));color:var(--accent-strong);font-size:26px;pointer-events:none}.webklip-card-media img:not([src]),.webklip-card-media img.webklip-image-broken{display:none}
+.webklip-card-video{position:relative}
+.webklip-card-video:after{content:'▶';position:absolute;left:12px;bottom:11px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:rgba(20,18,39,.82);color:#fff;font-size:10px}
+.webklip-card-title,.webklip-card-summary,.webklip-card-foot{position:relative;z-index:1}
+.webklip-card-top{position:relative;z-index:1}
+.webklip-card-foot{gap:6px}
+.webklip-card-open{width:28px;height:28px;display:grid;place-items:center;flex:0 0 auto;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:14px;transition:transform .16s,border-color .16s,background .16s}
+.webklip-card-open:hover{transform:translateY(-1px);border-color:var(--accent-strong);background:var(--hover)}
+.webklip-loading{min-height:220px;display:grid;place-items:center;gap:12px}
+.webklip-loading:before{content:'';width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--accent-strong);border-radius:50%;animation:webklipSpin .75s linear infinite}
+.webklip-empty{background:color-mix(in srgb,var(--panel) 74%,transparent);box-shadow:0 10px 28px rgba(17,14,45,.05)}
+@keyframes webklipRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes webklipCardIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes webklipSheen{0%,100%{transform:translateX(-18%);opacity:.35}50%{transform:translateX(18%);opacity:.7}}
+@keyframes webklipSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.webklip-view:before,.webklip-search-hero,.webklip-results-header,.webklip-card,.webklip-loading:before{animation:none!important}.webklip-card,.webklip-search-hero .webklip-search-form,.webklip-search-hint,.webklip-card-image{transition:none!important}}
 .webklip-inner{width:min(1120px,100%);margin:0 auto}
 .webklip-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:18px}
 .webklip-eyebrow{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:750}
@@ -2567,7 +2612,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   let welcomePromptIndex=0;
   const WEBKLIP_API_BASE='https://klipza-zzz.vercel.app';
   const WEBKLIP_PAGE_SIZE=18;
-  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,page:null};
+  let webKlipState={dayKey:null,items:[],category:'all',selected:null,loading:false,error:null,query:'',searchResults:[],searchTabs:{web:[],videos:[],images:[],news:[]},activeTab:'all',searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,page:null};
   const WEBKLIP_LOCALES={BR:{label:'Brasil',language:'pt-BR',hl:'pt-BR',gl:'BR',ceid:'BR:pt'},PT:{label:'Portugal',language:'pt-PT',hl:'pt-PT',gl:'PT',ceid:'PT:pt'},US:{label:'Estados Unidos',language:'en-US',hl:'en-US',gl:'US',ceid:'US:en'},GB:{label:'Reino Unido',language:'en-GB',hl:'en-GB',gl:'GB',ceid:'GB:en'},ES:{label:'Espanha',language:'es-ES',hl:'es-ES',gl:'ES',ceid:'ES:es'},MX:{label:'México',language:'es-MX',hl:'es-419',gl:'MX',ceid:'MX:es'},FR:{label:'França',language:'fr-FR',hl:'fr-FR',gl:'FR',ceid:'FR:fr'},DE:{label:'Alemanha',language:'de-DE',hl:'de-DE',gl:'DE',ceid:'DE:de'},JP:{label:'Japão',language:'ja-JP',hl:'ja',gl:'JP',ceid:'JP:ja'},IN:{label:'Índia',language:'en-IN',hl:'en-IN',gl:'IN',ceid:'IN:en'}};
   const WEBKLIP_AI_LINKS=[{name:'ChatGPT',url:'https://chatgpt.com/'},{name:'Claude',url:'https://claude.ai/'},{name:'Gemini',url:'https://gemini.google.com/'},{name:'Perplexity',url:'https://www.perplexity.ai/'},{name:'Microsoft Copilot',url:'https://copilot.microsoft.com/'}];
   const WELCOME_PROMPTS=[
@@ -2581,7 +2626,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
 
   function currentWebKlipLocale(){return WEBKLIP_LOCALES[state.settings?.country]||WEBKLIP_LOCALES.BR;}
   function webKlipCountryOptions(){const current=state.settings?.country||'BR';return Object.entries(WEBKLIP_LOCALES).map(([code,locale])=>`<option value="${code}" ${code===current?'selected':''}>${locale.label}</option>`).join('');}
-  function setWebKlipCountry(country){if(!WEBKLIP_LOCALES[country])return;state.settings.country=country;state.settings.language=WEBKLIP_LOCALES[country].language;save();      webKlipState={...webKlipState,dayKey:null,items:[],searchResults:[],visibleLimit:WEBKLIP_PAGE_SIZE,error:null};renderWebKlipPage();}
+  function setWebKlipCountry(country){if(!WEBKLIP_LOCALES[country])return;state.settings.country=country;state.settings.language=WEBKLIP_LOCALES[country].language;save();      webKlipState={...webKlipState,dayKey:null,items:[],searchResults:[],searchTabs:{web:[],videos:[],images:[],news:[]},activeTab:'all',visibleLimit:WEBKLIP_PAGE_SIZE,error:null};renderWebKlipPage();}
   function localDayKey(date=new Date()){
     const local=new Date(date.getTime()-date.getTimezoneOffset()*60000);
     return local.toISOString().slice(0,10);
@@ -2702,19 +2747,33 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     }
     if(currentView==='webklip')renderWebKlipPage();
   }
-  function webKlipCategoryLabel(category){return ({all:'Tudo',news:'Notícias',games:'Jogos',code:'Código',design:'Design',search:'Pesquisa'})[category]||category;}
+  const WEBKLIP_SEARCH_TABS=[{id:'all',label:'Tudo'},{id:'web',label:'Web'},{id:'videos',label:'Vídeos'},{id:'images',label:'Imagens'},{id:'news',label:'Notícias'}];
+  function webKlipCategoryLabel(category){return ({all:'Tudo',news:'Notícias',videos:'Vídeos',images:'Imagens',web:'Web',games:'Jogos',code:'Código',design:'Design',search:'Pesquisa'})[category]||category;}
   function webKlipFilteredItems(){return webKlipState.category==='all'?webKlipState.items:webKlipState.items.filter(item=>item.category===webKlipState.category);}
-  function webKlipItemHTML(item,index){return `<article class="webklip-card" data-webklip-id="${esc(item.id)}"><div class="webklip-card-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))}</span><span class="webklip-rank">#${index+1}</span></div><div class="webklip-card-title">${esc(item.title)}</div><div class="webklip-card-summary">${esc(item.summary)}</div><div class="webklip-card-foot"><span class="webklip-source">${esc(item.source||'Fonte pública')}</span><span class="webklip-arrow">→</span></div></article>`;}
+  function webKlipSearchGroups(){
+    const tabs=webKlipState.searchTabs||{};
+    const grouped={web:Array.isArray(tabs.web)?tabs.web:[],videos:Array.isArray(tabs.videos)?tabs.videos:[],images:Array.isArray(tabs.images)?tabs.images:[],news:Array.isArray(tabs.news)?tabs.news:[]};
+    grouped.all=[];const seen=new Set();Object.values(grouped).forEach(list=>list.forEach(item=>{if(item?.url&&!seen.has(item.url)){seen.add(item.url);grouped.all.push(item);}}));
+    return grouped;
+  }
+  function webKlipItemHTML(item,index){
+    const image=item.image?`<div class="webklip-card-media ${item.category==='videos'?'webklip-card-video':''}"><img class="webklip-card-image" data-webklip-image src="${esc(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer"><span class="webklip-card-media-fallback">${item.category==='videos'?'▶':'◌'}</span></div>`:'';
+    return `<article class="webklip-card" style="animation-delay:${Math.min(index,10)*24}ms" data-webklip-id="${esc(item.id)}"><div class="webklip-card-top"><span class="webklip-tag">${esc(webKlipCategoryLabel(item.category))}</span><span class="webklip-rank">#${index+1}</span></div>${image}<div class="webklip-card-title">${esc(item.title)}</div><div class="webklip-card-summary">${esc(item.summary)}</div><div class="webklip-card-foot"><span class="webklip-source">${esc(item.source||'Fonte pública')}</span>${item.url?`<button class="webklip-card-open" data-webklip-open="${esc(item.id)}" type="button" title="Abrir fonte" aria-label="Abrir fonte">↗</button>`:'<span class="webklip-arrow">→</span>'}</div></article>`;
+  }
   async function searchWebKlip(query){
     const clean=String(query||'').trim().slice(0,180);
-    webKlipState={...webKlipState,query:clean,searchResults:[],searchLoading:Boolean(clean),visibleLimit:WEBKLIP_PAGE_SIZE,error:null};
+    webKlipState={...webKlipState,query:clean,searchResults:[],searchTabs:{web:[],videos:[],images:[],news:[]},activeTab:'all',searchLoading:Boolean(clean),visibleLimit:WEBKLIP_PAGE_SIZE,error:null};
     renderWebKlipPage();
     if(!clean)return;
     try{
       const locale=currentWebKlipLocale();
       const data=await fetchJSON(`${WEBKLIP_API_BASE}/api/webklip?q=${encodeURIComponent(clean)}&country=${encodeURIComponent(state.settings.country||'BR')}&language=${encodeURIComponent(locale.language)}`);
-      const items=(Array.isArray(data?.items)?data.items:[]).filter(item=>item?.url&&!blockedNews(`${item.title||''} ${item.summary||''}`)).slice(0,50);
-      webKlipState={...webKlipState,query:clean,searchResults:items,searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,error:items.length?'': 'Nenhum resultado público encontrado para esta busca.'};
+      const returnedTabs=data?.tabs&&typeof data.tabs==='object'?data.tabs:null;
+      const fallbackItems=(Array.isArray(data?.items)?data.items:[]).filter(item=>item?.url&&!blockedNews(`${item.title||''} ${item.summary||''}`)).map(item=>({...item,category:'web'}));
+      const searchTabs={web:(Array.isArray(returnedTabs?.web)?returnedTabs.web:[]).concat(returnedTabs?[]:fallbackItems).filter(item=>item?.url),videos:Array.isArray(returnedTabs?.videos)?returnedTabs.videos.filter(item=>item?.url):[],images:Array.isArray(returnedTabs?.images)?returnedTabs.images.filter(item=>item?.url):[],news:Array.isArray(returnedTabs?.news)?returnedTabs.news.filter(item=>item?.url):[]};
+      const groups={...searchTabs,all:[...searchTabs.web,...searchTabs.videos,...searchTabs.images,...searchTabs.news]};
+      const all=groups.all.filter((item,index,array)=>array.findIndex(entry=>entry.url===item.url)===index).slice(0,50);
+      webKlipState={...webKlipState,query:clean,searchResults:all,searchTabs,searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE,error:all.length?'': 'Nenhum resultado público encontrado para esta busca.'};
     }catch(error){webKlipState={...webKlipState,searchLoading:false,error:'A pesquisa pública está indisponível agora. Tente novamente em instantes.'};}
     renderWebKlipPage();
   }
@@ -2779,7 +2838,6 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     const mount=$('main');if(!mount)return;
     const locale=currentWebKlipLocale();
     const searching=Boolean(webKlipState.query);
-    const items=searching?webKlipState.searchResults:[];
     if(webKlipState.page){
       const page=webKlipState.page;
       mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">Navegação interna</span></div></header><section class="webklip-view webklip-page-view"><div class="webklip-inner"><div class="webklip-browser-toolbar"><button class="webklip-toolbar-button" id="webKlipPageBack" type="button">‹ Voltar</button><div class="webklip-address" title="${esc(page.url)}">${esc(page.title)}</div><button class="webklip-toolbar-button" id="webKlipPageHome" type="button">Início</button></div>${webKlipPageStateHTML(page)}</div></section>`;
@@ -2792,19 +2850,33 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       if(page.status==='loading')monitorWebKlipFrame(page);
       return;
     }
+    const groups=searching?webKlipSearchGroups():{all:[],web:[],videos:[],images:[],news:[]};
+    const activeTab=WEBKLIP_SEARCH_TABS.some(tab=>tab.id===webKlipState.activeTab)?webKlipState.activeTab:'all';
+    const items=groups[activeTab]||[];
     const visibleItems=items.slice(0,webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE);
     const moreItems=items.length>visibleItems.length;
-    const body=webKlipState.searchLoading?'<div class="webklip-loading">Pesquisando fontes públicas…</div>':searching?(items.length?`<div class="webklip-grid">${visibleItems.map(webKlipItemHTML).join('')}</div>${moreItems?`<button class="webklip-load-more" id="webKlipLoadMore" type="button">Carregar mais ${Math.min(WEBKLIP_PAGE_SIZE,items.length-visibleItems.length)}</button>`:''}`:`<div class="webklip-empty">${esc(webKlipState.error||'Nenhum resultado encontrado para essa busca. Tente outros termos.')}</div>`):'<div class="webklip-search-empty"><div class="webklip-search-empty-icon">⌕</div><h1 class="webklip-title">Pesquise na web</h1><p class="webklip-subtitle">Digite uma pergunta, assunto, ferramenta, jogo ou referência. Os resultados aparecem aqui sem sair do Klipza.</p></div>';
-    mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">${esc(locale.label)} · ${esc(locale.language)}</span></div></header><section class="webklip-view"><div class="webklip-inner"><div class="webklip-browser-bar"><form class="webklip-search-form" id="webKlipSearchForm" role="search"><span class="webklip-search-icon" aria-hidden="true">⌕</span><input id="webKlipSearchInput" value="${esc(webKlipState.query)}" maxlength="180" autocomplete="off" placeholder="Pesquisar na web…" aria-label="Pesquisar na web"><button type="submit">Pesquisar</button></form></div><div class="webklip-head"><div><div class="webklip-eyebrow">Klipza · busca interna</div><h2 class="webklip-title">${searching?'Resultados da pesquisa':'Comece uma pesquisa'}</h2><p class="webklip-subtitle">${searching?'Abra uma fonte dentro do Klipza ou envie a referência ao chat para continuar criando.':'O web.klip pesquisa fontes públicas e mantém você dentro do aplicativo.'}</p></div>${searching?'<button class="webklip-refresh" id="webKlipRefresh" type="button">Limpar</button>':''}</div>${searching&&webKlipState.searchLoading?'':`<div class="webklip-meta">${searching?`${items.length} resultado(s) · exibindo ${visibleItems.length} · limite de 50`:'A pesquisa só começa quando você enviar uma consulta.'}${webKlipState.error?` · ${esc(webKlipState.error)}`:''}</div>`}${body}</div></section>`;
+    const searchForm=`<form class="webklip-search-form" id="webKlipSearchForm" role="search"><span class="webklip-search-icon" aria-hidden="true">⌕</span><input id="webKlipSearchInput" value="${esc(webKlipState.query)}" maxlength="180" autocomplete="off" placeholder="Pesquise por assunto, pergunta ou referência…" aria-label="Pesquisar na web"><button type="submit">Pesquisar</button></form>`;
+    const hints=['tecnologia hoje','ideias de design','jogos indie','clima em Curitiba'];
+    const hero=!searching?`<div class="webklip-search-hero"><div class="webklip-eyebrow">web.klip · pesquisa pública</div><h1 class="webklip-title">Tudo o que você quer<br>explorar, em um só lugar.</h1><p class="webklip-subtitle">Pesquise na web, compare referências e continue a conversa no Klipza sem perder o contexto.</p>${searchForm}<div class="webklip-search-hints">${hints.map(hint=>`<button class="webklip-search-hint" type="button" data-webklip-hint="${esc(hint)}">${esc(hint)}</button>`).join('')}</div></div>`:'';
+    const tabs=searching?`<div class="webklip-tabs" role="tablist" aria-label="Tipos de resultado">${WEBKLIP_SEARCH_TABS.map(tab=>`<button class="webklip-tab ${activeTab===tab.id?'active':''}" data-webklip-tab="${tab.id}" role="tab" aria-selected="${activeTab===tab.id?'true':'false'}" type="button">${esc(tab.label)}<span class="webklip-tab-count">${groups[tab.id]?.length||0}</span></button>`).join('')}</div>`:'';
+    const body=webKlipState.searchLoading?'<div class="webklip-loading"><span>Consultando fontes públicas…</span></div>':searching?(items.length?`<div class="webklip-grid">${visibleItems.map(webKlipItemHTML).join('')}</div>${moreItems?`<button class="webklip-load-more" id="webKlipLoadMore" type="button">Carregar mais ${Math.min(WEBKLIP_PAGE_SIZE,items.length-visibleItems.length)}</button>`:''}`:`<div class="webklip-empty">${esc(webKlipState.error||'Nenhum resultado encontrado nesta aba. Tente outra categoria ou outros termos.')}</div>`):'';
+    const resultsHeader=searching?`<div class="webklip-results-header"><div><div class="webklip-eyebrow">${esc(locale.label)} · fontes abertas</div><h2 class="webklip-title">Resultados para “${esc(webKlipState.query)}”</h2></div><div class="webklip-results-count">${groups.all.length} resultado(s) · ${activeTab==='all'?'todas as fontes':esc(WEBKLIP_SEARCH_TABS.find(tab=>tab.id===activeTab)?.label||'')}</div></div>${tabs}`:'';
+    const resultsSearch=searching?`<div class="webklip-browser-bar">${searchForm}<button class="webklip-clear-search" id="webKlipRefresh" type="button">Limpar</button></div>`:'';
+    mount.innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" id="webKlipBack" title="Voltar ao chat" aria-label="Voltar ao chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></button><div class="topbar-title">web.klip</div></div><div class="topbar-right"><span class="webklip-topbar-label">${esc(locale.label)} · ${esc(locale.language)}</span></div></header><section class="webklip-view"><div class="webklip-inner">${hero}${resultsSearch}${resultsHeader}${body}</div></section>`;
     mount.querySelector('#webKlipBack')?.addEventListener('click',()=>setView('chat'));
-    const form=mount.querySelector('#webKlipSearchForm');
-    form?.addEventListener('submit',event=>{event.preventDefault();searchWebKlip(mount.querySelector('#webKlipSearchInput')?.value||'');});
+    mount.querySelector('#webKlipSearchForm')?.addEventListener('submit',event=>{event.preventDefault();searchWebKlip(mount.querySelector('#webKlipSearchInput')?.value||'');});
     mount.querySelector('#webKlipRefresh')?.addEventListener('click',refreshWebKlip);
+    mount.querySelectorAll('[data-webklip-hint]').forEach(button=>button.addEventListener('click',()=>searchWebKlip(button.dataset.webklipHint||'')));
+    mount.querySelectorAll('[data-webklip-tab]').forEach(button=>button.addEventListener('click',()=>{webKlipState.activeTab=button.dataset.webklipTab||'all';webKlipState.visibleLimit=WEBKLIP_PAGE_SIZE;renderWebKlipPage();}));
     mount.querySelector('#webKlipLoadMore')?.addEventListener('click',()=>{webKlipState.visibleLimit=(webKlipState.visibleLimit||WEBKLIP_PAGE_SIZE)+WEBKLIP_PAGE_SIZE;renderWebKlipPage();});
-    mount.querySelectorAll('[data-webklip-id]').forEach(card=>card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId)));
+    mount.querySelectorAll('[data-webklip-id]').forEach(card=>{
+      card.addEventListener('click',()=>openWebKlipItem(card.dataset.webklipId));
+      card.querySelector('[data-webklip-open]')?.addEventListener('click',event=>{event.stopPropagation();const item=[...webKlipState.searchResults,...Object.values(webKlipState.searchTabs||{}).flat(),...webKlipState.items].find(entry=>entry.id===card.dataset.webklipId);if(item?.url)openWebKlipPage(item.url,item.title);});
+      card.querySelector('[data-webklip-image]')?.addEventListener('error',event=>{event.currentTarget.classList.add('webklip-image-broken');});
+    });
   }
   function openWebKlipItem(id){
-    const item=[...webKlipState.items,...webKlipState.searchResults].find(entry=>entry.id===id);if(!item)return;
+    const item=[...webKlipState.items,...webKlipState.searchResults,...Object.values(webKlipState.searchTabs||{}).flat()].find(entry=>entry.id===id);if(!item)return;
     webKlipState.selected=item;
     const card=document.querySelector(`[data-webklip-id="${CSS.escape(id)}"]`);if(card)card.scrollIntoView({block:'center',behavior:'smooth'});
     const summary=`${item.summary}${item.meta?`\n\n${item.meta}`:''}`;
@@ -2820,7 +2892,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   }
   function refreshWebKlip(){
     const today=localDayKey();
-    webKlipState={...webKlipState,dayKey:null,items:[],selected:null,loading:false,error:null,query:'',searchResults:[],searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE};
+    webKlipState={...webKlipState,dayKey:null,items:[],selected:null,loading:false,error:null,query:'',searchResults:[],searchTabs:{web:[],videos:[],images:[],news:[]},activeTab:'all',searchLoading:false,visibleLimit:WEBKLIP_PAGE_SIZE};
     try{localStorage.removeItem(WEBKLIP_CACHE_KEY);}catch(e){}
     renderWebKlipPage();
   }

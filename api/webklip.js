@@ -64,7 +64,7 @@ function idFor(prefix, value) {
 
 async function getJSON(url, options = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 9000);
+  const timer = setTimeout(() => controller.abort(), 6500);
   try {
     const response = await fetch(url, {
       ...options,
@@ -80,7 +80,7 @@ async function getJSON(url, options = {}) {
 
 async function getText(url, options = {}) {
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 9000);
+  const timer = setTimeout(() => controller.abort(), 6500);
   try {
     const response = await fetch(url, {
       ...options,
@@ -278,25 +278,88 @@ function mapDuckDuckGoResults(html, query) {
     return { url, title, summary: summary || 'Resultado público encontrado na web.', relevance, index };
   }).filter((item) => item.url && item.title && item.relevance >= 0 && !seen.has(item.url) && !hasBlockedTerm(`${item.title} ${item.summary}`)).sort((a, b) => b.relevance - a.relevance).map((item) => {
     seen.add(item.url);
-    return { id: idFor('search', item.url), category: 'search', title: item.title, summary: item.summary, source: new URL(item.url).hostname.replace(/^www\\./, ''), url: item.url, date: new Date().toISOString() };
+    return {       id: idFor('web', item.url), category: 'web', title: item.title, summary: item.summary, source: new URL(item.url).hostname.replace(/^www\\./, ''), url: item.url, date: new Date().toISOString() };
   }).slice(0, 50);
 }
 
 function mapNewsSearchResults(xml, query) {
   return mapGoogleNews(xml).map((item) => ({
     ...item,
-    id: idFor('search', item.url || item.title),
-    category: 'search',
+    id: idFor('news', item.url || item.title),
+    category: 'news',
     summary: `${item.summary} Abra a fonte original para continuar a leitura.`,
     relevance: searchRelevance(`${item.title} ${item.summary} ${item.source}`, query)
   })).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 50);
 }
 
 function mapGitHubSearchResults(data, query) {
-  return mapRepositories(data, 'search').map((item) => ({
+  return mapRepositories(data, 'web').map((item) => ({
     ...item,
     relevance: searchRelevance(`${item.title} ${item.summary} ${item.meta}`, query)
   })).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 50);
+}
+
+function decodeJsonString(value) {
+  try { return JSON.parse(`"${String(value || '').replace(/"/g, '\\"')}"`); } catch { return cleanText(value); }
+}
+
+function mapYouTubeResults(html, query) {
+  const matches = [...String(html || '').matchAll(/"videoId":"([A-Za-z0-9_-]{6,})"/g)];
+  const seen = new Set();
+  return matches.map((match, index) => {
+    const videoId = match[1];
+    if (seen.has(videoId)) return null;
+    seen.add(videoId);
+    const segment = String(html || '').slice(Math.max(0, match.index - 500), match.index + 5200);
+    const title = decodeJsonString(segment.match(/"title":\{"runs":\[\{"text":"(.*?)"/)?.[1] || segment.match(/"title":\{"simpleText":"(.*?)"/)?.[1] || 'Vídeo no YouTube');
+    const channel = decodeJsonString(segment.match(/"ownerText":\{"runs":\[\{"text":"(.*?)"/)?.[1] || segment.match(/"longBylineText":\{"runs":\[\{"text":"(.*?)"/)?.[1] || 'Canal do YouTube');
+    const duration = decodeJsonString(segment.match(/"lengthText":\{"simpleText":"(.*?)"/)?.[1] || '');
+    const relevance = searchRelevance(`${title} ${channel}`, query);
+    return { videoId, title, channel, duration, relevance, index };
+  }).filter((item) => item && item.relevance >= 0 && !hasBlockedTerm(`${item.title} ${item.channel}`)).sort((a, b) => b.relevance - a.relevance).slice(0, 24).map((item) => ({
+    id: idFor('video', item.videoId), category: 'videos', title: item.title, summary: `${item.channel}${item.duration ? ` · ${item.duration}` : ''}. Abra no YouTube para assistir ao conteúdo completo.`, source: 'YouTube', url: `https://www.youtube.com/watch?v=${item.videoId}`, image: `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`, meta: item.duration || 'Vídeo', date: new Date().toISOString()
+  }));
+}
+
+function mapOpenverseImages(data, query) {
+  const results = Array.isArray(data?.results) ? data.results : [];
+  return results.filter((item) => item?.id && item?.title && (item.thumbnail || item.url || item.foreign_landing_url) && !hasBlockedTerm(`${item.title} ${item.creator}`)).map((item, index) => {
+    const title = cleanText(item.title) || 'Imagem aberta';
+    const creator = cleanText(item.creator);
+    return { id: idFor('image', item.id || item.url || `${query}-${index}`), category: 'images', title, summary: `${creator ? `Por ${creator}. ` : ''}${cleanText(item.license) ? `Licença ${cleanText(item.license)}. ` : ''}Confira a licença na fonte antes de reutilizar.`, source: 'Openverse', url: item.foreign_landing_url || item.url || 'https://openverse.org/', image: item.thumbnail || item.url, meta: cleanText(item.license_version || item.license || 'Licença aberta'), date: item.created_on || new Date().toISOString(), relevance: searchRelevance(`${title} ${creator} ${item.alt || item.tags || ''}`, query) };
+  }).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 24);
+}
+
+function mapWikipediaResults(data, language = 'pt', query = '') {
+  const results = Array.isArray(data?.query?.search) ? data.query.search : [];
+  const host = language === 'pt' ? 'pt.wikipedia.org' : 'en.wikipedia.org';
+  return results.filter((item) => item?.title && !hasBlockedTerm(`${item.title} ${item.snippet}`)).map((item) => {
+    const title = cleanText(item.title);
+    const summary = cleanText(item.snippet).replace(/&quot;/g, '"') || 'Artigo enciclopédico relacionado à busca.';
+    return { id: idFor('wiki', `${host}-${item.pageid || title}`), category: 'web', title, summary, source: `Wikipedia · ${language.toUpperCase()}`, url: `https://${host}/wiki/${encodeURIComponent(String(title).replace(/ /g, '_'))}`, meta: 'Enciclopédia aberta', date: item.timestamp || new Date().toISOString(), relevance: searchRelevance(`${title} ${summary}`, query) };
+  }).filter((item) => item.relevance >= 0).sort((a, b) => b.relevance - a.relevance).map(({ relevance, ...item }) => item).slice(0, 16);
+}
+
+function weatherRequested(query) {
+  return /\b(clima|tempo|previs[aã]o|temperatura|chuva|weather|forecast|temperature|rain)\b/i.test(String(query || ''));
+}
+
+async function fetchWeatherResult(query, locale) {
+  if (!weatherRequested(query)) return [];
+  const locationQuery = cleanText(String(query || '').replace(/\b(clima|tempo|previs[aã]o|temperatura|chuva|weather|forecast|temperature|rain)\b/gi, ' ')).replace(/\s+/g, ' ').trim() || (locale.language.startsWith('pt') ? 'Brasil' : 'United States');
+  const geo = await getJSON(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=${encodeURIComponent(locale.language.slice(0, 2))}&format=json`);
+  const place = geo?.results?.[0];
+  if (!place?.latitude || !place?.longitude) return [];
+  const weather = await getJSON(`https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(place.latitude)}&longitude=${encodeURIComponent(place.longitude)}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`);
+  const current = weather?.current;
+  if (!current) return [];
+  const unit = weather?.current_units || {};
+  return [{ id: idFor('weather', `${place.latitude}-${place.longitude}`), category: 'web', title: `${place.name}, ${place.country || ''}: ${current.temperature_2m}${unit.temperature_2m || '°C'} agora`, summary: `Sensação de ${current.apparent_temperature}${unit.apparent_temperature || '°C'} · vento de ${current.wind_speed_10m}${unit.wind_speed_10m || ' km/h'}. Dados meteorológicos públicos do Open-Meteo.`, source: 'Open-Meteo', url: `https://open-meteo.com/en/docs`, meta: 'Clima atual', date: new Date().toISOString() }];
+}
+
+function dedupeItems(items) {
+  const seen = new Set();
+  return items.filter((item) => item?.url && !seen.has(item.url) && (seen.add(item.url), true));
 }
 
 export default async function handler(request, response) {
@@ -327,28 +390,36 @@ export default async function handler(request, response) {
   const locale = resolveLocale(request.query?.country, request.query?.language);
   response.setHeader('Cache-Control', query ? 's-maxage=300, stale-while-revalidate=900' : 's-maxage=900, stale-while-revalidate=3600');
   if (query) {
-    let results=[];
-    try {
-      const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(locale.gl.toLowerCase())}`;
-      const html = await getText(searchUrl, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' } });
-      results = mapDuckDuckGoResults(html, query);
-    } catch {}
-    let fallback = results.length ? 'duckduckgo' : null;
-    if (!results.length) {
-      try {
-        const rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:7d`)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`;
-        results = mapNewsSearchResults(await getText(rssUrl), query);
-        if (results.length) fallback = 'google-news-rss';
-      } catch {}
-    }
-    if (!results.length) {
-      try {
-        const githubUrl = `https://api.github.com/search/repositories?q=${encodeURIComponent(query)}&sort=stars&order=desc&per_page=50`;
-        results = mapGitHubSearchResults(await getJSON(githubUrl, { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'KlipzaWebKlip/1.0' } }), query);
-        if (results.length) fallback = 'github';
-      } catch {}
-    }
-    response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: results, count: results.length, fallback });
+    const wikiLanguage = locale.language.startsWith('pt') ? 'pt' : 'en';
+    const wikiHost = wikiLanguage === 'pt' ? 'pt.wikipedia.org' : 'en.wikipedia.org';
+    const sources = {
+      web: async () => {
+        const html = await getText(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}&kl=${encodeURIComponent(locale.gl.toLowerCase())}`, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0 (+https://klipza-zzz.vercel.app/)' } });
+        return mapDuckDuckGoResults(html, query);
+      },
+      videos: async () => {
+        const html = await getText(`https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&hl=${encodeURIComponent(locale.hl)}`, { headers: { Accept: 'text/html,application/xhtml+xml', 'User-Agent': 'KlipzaWebKlip/1.0' } });
+        return mapYouTubeResults(html, query);
+      },
+      images: async () => mapOpenverseImages(await getJSON(`https://api.openverse.org/v1/images/?q=${encodeURIComponent(query)}&page_size=24`), query),
+      news: async () => mapNewsSearchResults(await getText(`https://news.google.com/rss/search?q=${encodeURIComponent(`${query} when:7d`)}&hl=${encodeURIComponent(locale.hl)}&gl=${encodeURIComponent(locale.gl)}&ceid=${encodeURIComponent(locale.ceid)}`), query),
+      wikipedia: async () => mapWikipediaResults(await getJSON(`https://${wikiHost}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&srnamespace=0&srlimit=16&srprop=snippet|timestamp&format=json&origin=*`), wikiLanguage, query),
+      weather: async () => fetchWeatherResult(query, locale)
+    };
+    const entries = await Promise.allSettled(Object.entries(sources).map(async ([name, loader]) => [name, await loader()]));
+    const grouped = Object.fromEntries(entries.filter((entry) => entry.status === 'fulfilled').map((entry) => entry.value));
+    const tabs = {
+      web: dedupeItems(grouped.web || []).slice(0, 50),
+      videos: dedupeItems(grouped.videos || []).slice(0, 24),
+      images: dedupeItems(grouped.images || []).slice(0, 24),
+      news: dedupeItems(grouped.news || []).slice(0, 24)
+    };
+    const supplementalWeb = dedupeItems([...(grouped.wikipedia || []), ...(grouped.weather || [])]);
+    tabs.web = dedupeItems([...tabs.web, ...supplementalWeb]).slice(0, 50);
+    const all = dedupeItems([...tabs.web, ...tabs.videos, ...tabs.images, ...tabs.news]);
+    const legacyItems = all.map((item) => ({ ...item, category: 'search' }));
+    const status = Object.fromEntries(Object.entries(sources).map(([key]) => [key, grouped[key]?.length ? 'ok' : 'unavailable']));
+    response.status(200).json({ query, country: request.query?.country || 'BR', language: locale.language, items: legacyItems.slice(0, 50), tabs, status, sources: Object.keys(sources), count: all.length, fallback: Object.entries(status).filter(([, value]) => value === 'ok').map(([key]) => key).join(',') || null });
     return;
   }
 

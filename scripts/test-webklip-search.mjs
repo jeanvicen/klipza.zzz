@@ -24,6 +24,13 @@ const search = await invoke({ q: 'open source javascript', country: 'BR', langua
 assert.ok([200, 502].includes(search.statusCode));
 assert.ok(Array.isArray(search.payload.items));
 assert.ok(search.payload.items.length <= 50);
+assert.ok(search.payload.tabs && typeof search.payload.tabs === 'object');
+for (const tab of ['web', 'videos', 'images', 'news']) {
+  assert.ok(Array.isArray(search.payload.tabs[tab]), `A aba ${tab} deve ser um array`);
+  assert.ok(search.payload.tabs[tab].length <= (tab === 'web' ? 50 : 24));
+  for (const item of search.payload.tabs[tab]) assert.ok(/^https?:$/.test(new URL(item.url).protocol));
+}
+assert.ok(search.payload.status && typeof search.payload.status === 'object');
 if (search.statusCode === 200) {
   for (const item of search.payload.items) {
     assert.ok(/^https?:$/.test(new URL(item.url).protocol));
