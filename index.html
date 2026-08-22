@@ -1370,6 +1370,32 @@ body.prime-modal-open{overflow:hidden}
     const resetTime=formatResetTime(state.quota?.resetAt);
     return resetTime?`Sua cota será resetada às ${resetTime}.`:'Sua cota foi atingida. O horário de reset será atualizado em instantes.';
   }
+  function quotaIsExhausted(){
+    ensureQuota();
+    if(!quotaReady())return false;
+    const requiredCost=currentMessageCost();
+    const tokenBalance=Math.max(0,Number(state.wallet?.tokenBalance)||0);
+    return state.quota.energy<requiredCost&&tokenBalance<requiredCost;
+  }
+  function applyQuotaLock(){
+    const locked=quotaIsExhausted();
+    const input=document.getElementById('prompt');
+    const sendButton=document.getElementById('sendBtn');
+    const plusButton=document.getElementById('plusBtn');
+    const micButton=document.getElementById('micBtn');
+    if(input){
+      input.disabled=locked||responseState.active;
+      input.setAttribute('aria-disabled',String(locked));
+      input.placeholder=locked?'Sua cota foi atingida. Aguarde o reset.':'Envie uma mensagem para o Klipza.IA';
+    }
+    if(sendButton){
+      sendButton.disabled=locked||responseState.active||(!input?.value.trim()&&!attached.length);
+      sendButton.setAttribute('aria-disabled',String(locked));
+    }
+    if(plusButton)plusButton.disabled=locked||anonymousMode;
+    if(micButton)micButton.disabled=locked||responseState.active;
+    return locked;
+  }
   function energyPercent(){ensureQuota(); return Math.max(0,Math.min(100,state.quota.energy));}
   function quotaHTML(compact=false){
     ensureQuota();
@@ -1392,9 +1418,7 @@ body.prime-modal-open{overflow:hidden}
     if(!banner)return;
     ensureQuota();
     if(!quotaReady()){banner.classList.remove('show');if(text)text.textContent='Sincronizando o saldo oficial desta conta…';return;}
-    const requiredCost=currentMessageCost();
-    const tokenBalance=Math.max(0,Number(state.wallet?.tokenBalance)||0);
-    const empty=state.quota.energy<requiredCost&&tokenBalance<requiredCost;
+    const empty=quotaIsExhausted();
     banner.classList.toggle('show',empty);
     if(empty&&text)text.textContent=quotaResetMessage();
   }
@@ -1428,6 +1452,7 @@ body.prime-modal-open{overflow:hidden}
     const energy=document.getElementById('energySettings'); if(energy) energy.innerHTML=renderEnergySettings();
     const status=document.getElementById('composerQuota'); if(status) status.innerHTML='';
     updateEnergyBanner();
+    applyQuotaLock();
   }
   function renderEnergySettings(){
     ensureQuota();
@@ -2266,7 +2291,7 @@ body.prime-modal-open{overflow:hidden}
         </div>
         <div class="composer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
       </div></section>`;
-    bindComposer(); renderActiveModes(); renderMessages(); renderForegroundResponseView(); renderBackgroundResponseBanner(); setResponseUI(responseState.active && responseOwnsActiveChat(),true);
+    bindComposer(); renderActiveModes(); renderMessages(); renderForegroundResponseView(); renderBackgroundResponseBanner(); setResponseUI(responseState.active && responseOwnsActiveChat(),true); refreshQuotaUI();
   }
   let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0,chatId:null,chatRef:null,messageId:null,requestMessage:'',partial:'',manualScrollLock:false};
   let foregroundResponse=null;
@@ -2396,18 +2421,22 @@ body.prime-modal-open{overflow:hidden}
   let recognition=null, dictating=false, dictationSession=0, dictationRestartTimer=null;
   function bindComposer(){
     const input=$('prompt'), send=$('sendBtn');
-    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';send.disabled=responseState.active || (!input.value.trim()&&!attached.length);});
-    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!responseState.active && !send.disabled)window.K.send()}});
+    input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';applyQuotaLock();});
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!responseState.active&&!quotaIsExhausted()&&!send.disabled)window.K.send()}});
+    applyQuotaLock();
   }
   function setResponseUI(active,preserveResponseState=false){
     if(!preserveResponseState)responseState.active=active;
     const send=$('sendBtn'), stop=$('stopBtn'), mic=$('micBtn');
+    const locked=quotaIsExhausted();
     if(send) send.style.display=active?'none':'flex';
     if(stop) stop.style.display=active?'flex':'none';
-    if(mic) mic.disabled=active;
+    if(mic) mic.disabled=active||locked;
     if(active && $('prompt')) $('prompt').disabled=true;
-    if(!active && $('prompt')) $('prompt').disabled=false;
-    if(!active && $('prompt')) send.disabled=!$('prompt').value.trim()&&!attached.length;
+    if(!active && $('prompt')) $('prompt').disabled=locked;
+    if(!active && $('prompt')) $('prompt').placeholder=locked?'Sua cota foi atingida. Aguarde o reset.':'Envie uma mensagem para o Klipza.IA';
+    if(send)send.disabled=active||locked||(!$('prompt')?.value.trim()&&!attached.length);
+    const plus=$('plusBtn');if(plus)plus.disabled=locked||anonymousMode;
     updateJumpToLatest();
   }
   function showResponseStatus(text,emphasis=false){
@@ -3169,6 +3198,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     try{
       ensureQuota();
       if(state.user?.restricted){showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');return;}
+      if(quotaIsExhausted()){applyQuotaLock();return;}
       const input=$('prompt'); const text=input.value.trim(); if(!text && !attached.length)return;
       if(expertModeArmed){
         if(attached.length){showResponseStatus('Remova os anexos para iniciar o Modo Especialista com segurança.');setTimeout(()=>showResponseStatus(''),3200);return;}
