@@ -22,6 +22,7 @@ function safeJob(row) {
     id: row.id,
     chatId: row.chat_id,
     messageId: row.message_id,
+    message: text(row.message),
     status: row.status,
     complexity: row.complexity,
     progress: row.progress || {},
@@ -42,7 +43,7 @@ export default async function handler(request, response) {
     const { client, user } = await requireUser(request);
     if (request.method === 'GET') {
       const chatId = text(request.query?.chatId || '', 140);
-      let query = client.from('deep_jobs').select('id,chat_id,message_id,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').eq('user_id', user.id).in('status', ['queued', 'processing', 'completed', 'failed']).is('delivered_at', null).order('created_at', { ascending: false }).limit(25);
+      let query = client.from('deep_jobs').select('id,chat_id,message_id,message,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').eq('user_id', user.id).in('status', ['queued', 'processing', 'completed', 'failed']).is('delivered_at', null).order('created_at', { ascending: false }).limit(25);
       if (chatId) query = query.eq('chat_id', chatId);
       const { data, error } = await query;
       if (error) throw error;
@@ -77,14 +78,14 @@ export default async function handler(request, response) {
     if (action === 'ack') {
       const jobId = text(body.jobId, 80);
       if (!jobId) throw httpError(400, 'Tarefa inválida.');
-      const { data, error } = await client.from('deep_jobs').update({ delivered_at: new Date().toISOString() }).eq('id', jobId).eq('user_id', user.id).in('status', ['completed', 'failed', 'canceled']).select('id,chat_id,message_id,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').maybeSingle();
+      const { data, error } = await client.from('deep_jobs').update({ delivered_at: new Date().toISOString() }).eq('id', jobId).eq('user_id', user.id).in('status', ['completed', 'failed', 'canceled']).select('id,chat_id,message_id,message,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').maybeSingle();
       if (error) throw error;
       return json(response, 200, { job: safeJob(data) });
     }
     if (action === 'cancel') {
       const jobId = text(body.jobId, 80);
       if (!jobId) throw httpError(400, 'Tarefa inválida.');
-      const { data, error } = await client.from('deep_jobs').update({ status: 'canceled', error_message: 'Cancelada pelo usuário.', completed_at: new Date().toISOString() }).eq('id', jobId).eq('user_id', user.id).in('status', ['queued', 'processing']).select('id,chat_id,message_id,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').maybeSingle();
+      const { data, error } = await client.from('deep_jobs').update({ status: 'canceled', error_message: 'Cancelada pelo usuário.', completed_at: new Date().toISOString() }).eq('id', jobId).eq('user_id', user.id).in('status', ['queued', 'processing']).select('id,chat_id,message_id,message,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').maybeSingle();
       if (error) throw error;
       return json(response, 200, { job: safeJob(data) });
     }
@@ -103,10 +104,10 @@ export default async function handler(request, response) {
       label: 'Klipza está aguardando o início da análise.',
       updates: ['Pedido recebido; vou organizar os requisitos antes de responder.']
     };
-    const { data, error } = await client.from('deep_jobs').insert({ user_id: user.id, chat_id: chatId, message_id: messageId, message, history, provider, complexity, progress: initialProgress }).select('id,chat_id,message_id,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').single();
+    const { data, error } = await client.from('deep_jobs').insert({ user_id: user.id, chat_id: chatId, message_id: messageId, message, history, provider, complexity, progress: initialProgress }).select('id,chat_id,message_id,message,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').single();
     if (error) {
       if (error.code === '23505') {
-        const existing = await client.from('deep_jobs').select('id,chat_id,message_id,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').eq('user_id', user.id).eq('message_id', messageId).maybeSingle();
+        const existing = await client.from('deep_jobs').select('id,chat_id,message_id,message,status,complexity,progress,result,error_message,created_at,updated_at,started_at,completed_at,delivered_at').eq('user_id', user.id).eq('message_id', messageId).maybeSingle();
         if (existing.error) throw existing.error;
         return json(response, 200, { job: safeJob(existing.data), existing: true });
       }

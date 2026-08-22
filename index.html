@@ -302,8 +302,12 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .page-title{font-size:26px;letter-spacing:-.7px;margin-bottom:4px}.page-sub{font-size:13px;color:#777;margin-bottom:24px}
 .artifact-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .artifact-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--bg);min-height:150px;display:flex;flex-direction:column;gap:11px;cursor:pointer}
-.artifact-card:hover{border-color:#000}
-.artifact-head{display:flex;align-items:center;gap:9px}.artifact-icon{width:34px;height:34px;background:#000;color:#fff;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:700}.artifact-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artifact-meta{font-size:10px;color:#999;margin-top:2px}.artifact-preview{font-size:11px;color:#666;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+ .artifact-card:hover{border-color:#000}
+ .artifact-head{display:flex;align-items:center;gap:9px}.artifact-icon{width:34px;height:34px;background:#000;color:#fff;border-radius:9px;display:grid;place-items:center;font-size:12px;font-weight:700}.artifact-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artifact-meta{font-size:10px;color:#999;margin-top:2px}.artifact-preview{font-size:11px;color:#666;line-height:1.55;overflow:hidden;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical}
+ .artifact-inline-card{margin-top:13px;padding:12px;border:1px solid var(--line2);border-radius:12px;background:var(--panel);display:grid;gap:9px}.artifact-inline-head{display:flex;align-items:center;gap:9px;min-width:0}.artifact-inline-copy{min-width:0;flex:1}.artifact-inline-name{display:block;font-size:12px;font-weight:750;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artifact-inline-meta{display:block;margin-top:3px;color:var(--muted);font-size:10px}.artifact-inline-preview{max-height:118px;overflow:auto;padding:9px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--muted);font:10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}.artifact-inline-actions{display:flex;gap:7px;flex-wrap:wrap}.artifact-inline-action{height:29px;padding:0 10px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);color:var(--text);font-size:10px;font-weight:700}.artifact-inline-action:hover{background:var(--black);color:var(--bg);border-color:var(--black)}
+ .artifact-canvas{position:fixed;top:0;right:0;bottom:0;z-index:180;width:min(620px,92vw);display:flex;flex-direction:column;background:var(--bg);border-left:1px solid var(--line2);box-shadow:-22px 0 70px rgba(0,0,0,.2);transform:translateX(102%);transition:transform .22s cubic-bezier(.23,1,.32,1)}.artifact-canvas.open{transform:translateX(0)}.artifact-canvas-backdrop{position:fixed;inset:0;z-index:179;background:rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:opacity .18s}.artifact-canvas-backdrop.open{opacity:1;pointer-events:auto}.artifact-canvas-head{display:flex;align-items:center;gap:10px;min-height:58px;padding:0 14px;border-bottom:1px solid var(--line);background:var(--panel)}.artifact-canvas-title{min-width:0;flex:1}.artifact-canvas-title strong{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.artifact-canvas-title span{display:block;margin-top:3px;color:var(--muted);font-size:10px}.artifact-canvas-actions{display:flex;gap:5px}.artifact-canvas-action{height:30px;padding:0 9px;border:1px solid var(--line2);border-radius:8px;background:var(--bg);font-size:10px;font-weight:700}.artifact-canvas-action:hover{background:var(--black);color:var(--bg);border-color:var(--black)}.artifact-canvas-close{width:30px;height:30px;border-radius:8px;font-size:19px}.artifact-canvas-body{min-height:0;flex:1;display:flex;background:#f7f7f8}.artifact-canvas-body pre{width:100%;margin:0;padding:18px;overflow:auto;background:#111;color:#e8e8e8;font:12px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-wrap}.artifact-canvas-body iframe{width:100%;height:100%;border:0;background:#fff}
+ @media(max-width:720px){.artifact-canvas{width:100%}.artifact-inline-card{padding:10px}}
+
 .empty-page{padding:60px 10px;text-align:center;color:#999;font-size:13px;border:1px dashed #ddd;border-radius:14px}
 
 /* SETTINGS — REDESIGN */
@@ -1083,8 +1087,8 @@ body.prime-modal-open{overflow:hidden}
         const remaining=Math.max(0,700000-total);
         const safeContent=content.slice(0,remaining);
         total+=safeContent.length;
-        const thinking=isObject(message?.thinking)?{enabled:true,topics:(Array.isArray(message.thinking.topics)?message.thinking.topics:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,5),checks:(Array.isArray(message.thinking.checks)?message.thinking.checks:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,5),summary:String(message.thinking.summary||'').slice(0,360)}:null;
-        messages.push({id:typeof message?.id==='string'?message.id:undefined,role:message?.role==='ai'?'ai':'user',content:safeContent,liked:message?.liked===true,disliked:message?.disliked===true,regenCount:Number(message?.regenCount)||0,thinking,thinkingDuration:Math.max(0,Math.min(120000,Number(message?.thinkingDuration)||0)),attachments:(Array.isArray(message?.attachments)?message.attachments:[]).slice(0,4).map(file=>({name:String(file?.name||'arquivo').slice(0,180),type:String(file?.type||'file').slice(0,120)}))});
+        const thinking=isObject(message?.thinking)?{enabled:true,topics:(Array.isArray(message.thinking.topics)?message.thinking.topics:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,5),checks:(Array.isArray(message.thinking.checks)?message.thinking.checks:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,5),solutions:(Array.isArray(message.thinking.solutions)?message.thinking.solutions:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,5),updates:(Array.isArray(message.thinking.updates)?message.thinking.updates:[]).map(item=>String(item||'').slice(0,220)).filter(Boolean).slice(0,6),alternatives:(Array.isArray(message.thinking.alternatives)?message.thinking.alternatives:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,4),decisions:(Array.isArray(message.thinking.decisions)?message.thinking.decisions:[]).map(item=>String(item||'').slice(0,180)).filter(Boolean).slice(0,4),summary:String(message.thinking.summary||'').slice(0,360)}:null;
+        messages.push({id:typeof message?.id==='string'?message.id:undefined,role:message?.role==='ai'?'ai':'user',content:safeContent,liked:message?.liked===true,disliked:message?.disliked===true,regenCount:Number(message?.regenCount)||0,thinking,thinkingDuration:Math.max(0,Math.min(120000,Number(message?.thinkingDuration)||0)),artifactIds:(Array.isArray(message?.artifactIds)?message.artifactIds:[]).slice(0,8),attachments:(Array.isArray(message?.attachments)?message.attachments:[]).slice(0,4).map(file=>({name:String(file?.name||'arquivo').slice(0,180),type:String(file?.type||'file').slice(0,120)}))});
       }
       result[id]={id,title:String(chat?.title||'Nova conversa').slice(0,120),created:Number(chat?.created)||Date.now(),updated:Number(chat?.updated)||Date.now(),messages};
     }
@@ -1128,7 +1132,7 @@ body.prime-modal-open{overflow:hidden}
         new Promise((_,reject)=>setTimeout(()=>reject(new Error('hydrate_timeout')),1800))
       ]);
       if(result.error)throw result.error;
-      if(!result.data||result.data.app_initialized!==true)return false;
+      if(!result.data||result.data.app_initialized!==true)return true;
       if(isObject(result.data.chats)){
         const localChats=state.chats||{};
         const remoteChats=result.data.chats;
@@ -1212,7 +1216,13 @@ body.prime-modal-open{overflow:hidden}
     const payload=await quotaRequest({action:'consume',amount,eventKey});
     if(payload?.result)applyServerQuota(payload.result);
     refreshQuotaUI();
-    return payload?.consumed===true;
+    return payload?.consumed===true||payload?.alreadyProcessed===true;
+  }
+  async function consumeArtifactEnergy(eventKey){
+    const payload=await quotaRequest({action:'consume_artifact',eventKey});
+    if(payload?.result)applyServerQuota(payload.result);
+    refreshQuotaUI();
+    return payload?.artifactCharged===true&&(payload?.consumed===true||payload?.alreadyProcessed===true);
   }
   async function refundAccountEnergy(amount,eventKey){
     if(!state.user?.id||!Number.isInteger(amount)||amount<=0)return false;
@@ -1223,6 +1233,19 @@ body.prime-modal-open{overflow:hidden}
       return payload?.refunded===true||payload?.alreadyProcessed===true;
     }catch(error){
       console.warn('Não foi possível estornar a energia desta tentativa.',error);
+      await syncServerQuota(true);
+      return false;
+    }
+  }
+  async function refundArtifactEnergy(eventKey){
+    if(!state.user?.id)return false;
+    try{
+      const payload=await quotaRequest({action:'refund_artifact',eventKey});
+      if(payload?.result)applyServerQuota(payload.result);
+      refreshQuotaUI();
+      return payload?.artifactRefunded===true&&(payload?.refunded===true||payload?.alreadyProcessed===true);
+    }catch(error){
+      console.warn('Não foi possível estornar a energia do artefato.',error);
       await syncServerQuota(true);
       return false;
     }
@@ -1312,7 +1335,7 @@ body.prime-modal-open{overflow:hidden}
     ensureQuota();
     const attachRemaining=primeActive()?FREE_ATTACH_LIMIT:Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed);
     const attachPercent=primeActive()?100:Math.max(0,Math.min(100,(attachRemaining/FREE_ATTACH_LIMIT)*100));
-    return `<div class="limit-card"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Mensagem normal: ${MSG_COST} pontos. Pensamento profundo: ${DEEP_MSG_COST} pontos.</div></div><div class="limit-number">${state.quota.energy}</div></div><div class="limit-track"><span style="width:${energyPercent()}%"></span></div><div class="limit-note">O modo profundo usa ${DEEP_EXTRA_ENERGY} pontos adicionais para planejamento e revisão.</div></div>
+    return `<div class="limit-card"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Mensagem normal: ${MSG_COST} pontos. Pensamento profundo: ${DEEP_MSG_COST} pontos. Cada artefato criado: ${ARTIFACT_ENERGY_COST} pontos.</div></div><div class="limit-number">${state.quota.energy}</div></div><div class="limit-track"><span style="width:${energyPercent()}%"></span></div><div class="limit-note">O modo profundo usa ${DEEP_EXTRA_ENERGY} pontos adicionais para planejamento e revisão.</div></div>
     <div class="limit-card"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário por conta.</div></div><div class="limit-number">${primeActive()?'∞':attachRemaining}</div></div><div class="limit-track"><span style="width:${attachPercent}%"></span></div><div class="limit-note">${primeActive()?'Anexos ilimitados enquanto o plano estiver ativo.':'Você pode usar até 3 anexos por ciclo de 24 horas. O contador permanece na sua conta.'}</div></div>`;
   }
   function applyTheme(){
@@ -1440,15 +1463,17 @@ body.prime-modal-open{overflow:hidden}
     if(!response.ok)throw new Error(payload?.error||'Não foi possível acompanhar a resposta em segundo plano.');
     return payload;
   }
-  function applyCompletedDeepJob(job){
+  async function applyCompletedDeepJob(job){
     const chat=state.chats?.[job?.chatId];
     const result=job?.result||{};
     if(!chat||!result.answer)return false;
     if(chat.messages.some(item=>item.id===job.messageId||item.backgroundJobId===job.id))return false;
     const thinking=result.thinking||null;
-    chat.messages.push({id:messageId(),role:'ai',content:String(result.answer),thinking,thinkingDuration:Math.max(0,Date.now()-new Date(job.startedAt||job.createdAt||Date.now()).getTime()),backgroundJobId:job.id});
+    const answerText=String(result.answer);
+    const artifactResult=await autoCreateArtifactsFromReply(answerText,job.message||'',null,job.id);
+    const artifactIds=artifactResult.ids;
+    chat.messages.push({id:messageId(),role:'ai',content:artifactResult.safeAnswer,artifactIds,thinking,thinkingDuration:Math.max(0,Date.now()-new Date(job.startedAt||job.createdAt||Date.now()).getTime()),backgroundJobId:job.id});
     chat.updated=Date.now();
-    autoCreateArtifactsFromReply(String(result.answer));
     persistIfNeeded();
     if(activeChatId===job.chatId&&currentView==='chat'){renderMessages();showResponseStatus('Klipza terminou a resposta.');setTimeout(()=>showResponseStatus(''),3200);}
     browserNotification('Klipza terminou a resposta','A resposta do Pensamento profundo está pronta.');
@@ -1463,7 +1488,7 @@ body.prime-modal-open{overflow:hidden}
       for(const job of jobs){
         if(['queued','processing'].includes(job.status)){state.backgroundJobs[job.id]=job;changed=true;}
         if(job.status==='completed'){
-          changed=applyCompletedDeepJob(job)||changed;
+          changed=(await applyCompletedDeepJob(job))||changed;
           delete state.backgroundJobs[job.id];
           void deepJobsRequest({action:'ack',jobId:job.id}).catch(()=>{});
         }
@@ -1635,6 +1660,13 @@ body.prime-modal-open{overflow:hidden}
   }
   async function finishSupabaseUser(user){
     if(!user)return;
+    const previousOwner=state.localOwnerId||state.user?.id||null;
+    const hasUnscopedCache=Object.keys(state.chats||{}).length>0||Object.keys(state.artifacts||{}).length>0||Array.isArray(state.memory?.memories)&&state.memory.memories.length>0;
+    const accountChanged=previousOwner?previousOwner!==user.id:hasUnscopedCache;
+    remoteSyncSuspended=true;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;
+    if(accountChanged){
+      state.chats={};state.artifacts={};state.activeChatId=null;state.backgroundJobs={};state.quota=null;state.memory={memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]};activeChatId=null;
+    }
     let profile=null;
     try{
       const response=await supabaseClient.from('profiles').select('display_name,email,avatar_url,country,language,status,deletion_scheduled_for,restricted,restriction_reason').eq('id',user.id).maybeSingle();
@@ -1650,22 +1682,25 @@ body.prime-modal-open{overflow:hidden}
       return;
     }
     state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR',status:profile?.status||'active',restricted:profile?.restricted===true,restrictionReason:profile?.restriction_reason||''};
+    state.localOwnerId=user.id;
     state.wallet={...state.wallet,tokenBalance:Number(profile?.token_balance||0),primeStatus:profile?.prime_status||'inactive',primePlanCode:profile?.prime_plan_code||null,primeSubscriptionId:profile?.prime_subscription_id||null,primeCurrentPeriodEnd:profile?.prime_current_period_end||null};
-    authResolved=true;
     save();
     showRecoveryPanel(false);
     enter();
     refreshWallet();
-    queueRemoteStateSync();
-    hydrateRemoteState(user).then(async(loaded)=>{
-      if(loaded){save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();}
+    const hydrateAccount=async()=>{
+      if(state.user?.id!==user.id)return;
+      const loaded=await hydrateRemoteState(user);
+      if(!loaded){showResponseStatus('Não foi possível sincronizar os dados desta conta. Tentando novamente…');setTimeout(()=>{if(state.user?.id===user.id)void hydrateAccount();},3000);return;}
+      save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();
       await hydrateMessageFeedback(user);
       await hydrateMemoryData(user);
       await syncServerQuota();
       await refreshDeepJobs();
       startDeepJobPolling();
-      queueRemoteStateSync();
-    }).catch(()=>{});
+      if(state.user?.id===user.id){authResolved=true;remoteSyncSuspended=false;queueRemoteStateSync();showResponseStatus('');}
+    };
+    void hydrateAccount();
     if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
     void touchSupabaseActivity(true);
   }
@@ -1966,7 +2001,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       </div></section>`;
     bindComposer(); renderMessages(); renderForegroundResponseView(); renderBackgroundResponseBanner(); setResponseUI(responseState.active && responseOwnsActiveChat(),true);
   }
-  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0,chatId:null,chatRef:null,messageId:null,partial:'',manualScrollLock:false};
+  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0,chatId:null,chatRef:null,messageId:null,requestMessage:'',partial:'',manualScrollLock:false};
   let foregroundResponse=null;
   let foregroundPromotionPromise=null;
   const messageId=()=>`msg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`;
@@ -2132,7 +2167,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(follow&&!responseState.manualScrollLock)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
     updateJumpToLatest();
   }
-  function stopResponse(){
+  async function stopResponse(){
     if(!responseState.active)return;
     const stoppedPlan=responseState.deepPlan;const stoppedDeep=responseState.deepThinking;const stoppedMessage=responseState.deepMessage;const stoppedDuration=stoppedDeep?Math.max(0,Date.now()-(responseState.deepStartedAt||Date.now())):0;
     const chat=responseTargetChat();
@@ -2144,9 +2179,9 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(row)row.remove();
     if(chat&&text){
       const thinking=stoppedDeep&&stoppedPlan?{enabled:true,topics:stoppedPlan.topics,checks:stoppedPlan.checks,solutions:stoppedPlan.solutions||[],updates:stoppedPlan.updates||[],alternatives:stoppedPlan.alternatives||[],decisions:stoppedPlan.decisions||[],summary:stoppedPlan.summary,complexity:stoppedPlan.complexity||'standard',passes:stoppedPlan.passes||2}:null;
-      chat.messages.push({id:messageId(),role:'ai',content:text,stopped:true,regenCount:responseState.regenerateCount||0,thinking,thinkingDuration:stoppedDuration});chat.updated=Date.now();autoCreateArtifactsFromReply(text);persistIfNeeded();
+      const artifactResult=await autoCreateArtifactsFromReply(text,responseState.requestMessage,null,responseState.messageId||'stopped');const artifactIds=artifactResult.ids;chat.messages.push({id:messageId(),role:'ai',content:artifactResult.safeAnswer,artifactIds,stopped:true,regenCount:responseState.regenerateCount||0,thinking,thinkingDuration:stoppedDuration});chat.updated=Date.now();persistIfNeeded();
     }
-    responseState.partial='';responseState.chatId=null;responseState.chatRef=null;responseState.messageId=null;responseState.manualScrollLock=false;
+    responseState.partial='';responseState.chatId=null;responseState.chatRef=null;responseState.messageId=null;responseState.requestMessage='';responseState.manualScrollLock=false;
     if(wasActiveChat)renderMessages();
     setResponseUI(false);showResponseStatus('Você parou a resposta.');setTimeout(()=>showResponseStatus(''),3200);
   }
@@ -2164,6 +2199,65 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(!payload?.answer) throw new Error('A resposta veio vazia.');
     return payload;
   }
+  const ARTIFACT_ENERGY_COST=15;
+  const ARTIFACT_CDN={
+    jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+    docx:'https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js',
+    xlsx:'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
+  };
+  const artifactLibraryPromises={};
+  const artifactRuntimeBlobs=new Map();
+  function loadArtifactLibrary(name){
+    if(name==='code')return Promise.resolve(true);
+    if(artifactLibraryPromises[name])return artifactLibraryPromises[name];
+    const url=ARTIFACT_CDN[name];
+    if(!url)return Promise.reject(new Error('Biblioteca de artefato desconhecida.'));
+    artifactLibraryPromises[name]=new Promise((resolve,reject)=>{
+      const existing=document.querySelector(`script[data-artifact-lib="${name}"]`);
+      if(existing){existing.addEventListener('load',()=>resolve(true),{once:true});existing.addEventListener('error',()=>reject(new Error(`Não foi possível carregar ${name}.`)),{once:true});if((name==='jspdf'&&window.jspdf)|| (name==='docx'&&window.docx)|| (name==='xlsx'&&window.XLSX))resolve(true);return;}
+      const script=document.createElement('script');script.src=url;script.async=true;script.dataset.artifactLib=name;script.onload=()=>resolve(true);script.onerror=()=>reject(new Error(`Não foi possível carregar a biblioteca de ${name}.`));document.head.appendChild(script);
+    });
+    return artifactLibraryPromises[name];
+  }
+  function artifactSlug(value){return String(value||'artefato').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,42)||'artefato';}
+  function artifactStamp(){const d=new Date();return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;}
+  function artifactFilename(seed,extension){return `klipza-${artifactSlug(seed)}-${artifactStamp()}.${extension}`;}
+  function artifactMime(type){return ({code:'text/plain;charset=utf-8',pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})[type]||'application/octet-stream';}
+  function stripMarkdown(value){return String(value||'').replace(/```[\s\S]*?```/g,match=>match.replace(/^```[^\n]*\n?/,'').replace(/```$/,'')).replace(/!\[.*?\]\(.*?\)/g,'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/[*_~`>#]/g,'').replace(/^\s*[-*+]\s+/gm,'• ').replace(/\n{3,}/g,'\n\n').trim();}
+  function parseMarkdownTable(value){
+    const lines=String(value||'').split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+    const tableLines=lines.filter(line=>line.includes('|'));
+    if(tableLines.length<6)return [];
+    const rows=tableLines.map(line=>line.replace(/^\||\|$/g,'').split('|').map(cell=>cell.trim()));
+    const valid=rows.filter(row=>row.length>1&&!row.every(cell=>/^:?-{2,}:?$/.test(cell)));
+    if(valid.length<2)return [];
+    const header=valid[0];return valid.slice(1).map(row=>Object.fromEntries(header.map((key,index)=>[key||`Coluna ${index+1}`,row[index]||''])));
+  }
+  function parseArtifactMarkers(value){
+    const specs=[];let answer=String(value||'');
+    answer=answer.replace(/<<ARTIFACT:type=(code|pdf|docx|xlsx)>>([\s\S]*?)<<END_ARTIFACT>>/gi,(_,type,content)=>{specs.push({type:type.toLowerCase(),content:String(content||'').trim(),explicit:true});return '';});
+    return {answer:answer.replace(/\n{3,}/g,'\n\n').trim(),specs};
+  }
+  function artifactSpecsForReply(reply,userMessage='',markerSpecs=[]){
+    const answer=String(reply||'');const request=String(userMessage||'').toLowerCase();const specs=[...markerSpecs];
+    const blocks=extractCodeBlocks(answer);const explicitCode=/\b(cri(e|ar)|fa(ça|ca)|gere|gerar|salva|salvar|arquivo|artefato|c[oó]digo|html|javascript|python|css|json|react)\b/i.test(request);
+    blocks.filter(block=>block.lines>20||explicitCode).forEach(block=>specs.push({type:'code',content:block.code,language:block.language,nameSeed:block.name.replace(/\.[^.]+$/,''),explicit:explicitCode}));
+    const rows=parseMarkdownTable(answer);
+    const wantsPdf=/\b(pdf|imprimir|impress[aã]o)\b/i.test(request);
+    const wantsXlsx=/\b(planilha|excel|xlsx|dados tabulares|tabela)\b/i.test(request)||(rows.length>=5&&!/\b(apenas|somente)\s+texto\b/i.test(request));
+    const wantsDocx=/\b(docx|word|documento|relat[oó]rio|salva isso|manda um arquivo|arquivo de texto)\b/i.test(request);
+    const longFormal=stripMarkdown(answer).split(/\s+/).filter(Boolean).length>800&&/\b(documento formal|relat[oó]rio formal|word|docx)\b/i.test(request);
+    if(wantsPdf)specs.push({type:'pdf',content:answer,nameSeed:request.match(/\b(pdf|relat[oó]rio|documento)\b/i)?.[0]||'documento'});
+    else if(wantsXlsx&&rows.length>=2)specs.push({type:'xlsx',content:answer,rows,nameSeed:'planilha'});
+    else if(wantsDocx||longFormal)specs.push({type:'docx',content:answer,nameSeed:request.match(/\b(relat[oó]rio|documento|word|docx)\b/i)?.[0]||'documento'});
+    const seen=new Set();return specs.filter(spec=>{const key=`${spec.type}|${String(spec.content||'').slice(0,180)}`;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,8);
+  }
+  function artifactRecord(spec){
+    const type=spec.type==='code'?'code':spec.type==='pdf'?'pdf':spec.type==='docx'?'docx':'xlsx';
+    const extension=type==='code'?(String(spec.name||'').match(/\.([a-z0-9]+)$/i)?.[1]||({javascript:'js',js:'js',typescript:'ts',ts:'ts',python:'py',py:'py',html:'html',htm:'html',css:'css',json:'json',jsx:'jsx',tsx:'tsx'}[String(spec.language||'').toLowerCase()]||'txt')):type;
+    const seed=spec.nameSeed||spec.name||type;const name=spec.filename||artifactFilename(seed,extension);const id='art_'+Math.random().toString(36).slice(2,10);const content=typeof spec.content==='string'?spec.content:'';
+    return {id,name,type,language:spec.language||null,content:content.slice(0,120000),rows:Array.isArray(spec.rows)?spec.rows.slice(0,300):undefined,preview:(type==='xlsx'&&spec.rows?.length?spec.rows.slice(0,6).map(row=>Object.values(row).join('\n')).join('\n'):stripMarkdown(content).slice(0,900)),status:type==='code'?'ready':'pending',created:Date.now()};
+  }
   function extractCodeBlocks(value){
     const blocks=[];const source=String(value||'');const pattern=/```([^\n]*)\n?([\s\S]*?)```/g;let match;let index=0;
     while((match=pattern.exec(source))){
@@ -2173,15 +2267,73 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       if(code.length<32)continue;
       const isHTML=label==='html'||label==='htm'||/^<!doctype\s+html|^<html[\s>]/i.test(code);
       const extension=isHTML?'html':({javascript:'js',js:'js',typescript:'ts',ts:'ts',jsx:'jsx',tsx:'tsx',python:'py',py:'py',json:'json',css:'css',java:'java',go:'go',rust:'rs',cpp:'cpp',c:'c',php:'php',ruby:'rb',bash:'sh',sh:'sh',html:'html',htm:'html'}[label]||'txt');
-      blocks.push({code,name:isHTML?'index.html':`codigo-${++index}.${extension}`,isHTML});
+      const lines=code.split(/\r?\n/).length;
+      blocks.push({code,name:isHTML?'index.html':`codigo-${++index}.${extension}`,language:label||extension,extension,lines,isHTML});
     }
     return blocks.slice(0,8);
   }
-  function autoCreateArtifactsFromReply(reply){
-    if(anonymousMode)return 0;
-    const blocks=extractCodeBlocks(reply);if(!blocks.length)return 0;
-    blocks.forEach(block=>{const id='art_'+Math.random().toString(36).slice(2,9);state.artifacts[id]={id,name:block.name,type:'code',content:block.code,preview:block.code.slice(0,240),created:Date.now()};});
-    save();renderArtifactsCount();return blocks.length;
+  function artifactInlineMarkup(ids){
+    const list=Array.isArray(ids)?ids.map(id=>state.artifacts?.[id]).filter(Boolean):[];
+    return list.map(artifact=>{
+      const ready=artifact.status!=='pending'&&artifact.status!=='failed';
+      const label=artifact.status==='pending'?'Preparando arquivo…':artifact.status==='failed'?'Não foi possível gerar este arquivo':artifact.type==='code'?'Código · preview ao vivo':artifact.type.toUpperCase()+' · download direto';
+      return `<section class="artifact-inline-card" data-artifact-id="${esc(artifact.id)}"><div class="artifact-inline-head"><div class="artifact-icon">${artifact.type==='code'?'{}':artifact.type.toUpperCase()}</div><div class="artifact-inline-copy"><span class="artifact-inline-name">${esc(artifact.name)}</span><span class="artifact-inline-meta">${esc(label)}</span></div></div><pre class="artifact-inline-preview">${esc(artifact.preview||'Conteúdo sendo preparado…')}</pre><div class="artifact-inline-actions">${artifact.type==='code'?`<button class="artifact-inline-action" type="button" onclick="window.K.openArtifactCanvas('${artifact.id}')">Abrir canvas</button>`:''}<button class="artifact-inline-action" type="button" ${ready?'':'disabled'} onclick="window.K.downloadArtifact('${artifact.id}')">Baixar arquivo</button></div></section>`;
+    }).join('');
+  }
+  function persistArtifact(artifact){
+    if(!artifact||anonymousMode)return null;
+    state.artifacts[artifact.id]=artifact;save();renderArtifactsCount();if(currentView==='artifacts')renderArtifactsPage();return artifact;
+  }
+  async function materializeArtifact(artifact){
+    if(!artifact||artifact.type==='code')return artifact;
+    try{
+      await loadArtifactLibrary(artifact.type);
+      let blob;
+      if(artifact.type==='pdf'){
+        const PDF=window.jspdf?.jsPDF||window.jsPDF;if(!PDF)throw new Error('Biblioteca de PDF indisponível.');
+        const doc=new PDF({unit:'pt',format:'a4'});const margin=42;const width=doc.internal.pageSize.getWidth()-margin*2;const lines=doc.splitTextToSize(stripMarkdown(artifact.content).slice(0,60000),width);let y=52;doc.setFont('helvetica','normal');doc.setFontSize(10);
+        lines.forEach(line=>{if(y>doc.internal.pageSize.getHeight()-48){doc.addPage();y=52;}doc.text(line,margin,y);y+=14;});blob=doc.output('blob');
+      }else if(artifact.type==='docx'){
+        const lib=window.docx;if(!lib?.Document||!lib?.Packer||!lib?.Paragraph)throw new Error('Biblioteca DOCX indisponível.');
+        const children=stripMarkdown(artifact.content).split(/\r?\n/).filter(Boolean).slice(0,700).map(line=>new lib.Paragraph({children:[new lib.TextRun({text:line})]}));
+        const doc=new lib.Document({sections:[{children:children.length?children:[new lib.Paragraph({text:'Klipza.IA'})]}]});blob=await lib.Packer.toBlob(doc);
+      }else{
+        const XLSX=window.XLSX;if(!XLSX?.utils)throw new Error('Biblioteca XLSX indisponível.');
+        const rows=Array.isArray(artifact.rows)&&artifact.rows.length?artifact.rows:stripMarkdown(artifact.content).split(/\r?\n/).filter(Boolean).map(line=>({Conteúdo:line}));
+        const worksheet=XLSX.utils.json_to_sheet(rows);const workbook=XLSX.utils.book_new();XLSX.utils.book_append_sheet(workbook,worksheet,'Klipza');blob=new Blob([XLSX.write(workbook,{bookType:'xlsx',type:'array'})],{type:artifactMime('xlsx')});
+      }
+      artifactRuntimeBlobs.set(artifact.id,blob);artifact.status='ready';artifact.dataUrl=null;artifact.preview=artifact.preview||stripMarkdown(artifact.content).slice(0,900);artifact.generatedAt=Date.now();persistArtifact(artifact);if(currentView==='chat')renderMessages();return artifact;
+    }catch(error){artifact.status='failed';artifact.error=String(error?.message||'Falha ao gerar o arquivo.');artifact.preview=artifact.error;persistArtifact(artifact);if(currentView==='chat')renderMessages();return artifact;}
+  }
+  async function reserveArtifactEnergy(count,eventKeyBase='artifact'){
+    if(!count||!state.user?.id)return {ok:true,keys:[]};
+    const synced=await syncServerQuota(true);
+    if(!synced)return {ok:false,keys:[],reason:'Não foi possível confirmar a energia da conta.'};
+    const keys=[];
+    for(let index=0;index<count;index++){
+      const key=`artifact:${String(eventKeyBase||'artifact').slice(0,120)}:${index+1}`;
+      try{
+        const consumed=await consumeArtifactEnergy(key);
+        if(!consumed)throw new Error('Energia insuficiente para criar o artefato.');
+        keys.push(key);
+      }catch(error){
+        for(const chargedKey of [...keys,key])await refundArtifactEnergy(chargedKey);
+        await syncServerQuota(true);
+        return {ok:false,keys:[],reason:String(error?.message||'Não foi possível reservar energia para o artefato.')};
+      }
+    }
+    return {ok:true,keys};
+  }
+  async function autoCreateArtifactsFromReply(reply,userMessage='',specsOverride=null,eventKeyBase='artifact'){
+    const parsed=parseArtifactMarkers(reply);if(anonymousMode)return {ids:[],safeAnswer:parsed.answer};
+    const specs=specsOverride||artifactSpecsForReply(parsed.answer,userMessage,parsed.specs);if(!specs.length)return {ids:[],safeAnswer:parsed.answer};
+    const reservation=await reserveArtifactEnergy(specs.length,eventKeyBase);
+    if(!reservation.ok){if(currentView==='chat'){showResponseStatus(reservation.reason||'O artefato não foi criado porque não há energia suficiente.');setTimeout(()=>showResponseStatus(''),3600);}return {ids:[],safeAnswer:parsed.answer};}
+    const ids=[];
+    specs.forEach((spec,index)=>{const artifact=persistArtifact({...artifactRecord(spec),chargeEventKey:reservation.keys[index]||null});if(!artifact)return;ids.push(artifact.id);if(artifact.type!=='code')void materializeArtifact(artifact);});
+    const firstCode=ids.map(id=>state.artifacts[id]).find(item=>item?.type==='code');
+    if(firstCode&&currentView==='chat')setTimeout(()=>openArtifactCanvas(firstCode.id),80);
+    return {ids,safeAnswer:parsed.answer};
   }
   function finalizeDeepThinking(plan,message,durationMs){
     if(!responseOwnsActiveChat())return;
@@ -2191,8 +2343,11 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const content=row.querySelector('.msg-content');const block=content?.querySelector('.msg-thinking');
     if(block){const holder=document.createElement('div');holder.innerHTML=thinkingMarkup(plan,false,message,5,durationMs);block.replaceWith(holder.firstElementChild);}
   }
-  function streamReply(reply,meta=null){
+  async function streamReply(reply,meta=null){
     const chat=responseTargetChat();
+    const artifactResult=await autoCreateArtifactsFromReply(reply,responseState.requestMessage,null,responseState.messageId||'response');
+    if(responseState.stopped)return;
+    const safeReply=artifactResult.safeAnswer;const artifactIds=artifactResult.ids;
     const deepEnabled=meta?.thinkingMode==='deep'||(state.settings.thinkingMode==='deep'&&meta?.thinking!==null);
     const deepPlan=meta?.thinking||null;
     if(deepEnabled){responseState.deepThinking=true;responseState.deepPlan=deepPlan;responseState.deepComplexity=['standard','medium','high'].includes(deepPlan?.complexity)?deepPlan.complexity:responseState.deepComplexity;clearInterval(responseState.progressTimer);responseState.deepStepIndex=4;renderDeepThinkingProgress('',deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else stopResponseProgress();
@@ -2202,16 +2357,16 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     responseState.partial='';
     responseState.timer=setInterval(()=>{
       if(responseState.stopped){clearInterval(responseState.timer);responseState.timer=null;return;}
-      partial+=reply[i++]||''; responseState.partial=partial; appendStreamingMessage(partial);
-      if(i>=reply.length){
+      partial+=safeReply[i++]||''; responseState.partial=partial; appendStreamingMessage(partial);
+      if(i>=safeReply.length){
         clearInterval(responseState.timer); responseState.timer=null;
         const wasActiveChat=responseOwnsActiveChat();
         const row=wasActiveChat ? $('messages')?.querySelector('.msg.ai.streaming') : null; if(row){row.querySelector('.stream-content')?.remove();row.classList.remove('streaming');}
         const thinking=deepEnabled&&deepPlan?{enabled:true,topics:deepPlan.topics,checks:deepPlan.checks,solutions:deepPlan.solutions||[],updates:deepPlan.updates||[],alternatives:deepPlan.alternatives||[],decisions:deepPlan.decisions||[],summary:deepPlan.summary,complexity:deepPlan.complexity||'standard',passes:deepPlan.passes||2}:null;
         const thinkingDuration=deepEnabled?Math.max(0,Date.now()-(responseState.deepStartedAt||Date.now())):0;
-        chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount,thinking,thinkingDuration}); chat.updated=Date.now(); autoCreateArtifactsFromReply(reply); persistIfNeeded(); if(wasActiveChat)renderMessages(); if(!anonymousMode) renderHistory();
+        chat.messages.push({id:messageId(),role:'ai',content:safeReply,artifactIds,regenCount,thinking,thinkingDuration}); chat.updated=Date.now(); persistIfNeeded(); if(wasActiveChat)renderMessages(); if(!anonymousMode) renderHistory();
         if(foregroundResponse&&!foregroundResponse.promoted)foregroundResponse=null;
-        responseState.regenerateCount=0;responseState.partial='';responseState.chatId=null;responseState.chatRef=null;responseState.messageId=null;responseState.manualScrollLock=false;
+        responseState.regenerateCount=0;responseState.partial='';responseState.chatId=null;responseState.chatRef=null;responseState.messageId=null;responseState.requestMessage='';responseState.manualScrollLock=false;
         setResponseUI(false);
         if(deepEnabled){responseState.deepStepIndex=5;if(wasActiveChat)finalizeDeepThinking(deepPlan,responseState.deepMessage,thinkingDuration);setTimeout(()=>{stopResponseProgress(false);showResponseStatus('');},6200);}else if(wasActiveChat)showResponseStatus('');
       }
@@ -2291,7 +2446,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
           <button class="msg-action-btn" onclick="window.K.regenerate('${m.id||''}')" title="Regenerar resposta" ${(m.regenCount||0)>=3?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>${(m.regenCount||0)>0?`<span class="regenerate-count">${m.regenCount}/3</span>`:''}</button>
         </div>` : '';
       const thinking=m.role==='ai'&&m.thinking?thinkingMarkup(m.thinking,false,'',5,m.thinkingDuration||0):'';
-      row.innerHTML=`<div class="msg-avatar">${m.role==='user'?esc(initials(state.user.name)):'K'}</div><div class="msg-content"><div class="msg-label">${m.role==='user'?'Você':'Klipza'}</div>${thinking}${formatMessage(m.content, m.id)}${files?`<div class="msg-attachments">${files}</div>`:''}${actions}</div>`;
+      row.innerHTML=`<div class="msg-avatar">${m.role==='user'?esc(initials(state.user.name)):'K'}</div><div class="msg-content"><div class="msg-label">${m.role==='user'?'Você':'Klipza'}</div>${thinking}${formatMessage(m.content, m.id)}${m.role==='ai'&&Array.isArray(m.artifactIds)?artifactInlineMarkup(m.artifactIds):''}${files?`<div class="msg-attachments">${files}</div>`:''}${actions}</div>`;
       wrap.appendChild(row);
     });
     const follow=!responseState.manualScrollLock&&messagesNearBottom(box);
@@ -2344,13 +2499,13 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       }catch(e){}
     }
   }
-  function createArtifactFromCode(code, name='artefato.html'){
+  async function createArtifactFromCode(code, name='artefato.html'){
     if(anonymousMode){showResponseStatus('Artefatos não são salvos em mensagens anônimas.');setTimeout(()=>showResponseStatus(''),2600);return;}
-    const safeCode=String(code||'').slice(0,100000);const safeName=String(name||'artefato.html').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'artefato.html';
-    const id='art_'+Math.random().toString(36).slice(2,9);
-    state.artifacts[id]={id,name:safeName,type:'code',content:safeCode,preview:safeCode.slice(0,240),created:Date.now()};
-    save(); renderArtifactsCount();
-    alert('Artefato criado! Você pode vê-lo na aba Artefatos ou no Studio Klip.');
+    const safeCode=String(code||'').slice(0,100000);const safeName=String(name||'artefato.html').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'artefato.html';const artifactId='art_'+Math.random().toString(36).slice(2,9);
+    const reservation=await reserveArtifactEnergy(1,artifactId);
+    if(!reservation.ok){showResponseStatus(reservation.reason||'Não há energia suficiente para criar este artefato.');setTimeout(()=>showResponseStatus(''),3600);return;}
+    const artifact=persistArtifact({id:artifactId,name:safeName,type:'code',language:safeName.split('.').pop(),content:safeCode,preview:safeCode.slice(0,900),status:'ready',chargeEventKey:reservation.keys[0]||null,created:Date.now()});
+    if(artifact){openArtifactCanvas(artifact.id);showResponseStatus('Artefato criado no canvas.');setTimeout(()=>showResponseStatus(''),2600);}
   }
   async function regenerate(msgId){
     const chat=currentChat(); if(!chat)return;
@@ -2671,10 +2826,10 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       }
       const chat=anonymousMode?anonymousChat:(state.chats?.[originChatId]||currentChat());
       const targetChatId=anonymousMode?'anonymous':(chat?.id||originChatId);
-      responseState.chatId=targetChatId;responseState.chatRef=chat;responseState.messageId=outboundMessageId;responseState.partial='';responseState.manualScrollLock=false;
+      responseState.chatId=targetChatId;responseState.chatRef=chat;responseState.messageId=outboundMessageId;responseState.requestMessage='';responseState.partial='';responseState.manualScrollLock=false;
       const canPromoteToBackground=deepMode&&!pendingResearchContext&&!attached.length&&!anonymousMode&&!!state.user?.id;
       const history=chat.messages.slice(-16).map(item=>({role:item.role,content:item.content}));
-      const messageText=text || 'Enviei um anexo.';
+      const messageText=text || 'Enviei um anexo.';responseState.requestMessage=messageText;
       const attachments=attached.map(a=>({name:a.name,type:a.type||'file',data:a.data||null}));
       const aiAttachments=attached.map(a=>({name:a.name,type:a.type||'file',aiData:a.aiData||null,aiText:a.aiText||''})).filter(a=>a.aiData||a.aiText);
       const researchContext=pendingResearchContext;
@@ -2699,13 +2854,13 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
           const minimumDeepTime=state.settings.thinkingMode==='deep'?(complexity==='high'?11000:complexity==='medium'?7600:4200):0;
           const remaining=Math.max(0,minimumDeepTime-(Date.now()-thinkingStartedAt));
           if(remaining)await new Promise(resolve=>setTimeout(resolve,remaining));
-          if(!responseState.stopped)streamReply(payload.answer,payload);
+          if(!responseState.stopped)await streamReply(payload.answer,payload);
         }
       }catch(error){
         if(responseState.stopped)return;
         if(serverEnergyConsumed)await refundAccountEnergy(requiredEnergy,energyEventKey);
         const fallback=String(error?.message||'Não foi possível concluir a resposta agora.');
-        streamReply(fallback,{thinkingMode:state.settings.thinkingMode,thinking:null});
+        await streamReply(fallback,{thinkingMode:state.settings.thinkingMode,thinking:null});
       }
     }finally{send.busy=false;}
   }
@@ -2841,22 +2996,55 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   async function readTextForAI(file){try{return (await file.text()).slice(0,18000);}catch(error){return '';}}
 
 
+  function renderArtifactCard(artifact){return artifact?artifactInlineMarkup([artifact.id]):'';}
+  function downloadBlob(blob,name,type){
+    if(!blob)return false;
+    const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=name;link.rel='noopener';document.body.appendChild(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1200);return true;
+  }
+  async function downloadArtifact(id){
+    const artifact=state.artifacts?.[id];if(!artifact)return false;
+    if(artifact.type!=='code'&&!artifactRuntimeBlobs.has(id))await materializeArtifact(artifact);
+    let blob=artifactRuntimeBlobs.get(id);
+    if(!blob&&artifact.type==='code')blob=new Blob([String(artifact.content||'')],{type:artifactMime('code')});
+    if(!blob){showResponseStatus(artifact.error||'O arquivo ainda não está disponível.');setTimeout(()=>showResponseStatus(''),3200);return false;}
+    downloadBlob(blob,artifact.name,artifactMime(artifact.type));return true;
+  }
+  function artifactCanvasDocument(artifact){
+    const code=String(artifact.content||'');const name=String(artifact.name||'').toLowerCase();
+    if(/\.html?$/.test(name)||artifact.language==='html'||artifact.isHTML)return code;
+    if(/\.css$/.test(name)||artifact.language==='css')return `<!doctype html><html><head><meta charset="utf-8"><style>${code}</style></head><body><main style="padding:24px;font-family:system-ui"><h2>Preview CSS</h2><p>Este painel mostra o estilo aplicado a uma página de teste.</p></main></body></html>`;
+    if(/\.(js|mjs)$/.test(name)||['js','javascript'].includes(String(artifact.language||'').toLowerCase()))return `<!doctype html><html><body><main id="app" style="padding:24px;font-family:system-ui">Preview JavaScript</main><script>${code.replace(/<\/script/gi,'<\\/script')}<\\/script></body></html>`;
+    return '';
+  }
+  function ensureArtifactCanvas(){
+    if($('artifactCanvas'))return;
+    const backdrop=document.createElement('div');backdrop.id='artifactCanvasBackdrop';backdrop.className='artifact-canvas-backdrop';backdrop.onclick=closeArtifactCanvas;
+    const panel=document.createElement('aside');panel.id='artifactCanvas';panel.className='artifact-canvas';panel.setAttribute('aria-hidden','true');panel.innerHTML='<div class="artifact-canvas-head"><div class="artifact-canvas-title"><strong id="artifactCanvasTitle">Código</strong><span id="artifactCanvasMeta">Preview local</span></div><div class="artifact-canvas-actions"><button class="artifact-canvas-action" type="button" id="artifactCanvasCopy">Copiar</button><button class="artifact-canvas-action" type="button" id="artifactCanvasDownload">Baixar</button><button class="artifact-canvas-close" type="button" aria-label="Fechar canvas">×</button></div></div><div class="artifact-canvas-body" id="artifactCanvasBody"></div>';
+    panel.querySelector('.artifact-canvas-close').onclick=closeArtifactCanvas;panel.querySelector('#artifactCanvasCopy').onclick=()=>{const artifact=state.artifacts?.[panel.dataset.artifactId];if(artifact)navigator.clipboard?.writeText(String(artifact.content||''));};panel.querySelector('#artifactCanvasDownload').onclick=()=>downloadArtifact(panel.dataset.artifactId);document.body.append(backdrop,panel);
+  }
+  function openArtifactCanvas(id){
+    const artifact=state.artifacts?.[id];if(!artifact||artifact.type!=='code')return openArtifact(id);
+    ensureArtifactCanvas();const panel=$('artifactCanvas'),backdrop=$('artifactCanvasBackdrop'),body=$('artifactCanvasBody');panel.dataset.artifactId=id;$('artifactCanvasTitle').textContent=artifact.name||'Código';$('artifactCanvasMeta').textContent='Preview local · código editável';body.innerHTML='';const documentText=artifactCanvasDocument(artifact);
+    if(documentText){const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-scripts');frame.title='Preview ao vivo do código';frame.srcdoc=documentText;body.appendChild(frame);}else{const pre=document.createElement('pre');pre.textContent=String(artifact.content||'');body.appendChild(pre);}
+    panel.classList.add('open');backdrop.classList.add('open');panel.setAttribute('aria-hidden','false');
+  }
+  function closeArtifactCanvas(){const panel=$('artifactCanvas'),backdrop=$('artifactCanvasBackdrop');if(panel){panel.classList.remove('open');panel.setAttribute('aria-hidden','true');}if(backdrop)backdrop.classList.remove('open');}
   function renderArtifactsCount(){$('artifactCount').textContent=Object.keys(state.artifacts).length}
   function renderArtifactsPage(){
     const items=Object.values(state.artifacts).sort((a,b)=>b.created-a.created);
     $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Artefatos</div></div></header>
-      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos</h1><div class="page-sub">O Klipza cria automaticamente um artefato quando uma resposta contém código útil. Você também pode abrir o preview.</div>
-      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card" role="button" tabindex="0" onclick="window.K.openArtifact('${a.id}')" onkeydown="if(event.key==='Enter')window.K.openArtifact('${a.id}')"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':a.type==='image'?'IMG':'TXT'}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)}</div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div><div class="artifact-card-cta">Abrir preview →</div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>
+      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos</h1><div class="page-sub">O Klipza cria arquivos automaticamente quando o pedido e a resposta justificam código, PDF, DOCX ou XLSX. Cada artefato criado consome 15 pontos de energia.</div>
+      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card" role="button" tabindex="0" onclick="window.K.openArtifact('${a.id}')" onkeydown="if(event.key==='Enter')window.K.openArtifact('${a.id}')"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':String(a.type||'file').toUpperCase()}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)}</div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div><div class="artifact-card-cta">Abrir preview → <button class="artifact-inline-action" type="button" ${(a.status==='pending'||a.status==='failed')?'disabled':''} onclick="event.stopPropagation();window.K.downloadArtifact('${a.id}')">Baixar</button></div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>
       <div class="artifact-viewer" id="artifactViewer" aria-hidden="true"><div class="artifact-viewer-dialog" role="dialog" aria-modal="true" aria-labelledby="artifactViewerTitle"><div class="artifact-viewer-head"><div class="artifact-viewer-title" id="artifactViewerTitle">Artefato</div><button class="artifact-viewer-close" type="button" onclick="window.K.closeArtifact()" aria-label="Fechar preview">×</button></div><div class="artifact-viewer-body" id="artifactViewerBody"></div></div></div>`;
   }
   function openArtifact(id){
-    const artifact=state.artifacts?.[id];const viewer=$('artifactViewer'),body=$('artifactViewerBody'),title=$('artifactViewerTitle');
-    if(!artifact||!viewer||!body)return;
-    title.textContent=artifact.name||'Artefato';
-    const isHTML=artifact.type==='code'&&(/\.html?$/i.test(artifact.name||'')||/^<!doctype\s+html|^<html[\s>]/i.test(String(artifact.content||'')));
-    body.innerHTML='';
-    if(isHTML){const frame=document.createElement('iframe');frame.setAttribute('sandbox','allow-scripts');frame.title='Preview do artefato';frame.srcdoc=String(artifact.content||'');body.appendChild(frame);}
-    else{const code=document.createElement('pre');code.className='artifact-viewer-code';code.textContent=String(artifact.content||artifact.preview||'');body.appendChild(code);}
+    const artifact=state.artifacts?.[id];if(!artifact)return;
+    if(artifact.type==='code'){openArtifactCanvas(id);return;}
+    const viewer=$('artifactViewer'),body=$('artifactViewerBody'),title=$('artifactViewerTitle');
+    if(!viewer||!body)return;
+    title.textContent=artifact.name||'Artefato';body.innerHTML='';
+    const preview=document.createElement('pre');preview.className='artifact-viewer-code';preview.textContent=String(artifact.preview||artifact.content||'');body.appendChild(preview);
+    const actions=document.createElement('div');actions.className='artifact-inline-actions';actions.innerHTML=`<button class="artifact-inline-action" type="button" onclick="window.K.downloadArtifact('${artifact.id}')">Baixar ${String(artifact.type||'arquivo').toUpperCase()}</button>`;body.appendChild(actions);
     viewer.classList.add('open');viewer.setAttribute('aria-hidden','false');
   }
   function closeArtifact(){const viewer=$('artifactViewer');if(!viewer)return;viewer.classList.remove('open');viewer.setAttribute('aria-hidden','true');const body=$('artifactViewerBody');if(body)body.innerHTML='';}
@@ -3021,7 +3209,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     window.__klipzaSettingsMobileDetail=false;
     renderSettingsPage();
   }
-  window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,openArtifact,closeArtifact,
+  window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,openArtifact,openArtifactCanvas,downloadArtifact,closeArtifact,
     upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal,hydrateMemoryData,exportAllData,deleteMemory,toggleThinkingDetails,toggleDeepThinking,refreshDeepJobs,jumpToLatest};
   $('authEmailForm')?.addEventListener('submit',submitEmailAuth);
   $('authRecoveryForm')?.addEventListener('submit',updateRecoveredPassword);

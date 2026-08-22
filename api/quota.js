@@ -30,32 +30,40 @@ export default async function handler(request, response) {
     }
     if (request.method !== 'POST') return json(response, 405, { error: 'Método não permitido.' });
     const body = parseBody(request);
-    const amount = Number(body.amount);
+    const action = text(body.action, 40);
     const eventKey = text(body.eventKey, 180);
-    const maxAmount = body.action === 'consume_attachments' ? 3 : 100;
+    if (action === 'consume_artifact' || action === 'refund_artifact') {
+      if (eventKey.length < 8) throw httpError(400, 'Consumo inválido.');
+      const rpcName = action === 'consume_artifact' ? 'consume_user_energy' : 'refund_user_energy';
+      const { data, error } = await client.rpc(rpcName, { p_amount: 15, p_event_key: `artifact:${eventKey}` });
+      if (error) throw error;
+      return json(response, 200, { result: normalizeQuota(data), consumed: data?.consumed === true, refunded: data?.refunded === true, alreadyProcessed: data?.already_processed === true, artifactCharged: action === 'consume_artifact', artifactRefunded: action === 'refund_artifact' });
+    }
+    const amount = Number(body.amount);
+    const maxAmount = action === 'consume_attachments' ? 3 : 100;
     if (!Number.isInteger(amount) || amount <= 0 || amount > maxAmount || eventKey.length < 8) throw httpError(400, 'Consumo inválido.');
-    if (body.action === 'consume_tokens') {
+    if (action === 'consume_tokens') {
       const { data, error } = await admin.rpc('consume_wallet_tokens', { p_user_id: user.id, p_amount: amount, p_event_key: eventKey });
       if (error) throw error;
       const quota = await client.rpc('get_user_quota');
       if (quota.error) throw quota.error;
       return json(response, 200, { result: normalizeQuota({ ...(quota.data || {}), token_balance: data?.token_balance }), consumed: data?.consumed === true, alreadyProcessed: data?.already_processed === true });
     }
-    if (body.action === 'consume_attachments') {
+    if (action === 'consume_attachments') {
       const { data, error } = await client.rpc('consume_user_attachments', { p_amount: amount, p_event_key: eventKey });
       if (error) throw error;
       const quota = await client.rpc('get_user_quota');
       if (quota.error) throw quota.error;
       return json(response, 200, { result: normalizeQuota(quota.data), consumed: data?.consumed === true, alreadyProcessed: data?.already_processed === true });
     }
-    if (body.action === 'refund') {
+    if (action === 'refund') {
       const { data, error } = await client.rpc('refund_user_energy', { p_amount: amount, p_event_key: eventKey });
       if (error) throw error;
       const quota = await client.rpc('get_user_quota');
       if (quota.error) throw quota.error;
       return json(response, 200, { result: normalizeQuota(quota.data), refunded: data?.refunded === true, alreadyProcessed: data?.already_processed === true });
     }
-    if (body.action !== 'consume') throw httpError(400, 'Ação de quota desconhecida.');
+    if (action !== 'consume') throw httpError(400, 'Ação de quota desconhecida.');
     const { data, error } = await client.rpc('consume_user_energy', { p_amount: amount, p_event_key: eventKey });
     if (error) throw error;
     return json(response, 200, { result: normalizeQuota(data), consumed: data?.consumed === true, alreadyProcessed: data?.already_processed === true });

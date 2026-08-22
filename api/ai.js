@@ -25,7 +25,8 @@ const SYSTEM_PROMPT = [
   'Use Markdown simples quando isso melhorar a leitura.',
   'Não invente fatos, fontes, resultados de pesquisa ou capacidades.',
   'Quando não tiver certeza, explique a limitação e sugira uma forma segura de verificar.',
-  'Não peça senhas, códigos de segurança ou dados completos de cartão.'
+  'Não peça senhas, códigos de segurança ou dados completos de cartão.',
+  'Quando o usuário pedir um arquivo ou quando a resposta claramente merecer um arquivo, você pode envolver somente o conteúdo do arquivo em <<ARTIFACT:type=code|pdf|docx|xlsx>> e <<END_ARTIFACT>>. Não use esse marcador para respostas normais e não o coloque em volta da explicação principal.'
 ].join(' ');
 const DEEP_THINKING_PROMPT = [
   'Modo de pensamento profundo: aja como um especialista adequado ao assunto do usuário.',
