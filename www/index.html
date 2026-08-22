@@ -1167,19 +1167,62 @@ body.prime-modal-open{overflow:hidden}
   function primeActive(){return state.wallet?.primeStatus==='active';}
   function attachmentLimit(){return primeActive()?Infinity:FREE_ATTACH_LIMIT;}
   function attachmentLabel(){return primeActive()?'Ilimitado':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} disponíveis`;}
+  async function quotaRequest(body=null){
+    if(!supabaseClient||!state.user?.id)throw new Error('Sua sessão expirou.');
+    const sessionResult=await supabaseClient.auth.getSession();
+    const accessToken=sessionResult?.data?.session?.access_token;
+    if(!accessToken)throw new Error('Sua sessão expirou.');
+    const response=await fetch('/api/quota',{method:body?'POST':'GET',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:'application/json'},body:body?JSON.stringify(body):undefined});
+    const payload=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(payload?.error||'Não foi possível sincronizar sua energia.');
+    return payload;
+  }
+  function applyServerQuota(value){
+    const row=value&&typeof value==='object'?value:{};
+    const resetAt=Number(row.resetAt)||Date.parse(row.resetAt||'')||Date.now()+CYCLE_MS;
+    const attachUsed=Math.max(0,Math.min(FREE_ATTACH_LIMIT,Number(row.attachmentsUsed??row.attachUsed)||0));
+    state.quota={...(state.quota||{}),energy:Math.max(0,Math.min(ENERGY_MAX,Number(row.energy)||0)),resetAt,attachUsed};
+    state.wallet={...(state.wallet||{}),tokenBalance:Math.max(0,Number(row.tokenBalance)||0),primeStatus:row.primeStatus||state.wallet?.primeStatus||'inactive'};
+    return state.quota;
+  }
+  let lastServerQuotaSync=0;
+  let serverQuotaSyncBusy=false;
+  async function syncServerQuota(force=false){
+    if(!state.user?.id||!supabaseClient)return false;
+    if(serverQuotaSyncBusy)return false;
+    if(!force&&Date.now()-lastServerQuotaSync<15000)return true;
+    serverQuotaSyncBusy=true;
+    try{const payload=await quotaRequest();if(payload?.quota)applyServerQuota(payload.quota);lastServerQuotaSync=Date.now();refreshQuotaUI();return true;}
+    catch(error){console.warn('Não foi possível sincronizar a energia da conta.',error);return false;}
+    finally{serverQuotaSyncBusy=false;}
+  }
+  async function consumeAccountEnergy(amount,eventKey){
+    const payload=await quotaRequest({action:'consume',amount,eventKey});
+    if(payload?.result)applyServerQuota(payload.result);
+    refreshQuotaUI();
+    return payload?.consumed===true;
+  }
   async function refreshWallet(){
+    await syncServerQuota();
     return state.wallet;
   }
-  async function consumePurchasedTokens(requiredCost=TOKEN_COST){
-    showResponseStatus(`O uso de tokens pagos está em desenvolvimento. Aguarde a ativação do Klipza.Prime. (${requiredCost} pontos necessários)`);
-    return false;
+  async function consumePurchasedTokens(requiredCost=TOKEN_COST,eventKey=messageId()){
+    if(!state.user?.id)return false;
+    try{
+      const payload=await quotaRequest({action:'consume_tokens',amount:requiredCost,eventKey:`tokens:${eventKey}`});
+      if(payload?.result)applyServerQuota(payload.result);
+      refreshQuotaUI();
+      return payload?.consumed===true;
+    }catch(error){showResponseStatus(error?.message||'Não foi possível usar seus tokens agora.');return false;}
   }
   function ensureQuota(){
-    state.quota=state.quota||{energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
+    const initialEnergy=state.user?.id?0:ENERGY_MAX;
+    state.quota=state.quota||{energy:initialEnergy,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
     const now=Date.now();
-    if(!state.quota.resetAt || now>=state.quota.resetAt){
-      state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:now+CYCLE_MS};
-      save();
+    if(!state.quota.resetAt||now>=Number(state.quota.resetAt)){
+      if(state.user?.id)state.quota.energy=0;
+      else state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:now+CYCLE_MS};
+      if(!state.user?.id)save();
     }
   }
   function timeLeft(ms){
@@ -1242,8 +1285,10 @@ body.prime-modal-open{overflow:hidden}
   }
   function renderEnergySettings(){
     ensureQuota();
+    const attachRemaining=primeActive()?FREE_ATTACH_LIMIT:Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed);
+    const attachPercent=primeActive()?100:Math.max(0,Math.min(100,(attachRemaining/FREE_ATTACH_LIMIT)*100));
     return `<div class="limit-card"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Mensagem normal: ${MSG_COST} pontos. Pensamento profundo: ${DEEP_MSG_COST} pontos.</div></div><div class="limit-number">${state.quota.energy}</div></div><div class="limit-track"><span style="width:${energyPercent()}%"></span></div><div class="limit-note">O modo profundo usa ${DEEP_EXTRA_ENERGY} pontos adicionais para planejamento e revisão.</div></div>
-    <div class="limit-card"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário.</div></div><div class="limit-number">${ATTACH_LIMIT-state.quota.attachUsed}</div></div><div class="limit-track"><span style="width:${((ATTACH_LIMIT-state.quota.attachUsed)/ATTACH_LIMIT)*100}%"></span></div><div class="limit-note">Limite renovado junto com a energia.</div></div>`;
+    <div class="limit-card"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário por conta.</div></div><div class="limit-number">${primeActive()?'∞':attachRemaining}</div></div><div class="limit-track"><span style="width:${attachPercent}%"></span></div><div class="limit-note">${primeActive()?'Anexos ilimitados enquanto o plano estiver ativo.':'Você pode usar até 3 anexos por ciclo de 24 horas. O contador permanece na sua conta.'}</div></div>`;
   }
   function applyTheme(){
     const dark=state.theme==='dark';
@@ -1549,6 +1594,7 @@ body.prime-modal-open{overflow:hidden}
       if(loaded){save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();}
       await hydrateMessageFeedback(user);
       await hydrateMemoryData(user);
+      await syncServerQuota();
       await refreshDeepJobs();
       startDeepJobPolling();
       queueRemoteStateSync();
@@ -2435,15 +2481,30 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       if(state.user?.restricted){showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');return;}
       const input=$('prompt'); const text=input.value.trim(); if(!text && !attached.length)return;
       if(anonymousMode && attached.length){attached=[];renderAttached();}
-      const energyBefore=state.quota.energy;
       const deepMode=state.settings.thinkingMode==='deep';
       const requiredEnergy=deepMode?DEEP_MSG_COST:MSG_COST;
       const requiredTokens=deepMode?DEEP_MSG_COST:TOKEN_COST;
+      const outboundMessageId=messageId();
+      const energyEventKey=`energy:${state.user?.id||'guest'}:${outboundMessageId}`;
       let paidWithTokens=false;
+      let serverEnergyConsumed=false;
+      if(state.user?.id){
+        const synced=await syncServerQuota(true);
+        if(!synced){showResponseStatus('Não foi possível sincronizar a energia da sua conta. Tente novamente.');return;}
+      }
+      const energyBefore=state.quota.energy;
       if(state.quota.energy<requiredEnergy){
         if(Number(state.wallet?.tokenBalance||0)<requiredTokens){refreshQuotaUI();updateEnergyBanner();openPrimeModal('prime');return;}
-        paidWithTokens=await consumePurchasedTokens(requiredTokens);
+        paidWithTokens=await consumePurchasedTokens(requiredTokens,outboundMessageId);
         if(!paidWithTokens){refreshQuotaUI();return;}
+      }else if(state.user?.id){
+        serverEnergyConsumed=await consumeAccountEnergy(requiredEnergy,energyEventKey);
+        if(!serverEnergyConsumed){
+          await syncServerQuota();
+          if(Number(state.wallet?.tokenBalance||0)<requiredTokens){refreshQuotaUI();updateEnergyBanner();openPrimeModal('prime');return;}
+          paidWithTokens=await consumePurchasedTokens(requiredTokens,outboundMessageId);
+          if(!paidWithTokens){refreshQuotaUI();return;}
+        }
       }else{
         state.quota.energy-=requiredEnergy;
       }
@@ -2456,7 +2517,6 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       const researchContext=pendingResearchContext;
       const mode=researchContext?'research':attached.length?'attachments':'chat';
       pendingResearchContext=null;
-      const outboundMessageId=messageId();
       chat.messages.push({id:outboundMessageId,role:'user',content:messageText,attachments});
       if(chat.title==='Nova conversa'){chat.title=(text || attachments[0]?.name || 'Nova conversa').slice(0,48)+((text || attachments[0]?.name || '').length>48?'…':'')}
       chat.updated=Date.now(); attached=[]; persistIfNeeded(); renderHistory(); renderMessages();
@@ -2473,7 +2533,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
           setTimeout(()=>showResponseStatus(''),3600);
           return;
         }catch(error){
-          state.quota.energy=Math.min(ENERGY_MAX,state.quota.energy+(paidWithTokens?0:requiredEnergy));
+          if(serverEnergyConsumed){await quotaRequest({action:'refund',amount:requiredEnergy,eventKey:energyEventKey}).catch(()=>{});await syncServerQuota();}
+          else if(!paidWithTokens&&!state.user?.id)state.quota.energy=Math.min(ENERGY_MAX,state.quota.energy+requiredEnergy);
           chat.messages=chat.messages.filter(item=>item.id!==outboundMessageId);
           chat.updated=Date.now();save();refreshQuotaUI();renderHistory();renderMessages();
           showResponseStatus(error?.message||'Não foi possível iniciar a resposta em segundo plano.');
@@ -2548,7 +2609,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     const menu=$('attachMenu'), btn=$('plusBtn'); menu.classList.toggle('open');btn.classList.toggle('active');
   }
   function closeAttach(){if($('attachMenu')){$('attachMenu').classList.remove('open');$('plusBtn').classList.remove('active')}}
-  function pick(kind){
+  async function pick(kind){
     if(anonymousMode){return;}
     if(kind==='artifact'){
       closeAttach();
@@ -2559,29 +2620,48 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       createArtifactFromCode(code,name);
       return;
     }
+    if(state.user?.id){
+      const synced=await syncServerQuota(true);
+      if(!synced){showResponseStatus('Não foi possível sincronizar o limite de anexos da sua conta. Tente novamente.');return;}
+    }
     ensureQuota();
-    if(!primeActive() && state.quota.attachUsed>=FREE_ATTACH_LIMIT){ alert('Você já usou os 3 anexos deste ciclo. Assine o Klipza.Prime para anexos ilimitados.'); openPrimeModal('prime'); return; }
+    if(!primeActive() && state.quota.attachUsed>=FREE_ATTACH_LIMIT){ alert('Você já usou os 3 anexos deste ciclo de 24 horas. Assine o Klipza.Prime para anexos ilimitados.'); openPrimeModal('prime'); return; }
     closeAttach();
     const input=kind==='camera'?$('cameraInput'):kind==='image'?$('imageInput'):$('fileInput');
     input.value='';
     input.multiple = kind!=='camera';
     input.onchange=async()=>{
       const files=[...input.files];
-      const available=primeActive()?files.length:FREE_ATTACH_LIMIT-state.quota.attachUsed;
-      const chosen=files.slice(0,available);
-      if(!chosen.length)return;
-      for(const file of chosen){
-        let data=null, aiData=null, aiText='';
-        if(file.type && file.type.startsWith('image/')){data=await readImagePreview(file);aiData=data;}
-        else if(file.type==='application/pdf' && file.size<=2200000) aiData=await readFileDataUrl(file);
-        else if(file.type.startsWith('text/') || /\.(md|markdown|txt|csv|json|js|ts|tsx|jsx|html|css|xml|yaml|yml)$/i.test(file.name)) aiText=await readTextForAI(file);
-        else aiText=`O arquivo ${file.name} foi anexado. O formato não pôde ser lido diretamente nesta versão; explique o que deseja fazer com ele.`;
-        attached.push({name:file.name,type:file.type||'file',data,aiData,aiText});
+      if(!files.length)return;
+      if(state.user?.id){
+        const synced=await syncServerQuota(true);
+        if(!synced){showResponseStatus('Não foi possível sincronizar o limite de anexos da sua conta. Tente novamente.');return;}
       }
-        if(!primeActive())state.quota.attachUsed+=chosen.length;
+      ensureQuota();
+      const available=primeActive()?files.length:Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed);
+      const chosen=files.slice(0,available);
+      if(!chosen.length){alert('Você já usou os 3 anexos deste ciclo de 24 horas. Assine o Klipza.Prime para anexos ilimitados.');openPrimeModal('prime');return;}
+      if(state.user?.id&&!primeActive()){
+        const attachmentEventKey=`attachments:${state.user.id}:${messageId()}`;
+        try{
+          const payload=await quotaRequest({action:'consume_attachments',amount:chosen.length,eventKey:attachmentEventKey});
+          if(payload?.result)applyServerQuota(payload.result);
+          if(payload?.consumed!==true){refreshQuotaUI();alert('O limite de 3 anexos deste ciclo já foi atingido. Assine o Klipza.Prime para anexos ilimitados.');openPrimeModal('prime');return;}
+        }catch(error){await syncServerQuota(true);showResponseStatus(error?.message||'Não foi possível reservar os anexos agora.');return;}
+      }
+      for(const file of chosen){
+        const fileType=file.type||'';
+        let data=null, aiData=null, aiText='';
+        if(fileType.startsWith('image/')){data=await readImagePreview(file);aiData=data;}
+        else if(fileType==='application/pdf' && file.size<=2200000) aiData=await readFileDataUrl(file);
+        else if(fileType.startsWith('text/') || /\.(md|markdown|txt|csv|json|js|ts|tsx|jsx|html|css|xml|yaml|yml)$/i.test(file.name)) aiText=await readTextForAI(file);
+        else aiText=`O arquivo ${file.name} foi anexado. O formato não pôde ser lido diretamente nesta versão; explique o que deseja fazer com ele.`;
+        attached.push({name:file.name,type:fileType||'file',data,aiData,aiText});
+      }
+        if(!primeActive()&&!state.user?.id)state.quota.attachUsed+=chosen.length;
       save(); renderAttached(); refreshQuotaUI();
       $('sendBtn').disabled=!$('prompt').value.trim()&&!attached.length;
-      if(!primeActive() && files.length>available) alert(`Você pode adicionar mais ${available} anexo(s) neste ciclo. Assine o Klipza.Prime para anexos ilimitados.`);
+      if(!primeActive() && files.length>chosen.length) alert(`Foram adicionados ${chosen.length} arquivo(s), o máximo disponível neste ciclo. Assine o Klipza.Prime para anexos ilimitados.`);
     };
     input.click();
   }
@@ -2821,7 +2901,9 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   document.addEventListener('contextmenu',e=>e.preventDefault());
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   $('webKlipToggle')?.addEventListener('click',toggleWebKlipMenu);
-  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); touchSupabaseActivity(); } }, 1000);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.user)void syncServerQuota(true);});
+  window.addEventListener('focus',()=>{if(state.user)void syncServerQuota(true);});
+  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); touchSupabaseActivity(); if(Date.now()-lastServerQuotaSync>=60000)void syncServerQuota(); } }, 1000);
   applyTheme();
   registerAppShell();
   setAuthMode('signin');
