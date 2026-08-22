@@ -323,31 +323,35 @@ body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-
 .attach-chip{display:flex;align-items:center;gap:6px;padding:6px 9px;border-radius:8px;background:#f0f0f0;font-size:11px}
 .attach-chip.attach-preview{padding:4px 7px 4px 4px}.attach-preview img{width:28px;height:28px;object-fit:cover;border-radius:6px}.attach-preview span{max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .attach-chip button{font-size:15px;color:#666}
-.attach-menu{position:absolute;left:7px;bottom:58px;width:min(320px,calc(100vw - 24px));display:none;flex-direction:column;gap:2px;padding:7px;background:var(--panel);border:1px solid var(--line2);border-radius:17px;box-shadow:0 20px 55px rgba(0,0,0,.18);z-index:50;max-height:min(420px,64vh);overflow:auto}
-.attach-menu.open{display:flex;animation:menuUp .15s cubic-bezier(.2,.8,.2,1)}
-.attach-menu-handle{display:none;width:42px;height:4px;margin:1px auto 3px;border-radius:999px;background:var(--line2)}
-.attach-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 8px 9px;border-bottom:1px solid var(--line)}
-.attach-menu-title{display:block;font-size:14px;line-height:1.1;letter-spacing:-.02em}
-.attach-menu-subtitle{display:block;margin-top:3px;color:var(--muted);font-size:9px;line-height:1.2}
-.attach-menu-close{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:9px;background:transparent;color:var(--muted);font-size:22px;line-height:1}
-.attach-menu-close:hover{background:var(--hover);color:var(--text)}
-@keyframes menuUp{from{opacity:0;transform:translateY(10px) scale(.97);transform-origin:bottom left}to{opacity:1;transform:translateY(0) scale(1);transform-origin:bottom left}}
-.attach-menu::after{content:"";position:absolute;left:18px;bottom:-6px;width:11px;height:11px;background:var(--panel);border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);transform:rotate(45deg)}
-.attach-option{width:100%;flex:0 0 auto;border:0;border-radius:11px;padding:9px 10px;display:flex;align-items:center;gap:11px;text-align:left;background:transparent;color:var(--text);min-height:50px}
-.attach-option:hover{background:var(--hover)}
-.attach-option:active{background:var(--line)}
-.attach-option.upcoming{position:relative;cursor:pointer}
-.attach-option.upcoming:hover{background:var(--hover)}
-.attach-option.upcoming .attach-option-icon{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
-.soon-badge{margin-left:auto;font-size:8px;padding:3px 6px;border:1px solid var(--line2);border-radius:999px;color:var(--muted);white-space:nowrap;background:var(--panel2)}
-.attach-option-icon{width:32px;height:32px;border-radius:9px;background:var(--black);color:var(--bg);display:grid;place-items:center;flex:0 0 auto}
-.attach-option-icon svg{width:15px;height:15px}
-.thinking-option{position:relative;border:1px solid transparent}.thinking-option.enabled{background:var(--hover);border-color:var(--line2)}.thinking-option.enabled .thinking-option-icon{background:var(--text);color:var(--bg)}.thinking-option-icon{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.thinking-pill{margin-left:auto;font-size:9px;font-weight:750;padding:4px 7px;border-radius:999px;background:var(--panel2);border:1px solid var(--line2);color:var(--muted);white-space:nowrap}.thinking-option.enabled .thinking-pill{background:#111;color:#fff;border-color:#111}
-.attach-option-title{display:block;font-size:12px;font-weight:650;line-height:1.2}.attach-option-sub{display:block;font-size:10px;color:var(--muted);margin-top:2px;line-height:1.25}
-.attach-divider{height:1px;background:var(--line);margin:4px 6px}
-.attach-section-label{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:7px 9px 5px}
-@media(max-width:720px){.attach-menu{left:6px;bottom:60px;width:min(325px,calc(100vw - 18px));max-height:60vh;border-radius:16px}.attach-option{min-height:50px;padding:9px}.attach-option-icon{width:31px;height:31px}}
-@media(max-width:720px){.energy-banner{align-items:flex-start;margin:0 0 9px;width:100%;padding:10px}.energy-banner-copy{flex:1}.energy-prime{height:32px;padding:0 10px;font-size:10px}}
+  .attach-menu-scrim{display:none}
+  .attach-menu{position:absolute;left:0;bottom:60px;width:min(390px,calc(100vw - 24px));display:none;flex-direction:column;gap:0;padding:9px;background:var(--panel);border:1px solid var(--line2);border-radius:20px;box-shadow:0 24px 70px rgba(0,0,0,.2);z-index:80;max-height:min(620px,76dvh);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+  .attach-menu.open{display:flex;animation:menuSheetUp .2s cubic-bezier(.2,.8,.2,1)}
+  .attach-menu-handle{display:block;width:42px;height:4px;margin:1px auto 7px;border-radius:999px;background:var(--line2)}
+  .attach-menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:5px 4px 12px;border-bottom:1px solid var(--line)}
+  .attach-menu-title{display:block;font-size:17px;line-height:1.1;letter-spacing:-.03em}
+  .attach-menu-subtitle{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.25}
+  .attach-menu-close{width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:11px;background:transparent;color:var(--muted);font-size:28px;line-height:1}
+  .attach-menu-close:hover{background:var(--hover);color:var(--text)}
+  .attach-feature-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:13px 2px 8px}
+  .attach-feature-card{min-height:112px;padding:14px 11px;border:1px solid var(--line);border-radius:15px;background:var(--bg);color:var(--text);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:7px;text-align:left;cursor:pointer;transition:transform .16s,background .16s,border-color .16s,box-shadow .16s}
+  .attach-feature-card:hover{background:var(--hover);border-color:var(--line2);box-shadow:0 8px 22px rgba(0,0,0,.06);transform:translateY(-1px)}
+  .attach-feature-card:active{transform:scale(.98)}
+  .attach-feature-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:10px;background:var(--black);color:var(--bg)}
+  .attach-feature-icon svg{width:19px;height:19px}
+  .attach-feature-title{font-size:13px;font-weight:750;line-height:1.15}.attach-feature-sub{font-size:10px;color:var(--muted);line-height:1.2}
+  @keyframes menuSheetUp{from{opacity:0;transform:translateY(13px) scale(.98);transform-origin:bottom left}to{opacity:1;transform:translateY(0) scale(1);transform-origin:bottom left}}
+  .attach-option{width:100%;flex:0 0 auto;border:1px solid transparent;border-radius:12px;padding:11px 9px;display:flex;align-items:center;gap:11px;text-align:left;background:transparent;color:var(--text);min-height:54px;cursor:pointer}
+  .attach-option:hover{background:var(--hover);border-color:var(--line)}
+  .attach-option:active{background:var(--line)}
+  .attach-option-icon{width:34px;height:34px;border-radius:10px;background:var(--black);color:var(--bg);display:grid;place-items:center;flex:0 0 auto}
+  .attach-option-icon svg{width:16px;height:16px}
+  .thinking-option{position:relative;border:1px solid transparent}.thinking-option.enabled{background:var(--hover);border-color:var(--line2)}.thinking-option.enabled .thinking-option-icon{background:var(--text);color:var(--bg)}.thinking-option-icon{background:var(--panel2);color:var(--text);border:1px solid var(--line)}.thinking-pill{margin-left:auto;font-size:9px;font-weight:750;padding:4px 7px;border-radius:999px;background:var(--panel2);border:1px solid var(--line2);color:var(--muted);white-space:nowrap}.thinking-option.enabled .thinking-pill{background:#111;color:#fff;border-color:#111}
+  .attach-option-title{display:block;font-size:12px;font-weight:700;line-height:1.2}.attach-option-sub{display:block;font-size:10px;color:var(--muted);margin-top:3px;line-height:1.25}
+  .attach-divider{height:1px;background:var(--line);margin:7px 4px}
+  .attach-section-label{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px 6px}
+  @media(max-width:720px){body.attach-menu-open{overflow:hidden}body.attach-menu-open .composer-box{z-index:75}body.attach-menu-open .attach-menu-scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:70}.attach-menu{position:fixed;left:0;right:0;bottom:0;width:100%;max-height:min(86dvh,760px);padding:10px 14px calc(16px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.24)}.attach-menu.open{animation:menuSheetMobile .22s cubic-bezier(.2,.8,.2,1)}.attach-menu-head{padding-left:2px;padding-right:2px}.attach-menu-title{font-size:21px}.attach-feature-grid{padding-top:15px}.attach-feature-card{min-height:128px;padding:16px 14px}.attach-option{min-height:58px;padding:11px 8px}.attach-option-icon{width:35px;height:35px}@keyframes menuSheetMobile{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}}
+  @media(max-width:720px){.energy-banner{align-items:flex-start;margin:0 0 9px;width:100%;padding:10px}.energy-banner-copy{flex:1}.energy-prime{height:32px;padding:0 10px;font-size:10px}}
+  @media(prefers-reduced-motion:reduce){.attach-menu,.attach-feature-card{animation:none!important;transition:none!important}}
 .composer-row{display:flex;align-items:flex-end;gap:7px;padding:7px}
 .plus{width:37px;height:37px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;border:1px solid transparent;transition:.15s}.plus:hover{background:var(--hover);border-color:var(--line)}
 .plus.active{background:#000;color:#fff;border-color:#000;transform:rotate(45deg)}
@@ -2206,24 +2210,25 @@ body.prime-modal-open{overflow:hidden}
         </div>
         <div class="composer-box">
           <div class="attach-strip" id="attachStrip"></div>
-          <div class="attach-menu" id="attachMenu">
+          <div class="attach-menu-scrim" onclick="window.K.closeAttach()" aria-hidden="true"></div>
+          <div class="attach-menu" id="attachMenu" role="dialog" aria-modal="true" aria-labelledby="attachMenuTitle">
             <div class="attach-menu-handle" aria-hidden="true"></div>
-            <div class="attach-menu-head"><div><strong class="attach-menu-title">Adicionar</strong><span class="attach-menu-subtitle">Recursos disponíveis nesta conversa</span></div><button class="attach-menu-close" type="button" onclick="window.K.closeAttach()" aria-label="Fechar menu">×</button></div>
-            <div class="attach-section-label">Anexar ao chat</div>
-            <button class="attach-option" onclick="window.K.pick('camera')">
-              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>
-              <span><span class="attach-option-title">Câmera</span><span class="attach-option-sub">Tirar uma foto</span></span>
-            </button>
-            <button class="attach-option" onclick="window.K.pick('image')">
-              <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span>
-              <span><span class="attach-option-title">Fotos e imagens</span><span class="attach-option-sub">Escolher do dispositivo</span></span>
-            </button>
+            <div class="attach-menu-head"><div><strong class="attach-menu-title" id="attachMenuTitle">Adicionar ao chat</strong><span class="attach-menu-subtitle">Escolha uma função disponível nesta conversa</span></div><button class="attach-menu-close" type="button" onclick="window.K.closeAttach()" aria-label="Fechar menu">×</button></div>
+            <div class="attach-feature-grid" aria-label="Anexar imagens">
+              <button class="attach-feature-card" type="button" onclick="window.K.pick('camera')">
+                <span class="attach-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span><span class="attach-feature-title">Câmera</span><span class="attach-feature-sub">Tirar uma foto</span>
+              </button>
+              <button class="attach-feature-card" type="button" onclick="window.K.pick('image')">
+                <span class="attach-feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg></span><span class="attach-feature-title">Fotos e imagens</span><span class="attach-feature-sub">Escolher do dispositivo</span>
+              </button>
+            </div>
+            <div class="attach-section-label">Anexos e recursos</div>
             <button class="attach-option" onclick="window.K.pick('file')">
               <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg></span>
-              <span><span class="attach-option-title">Arquivos</span><span class="attach-option-sub">PDF, DOC, TXT e outros</span></span>
+              <span><span class="attach-option-title">Adicionar arquivos locais</span><span class="attach-option-sub">PDF, DOC, TXT e outros</span></span>
             </button>
             <div class="attach-divider"></div>
-            <div class="attach-section-label">Recursos</div>
+            <div class="attach-section-label">Modos do Klipza</div>
             <button class="attach-option" onclick="window.K.openWebKlipModal()">
               <span class="attach-option-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
               <span><span class="attach-option-title">Pesquisa na web</span><span class="attach-option-sub">Pesquisar com referências atuais</span></span>
@@ -2239,7 +2244,7 @@ body.prime-modal-open{overflow:hidden}
           </div>
           <div class="composer-active-modes" id="composerActiveModes" aria-live="polite" aria-label="Modos ativos"></div>
           <div class="composer-row">
-            <button class="plus ${anonymousMode?'anonymous-disabled':''}" id="plusBtn" onclick="window.K.toggleAttach()" title="Adicionar" ${anonymousMode?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
+            <button class="plus ${anonymousMode?'anonymous-disabled':''}" id="plusBtn" onclick="window.K.toggleAttach()" title="Adicionar" aria-label="Adicionar ao chat" aria-expanded="false" aria-controls="attachMenu" ${anonymousMode?'disabled':''}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg></button>
             <textarea id="prompt" rows="1" placeholder="Envie uma mensagem para o Klipza.IA"></textarea>
             <button class="mic-btn" id="micBtn" title="Ditado por voz" aria-label="Ditado por voz" onclick="window.K.toggleDictation()"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></button>
             <span class="voice-hint" id="voiceHint">Ouvindo...</span>
@@ -3253,9 +3258,11 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
 
   function toggleAttach(){
     if(anonymousMode)return;
-    const menu=$('attachMenu'), btn=$('plusBtn'); menu.classList.toggle('open');btn.classList.toggle('active');
+    const menu=$('attachMenu'), btn=$('plusBtn');
+    const open=menu.classList.toggle('open');btn.classList.toggle('active',open);btn.setAttribute('aria-expanded',String(open));document.body.classList.toggle('attach-menu-open',open);
+    if(open)requestAnimationFrame(()=>menu.querySelector('.attach-menu-close')?.focus());
   }
-  function closeAttach(){if($('attachMenu')){$('attachMenu').classList.remove('open');$('plusBtn').classList.remove('active')}}
+  function closeAttach(){const menu=$('attachMenu'),btn=$('plusBtn');if(menu){const wasOpen=menu.classList.contains('open');menu.classList.remove('open');btn?.classList.remove('active');btn?.setAttribute('aria-expanded','false');document.body.classList.remove('attach-menu-open');if(wasOpen)requestAnimationFrame(()=>btn?.focus())}}
   async function pick(kind){
     if(anonymousMode){return;}
     if(kind==='artifact'){
@@ -3569,7 +3576,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     const key=String(e.key||'').toUpperCase();
     const inspectShortcut=e.key==='F12'||(e.ctrlKey&&e.shiftKey&&['I','J','C'].includes(key))||(e.ctrlKey&&key==='U')||(e.metaKey&&e.altKey&&['I','J','C'].includes(key));
     if(inspectShortcut){e.preventDefault();e.stopPropagation();return;}
-    if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();if(e.key==='Escape' && $('confirmModal')?.classList.contains('open')) closeConfirmModal();if(e.key==='Escape' && $('webKlipModal')?.classList.contains('open')) closeWebKlipModal();
+    if(e.key==='Escape' && $('attachMenu')?.classList.contains('open')) closeAttach();if(e.key==='Escape' && $('primeModal')?.classList.contains('open')) closePrimeModal();if(e.key==='Escape' && $('confirmModal')?.classList.contains('open')) closeConfirmModal();if(e.key==='Escape' && $('webKlipModal')?.classList.contains('open')) closeWebKlipModal();
   },true);
   // UX-only guard against casual context-menu inspection; this is not a security boundary.
   document.addEventListener('contextmenu',e=>e.preventDefault());
