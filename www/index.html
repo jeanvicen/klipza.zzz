@@ -1323,6 +1323,7 @@ body.prime-modal-open{overflow:hidden}
     });
   }
   function browserNotification(title,body){
+    if(!document.hidden)return;
     if(state.settings.notifications && 'Notification' in window && Notification.permission==='granted'){ try{new Notification(title,{body});}catch(e){} }
   }
   async function memoryRequest(body=null,view=''){
@@ -1465,6 +1466,47 @@ body.prime-modal-open{overflow:hidden}
     state.backgroundJobs[job.id]=job;renderHistory();renderBackgroundResponseBanner();startDeepJobPolling();
     void deepJobsRequest({action:'start',jobId:job.id}).then(()=>refreshDeepJobs()).catch(error=>{console.warn('A tarefa profunda não iniciou agora.',error);refreshDeepJobs();});
     return job;
+  }
+  function cancelForegroundVisualForPromotion(){
+    clearInterval(responseState.timer);responseState.timer=null;responseState.stopped=true;
+    stopResponseProgress();
+    $('messages')?.querySelector('.msg.ai.streaming,.msg.ai.thinking-row')?.remove();
+    setResponseUI(false);
+  }
+  async function promoteForegroundResponseToBackground(){
+    const pending=foregroundResponse;
+    if(!pending||pending.promoted||foregroundPromotionPromise||!state.user?.id||!document.hidden)return false;
+    pending.promoted=true;
+    foregroundPromotionPromise=(async()=>{
+      let queued=false;
+      try{
+        cancelForegroundVisualForPromotion();
+        await queueDeepJob(pending);
+        queued=true;
+        if(document.hidden)renderBackgroundResponseBanner();
+        return true;
+      }catch(error){
+        pending.promoted=false;
+        responseState.stopped=false;
+        setResponseUI(true);
+        console.warn('Não foi possível continuar a resposta em segundo plano.',error);
+        return false;
+      }finally{
+        if(queued)foregroundResponse=null;
+        foregroundPromotionPromise=null;
+      }
+    })();
+    return foregroundPromotionPromise;
+  }
+  function handleAppVisibility(){
+    if(document.hidden){
+      renderBackgroundResponseBanner();
+      void promoteForegroundResponseToBackground();
+      return;
+    }
+    renderBackgroundResponseBanner();
+    renderHistory();
+    if(state.user){void syncServerQuota(true);void refreshDeepJobs();}
   }
 
   function updateThinkingControls(){
@@ -1769,6 +1811,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   }
   function renderBackgroundResponseBanner(){
     const el=$('backgroundResponseBanner');if(!el)return;
+    if(!document.hidden){el.classList.remove('show');el.innerHTML='';return;}
     const currentJob=backgroundJobForChat(activeChatId);
     const otherJob=Object.values(state.backgroundJobs||{}).find(job=>job?.chatId!==activeChatId&&['queued','processing'].includes(job.status));
     const job=currentJob||otherJob;
@@ -1784,7 +1827,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(!ids.length){box.innerHTML='<div style="padding:22px 12px;color:#999;font-size:12px">Nenhuma conversa.</div>';return}
     box.innerHTML=ids.map(id=>{
       const c=state.chats[id];
-      const pending=backgroundJobForChat(id);
+      const pending=document.hidden?backgroundJobForChat(id):null;
       return `<div class="chat-row ${id===activeChatId?'active':''}" data-chat-id="${id}">
         <div class="chat-title" onclick="window.K.openChat('${id}')">${esc(c.title)}${pending?'<span class="chat-pending-dot" title="Klipza está respondendo"></span>':''}</div>
         <div class="row-actions">
@@ -1888,6 +1931,8 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     bindComposer(); renderMessages(); renderBackgroundResponseBanner();
   }
   let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,regenerateCount:0};
+  let foregroundResponse=null;
+  let foregroundPromotionPromise=null;
   const messageId=()=>`msg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`;
   const codeRequestPattern=/\b(crie|criar|faça|faca|fazer|gere|gerar|escreva|program(e|ar)|código|codigo|arquivo|artefato|html|css|javascript|typescript|python|react|component(e|ar)|script|site|página|pagina|app)\b/i;
   function isCodeRequest(text){return codeRequestPattern.test(String(text||''));}
@@ -1993,6 +2038,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   function stopResponse(){
     if(!responseState.active)return;
     const stoppedPlan=responseState.deepPlan;const stoppedDeep=responseState.deepThinking;const stoppedMessage=responseState.deepMessage;const stoppedDuration=stoppedDeep?Math.max(0,Date.now()-(responseState.deepStartedAt||Date.now())):0;
+    foregroundResponse=null;
     clearInterval(responseState.timer); responseState.timer=null; stopResponseProgress(); responseState.active=false; responseState.stopped=true;
     const row=$('messages')?.querySelector('.msg.ai.streaming,.msg.ai.thinking-row');
     if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat();         const thinking=stoppedDeep&&stoppedPlan?{enabled:true,topics:stoppedPlan.topics,checks:stoppedPlan.checks,updates:stoppedPlan.updates||[],alternatives:stoppedPlan.alternatives||[],decisions:stoppedPlan.decisions||[],summary:stoppedPlan.summary,complexity:stoppedPlan.complexity||'standard',passes:stoppedPlan.passes||2}:null;
@@ -2056,6 +2102,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         const thinking=deepEnabled&&deepPlan?{enabled:true,topics:deepPlan.topics,checks:deepPlan.checks,updates:deepPlan.updates||[],alternatives:deepPlan.alternatives||[],decisions:deepPlan.decisions||[],summary:deepPlan.summary,complexity:deepPlan.complexity||'standard',passes:deepPlan.passes||2}:null;
         const thinkingDuration=deepEnabled?Math.max(0,Date.now()-(responseState.deepStartedAt||Date.now())):0;
         chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount,thinking,thinkingDuration}); chat.updated=Date.now(); autoCreateArtifactsFromReply(reply); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
+        if(foregroundResponse&&!foregroundResponse.promoted)foregroundResponse=null;
         responseState.regenerateCount=0;
         setResponseUI(false);
         if(deepEnabled){responseState.deepStepIndex=5;finalizeDeepThinking(deepPlan,responseState.deepMessage,thinkingDuration);setTimeout(()=>{stopResponseProgress(false);showResponseStatus('');},6200);}else showResponseStatus('');
@@ -2509,7 +2556,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         state.quota.energy-=requiredEnergy;
       }
       const chat=currentChat();
-      const backgroundEligible=deepMode&&!pendingResearchContext&&!attached.length&&!anonymousMode;
+      const canPromoteToBackground=deepMode&&!pendingResearchContext&&!attached.length&&!anonymousMode&&!!state.user?.id;
       const history=chat.messages.slice(-16).map(item=>({role:item.role,content:item.content}));
       const messageText=text || 'Enviei um anexo.';
       const attachments=attached.map(a=>({name:a.name,type:a.type||'file',data:a.data||null}));
@@ -2524,25 +2571,9 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       renderAttached();
       refreshQuotaUI();
       if(!paidWithTokens)animateEnergyChange(energyBefore,state.quota.energy);
-      if(backgroundEligible){
-        try{
-          responseState.stopped=false;
-          await queueDeepJob({chat,chatId:activeChatId,messageIdValue:outboundMessageId,message:messageText,history,provider:'auto'});
-          setResponseUI(false);
-          showResponseStatus('Klipza está respondendo em segundo plano…',true);
-          setTimeout(()=>showResponseStatus(''),3600);
-          return;
-        }catch(error){
-          if(serverEnergyConsumed){await quotaRequest({action:'refund',amount:requiredEnergy,eventKey:energyEventKey}).catch(()=>{});await syncServerQuota();}
-          else if(!paidWithTokens&&!state.user?.id)state.quota.energy=Math.min(ENERGY_MAX,state.quota.energy+requiredEnergy);
-          chat.messages=chat.messages.filter(item=>item.id!==outboundMessageId);
-          chat.updated=Date.now();save();refreshQuotaUI();renderHistory();renderMessages();
-          showResponseStatus(error?.message||'Não foi possível iniciar a resposta em segundo plano.');
-          setTimeout(()=>showResponseStatus(''),3600);
-          return;
-        }
-      }
       responseState.stopped=false; setResponseUI(true);
+      if(canPromoteToBackground)foregroundResponse={chat,chatId:activeChatId,messageIdValue:outboundMessageId,message:messageText,history,provider:'auto',promoted:false};
+      else foregroundResponse=null;
       if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(messageText); else showResponseStatus('Klipza está respondendo…');
       const thinkingStartedAt=Date.now();
       try{
@@ -2901,7 +2932,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   document.addEventListener('contextmenu',e=>e.preventDefault());
   document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
   $('webKlipToggle')?.addEventListener('click',toggleWebKlipMenu);
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&state.user)void syncServerQuota(true);});
+  document.addEventListener('visibilitychange',handleAppVisibility);
+  window.addEventListener('pagehide',()=>{if(document.hidden)void promoteForegroundResponseToBackground();});
   window.addEventListener('focus',()=>{if(state.user)void syncServerQuota(true);});
   setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); touchSupabaseActivity(); if(Date.now()-lastServerQuotaSync>=60000)void syncServerQuota(); } }, 1000);
   applyTheme();
