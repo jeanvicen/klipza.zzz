@@ -20,3 +20,9 @@ A navegação local pelo botão `data-view="webklip"` foi acionada diretamente n
 ## Busca real local
 
 A tela inicial exibiu o hero central, campo amplo, sugestões rápidas e navegação de volta. Uma busca neutra por `open source javascript` retornou 49 resultados no build local; os cards foram renderizados em grade com fonte, metadados, abertura rápida e carregamento incremental. Para esse termo, a aba Web recebeu resultados relacionados; Vídeos, Imagens e Notícias ficaram vazias, comportamento esperado para fontes que não encontraram correspondência ou responderam sem dados. Não houve chamada à IA nem consumo de energia.
+
+## Produção
+
+Após o commit `2e85f6c`, a página pública respondeu HTTP 200, o endpoint `/api/webklip?q=...` respondeu HTTP 200 com o campo `tabs`, e o endpoint privado `/api/ai` sem sessão respondeu HTTP 401. Os marcadores do novo hero e do web.klip foram encontrados na página publicada. Nenhuma sessão de usuário foi usada e nenhuma mensagem foi enviada à IA.
+
+O redesign foi publicado no GitHub em `main` e o repositório ficou limpo após o push.
