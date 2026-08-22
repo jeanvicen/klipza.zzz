@@ -719,6 +719,20 @@ function sendEvent(response, type, payload = {}) {
   response.write(`data: ${JSON.stringify({ type, ...payload })}\n\n`);
 }
 
+function quotaSnapshot(value) {
+  const row = value && typeof value === 'object' ? value : {};
+  const energy = Number(row.energy);
+  const tokenBalance = Number(row.token_balance ?? row.tokenBalance);
+  const attachmentsUsed = Number(row.attachments_used ?? row.attachmentsUsed);
+  return {
+    energy: Number.isFinite(energy) ? Math.max(0, Math.min(100, energy)) : 0,
+    resetAt: row.reset_at || row.resetAt || null,
+    tokenBalance: Number.isFinite(tokenBalance) ? Math.max(0, tokenBalance) : 0,
+    primeStatus: row.prime_status || row.primeStatus || 'inactive',
+    attachmentsUsed: Number.isFinite(attachmentsUsed) ? Math.max(0, Math.min(3, attachmentsUsed)) : 0
+  };
+}
+
 function billingInput(body, thinkingMode, internalBilling = false, attachmentCount = 0) {
   const eventKey = text(body.quotaEventKey, 120);
   const energyAmount = Number(body.quotaEnergyAmount ?? (thinkingMode === 'deep' ? AI_DEEP_COST : AI_STANDARD_COST));
@@ -739,6 +753,7 @@ async function consumeAiQuota({ client, user, billing }) {
     if (attachment.consumed !== true && attachment.already_processed !== true) {
       const denied = httpError(402, 'O limite de anexos desta conta foi atingido.');
       denied.quotaDenied = true;
+      denied.quota = quotaSnapshot(attachment);
       throw denied;
     }
   }
@@ -765,6 +780,7 @@ async function consumeAiQuota({ client, user, billing }) {
     }
     const denied = httpError(402, 'Sua energia e seus tokens não são suficientes para esta mensagem.');
     denied.quotaDenied = true;
+    denied.quota = quotaSnapshot(result);
     throw denied;
   }
   return { ...result, attachment: attachment || null, attachmentEventKey };
@@ -871,7 +887,7 @@ export default async function handler(request, response) {
         const status = quotaSchemaMissing ? 503 : Number(error?.status) || 500;
         const publicMessage = quotaSchemaMissing ? 'A cobrança por conta ainda precisa ser ativada no banco do Klipza.' : status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message;
         if (status >= 400) console.error('ai_stream_failed', error?.message || error, error?.providerMessage || '');
-        sendEvent(response, 'error', { error: publicMessage });
+        sendEvent(response, 'error', { error: publicMessage, status, quotaDenied: error?.quotaDenied === true, ...(error?.quota ? { quota: error.quota } : {}) });
       } finally {
         response.end();
       }
@@ -884,6 +900,6 @@ export default async function handler(request, response) {
     const status = quotaSchemaMissing ? 503 : Number(error?.status) || 500;
     const publicMessage = quotaSchemaMissing ? 'A cobrança por conta ainda precisa ser ativada no banco do Klipza.' : status === 500 ? 'Não foi possível concluir a resposta agora.' : error.message;
     if (status >= 400) console.error('ai_request_failed', error?.message || error, error?.providerMessage || '');
-    json(response, status, { error: publicMessage });
+    json(response, status, { error: publicMessage, ...(error?.quota ? { quota: error.quota } : {}) });
   }
 }

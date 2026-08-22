@@ -1361,6 +1361,15 @@ body.prime-modal-open{overflow:hidden}
     if(h>=1) return `${h}h ${String(m).padStart(2,'0')}min`;
     return `${m}min`;
   }
+  function formatResetTime(resetAt){
+    const timestamp=Number(resetAt)||Date.parse(resetAt||'');
+    if(!timestamp)return '';
+    return new Date(timestamp).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true});
+  }
+  function quotaResetMessage(){
+    const resetTime=formatResetTime(state.quota?.resetAt);
+    return resetTime?`Sua cota será resetada às ${resetTime}.`:'Sua cota foi atingida. O horário de reset será atualizado em instantes.';
+  }
   function energyPercent(){ensureQuota(); return Math.max(0,Math.min(100,state.quota.energy));}
   function quotaHTML(compact=false){
     ensureQuota();
@@ -1384,9 +1393,10 @@ body.prime-modal-open{overflow:hidden}
     ensureQuota();
     if(!quotaReady()){banner.classList.remove('show');if(text)text.textContent='Sincronizando o saldo oficial desta conta…';return;}
     const requiredCost=currentMessageCost();
-    const empty=state.quota.energy<requiredCost;
+    const tokenBalance=Math.max(0,Number(state.wallet?.tokenBalance)||0);
+    const empty=state.quota.energy<requiredCost&&tokenBalance<requiredCost;
     banner.classList.toggle('show',empty);
-    if(empty && text){text.textContent=Number(state.wallet?.tokenBalance||0)>=requiredCost?`A energia disponível não é suficiente para este modo. Você ainda tem ${Number(state.wallet.tokenBalance).toLocaleString('pt-BR')} tokens comprados.`:`Seu ciclo termina em ${timeLeft(state.quota.resetAt-Date.now())}. O Pensamento profundo precisa de ${requiredCost} pontos.`;}
+    if(empty&&text)text.textContent=quotaResetMessage();
   }
   function paintEnergyValue(value){
     const pct=Math.max(0,Math.min(100,value));
@@ -1414,9 +1424,9 @@ body.prime-modal-open{overflow:hidden}
   function refreshQuotaUI(){
     ensureQuota();
     if(!quotaReady())stopEnergyAnimation();
-    const side=document.getElementById('sideQuota'); if(side) side.innerHTML=quotaHTML(true);
+    const side=document.getElementById('sideQuota'); if(side) side.innerHTML='';
     const energy=document.getElementById('energySettings'); if(energy) energy.innerHTML=renderEnergySettings();
-    const status=document.getElementById('composerQuota'); if(status) status.innerHTML=quotaReady()?`<span class="quota-dot"></span> ${state.quota.energy} energia · ${Number(state.wallet?.tokenBalance||0).toLocaleString('pt-BR')} tokens · ${primeActive()?'anexos ilimitados':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} anexos`} · recarrega em ${timeLeft(state.quota.resetAt-Date.now())}`:'<span class="quota-dot quota-dot-syncing"></span> Sincronizando energia, tokens e anexos…';
+    const status=document.getElementById('composerQuota'); if(status) status.innerHTML='';
     updateEnergyBanner();
   }
   function renderEnergySettings(){
@@ -1724,10 +1734,13 @@ body.prime-modal-open{overflow:hidden}
           void deepJobsRequest({action:'ack',jobId:job.id}).catch(()=>{});
         }
         if(job.status==='failed'){
-          const expertMessage=state.chats?.[job.chatId]?.messages?.find(item=>item.id===job.messageId&&item.expert);if(expertMessage){expertMessage.expert={...expertMessage.expert,state:'failed',error:job.errorMessage||'A execução não foi concluída.'};}
+          const quota=job.quota||job.progress?.quota||null;
+          if(quota){applyServerQuota(quota);refreshQuotaUI();}
+          const failureMessage=quota?quotaResetMessage():(job.errorMessage||'A resposta não foi concluída.');
+          const expertMessage=state.chats?.[job.chatId]?.messages?.find(item=>item.id===job.messageId&&item.expert);if(expertMessage){expertMessage.expert={...expertMessage.expert,state:'failed',error:failureMessage};}
           delete state.backgroundJobs[job.id];
-          if(activeChatId===job.chatId&&currentView==='chat'){showResponseStatus(job.errorMessage||'A resposta não foi concluída.');setTimeout(()=>showResponseStatus(''),3600);}
-          browserNotification('Klipza não concluiu a resposta',job.errorMessage||'Tente novamente.');
+          if(activeChatId===job.chatId&&currentView==='chat'){showResponseStatus(failureMessage);setTimeout(()=>showResponseStatus(''),5200);}
+          browserNotification(quota?'Limite de cota atingido':'Klipza não concluiu a resposta',failureMessage||'Tente novamente.');
           changed=true;
         }
       }
@@ -2195,12 +2208,11 @@ body.prime-modal-open{overflow:hidden}
           <div><strong>Mensagens anônimas</strong> · esta conversa não será salva no histórico. Anexos ficam desativados neste modo.</div>
           <button class="anonymous-exit" type="button" onclick="window.K.toggleAnonymous(false)">Sair</button>
         </div>
-        <div class="energy-banner" id="energyEmptyBanner">
+        <div class="energy-banner" id="energyEmptyBanner" role="status" aria-live="polite">
           <div class="energy-banner-copy">
-            <div class="energy-banner-title">Sua energia acabou</div>
-            <div class="energy-banner-sub" id="energyEmptyText">Você pode continuar quando seu ciclo recarregar.</div>
+            <div class="energy-banner-title">Limite de uso atingido</div>
+            <div class="energy-banner-sub" id="energyEmptyText">Sua cota será resetada no próximo ciclo.</div>
           </div>
-          <button class="energy-prime" type="button" onclick="window.K.upcoming('Klipza.Prime')">Mudar para Klipza.Prime</button>
         </div>
         <div class="voice-panel" id="voicePanel" aria-live="polite" aria-hidden="true">
           <div class="voice-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></div>
@@ -2464,7 +2476,12 @@ body.prime-modal-open{overflow:hidden}
           const payload=JSON.parse(data);
           if(payload.type==='progress')applyDeepStreamProgress(payload.progress||{});
           else if(payload.type==='complete')result=payload.result||null;
-          else if(payload.type==='error')streamError=new Error(payload.error||'Não foi possível concluir a resposta agora.');
+          else if(payload.type==='error'){
+            streamError=new Error(payload.error||'Não foi possível concluir a resposta agora.');
+            streamError.status=Number(payload.status)||500;
+            streamError.quotaDenied=payload.quotaDenied===true||streamError.status===402;
+            if(payload.quota)streamError.quota=payload.quota;
+          }
         }catch(error){streamError=error;}
       });
     };
@@ -2484,7 +2501,7 @@ body.prime-modal-open{overflow:hidden}
     const thinkingMode=state.settings.thinkingMode==='deep'?'deep':'standard';
     const provider=['auto','groq','qwen','hermes'].includes(state.settings.provider)?state.settings.provider:'auto';
     const response=await fetch(`${AI_API_BASE}/api/ai`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`,'Content-Type':'application/json',Accept:thinkingMode==='deep'?'text/event-stream':'application/json'},body:JSON.stringify({message,history,mode,attachments:aiAttachments,researchContext,thinkingMode,provider,stream:thinkingMode==='deep',quotaEventKey:billing?.eventKey||'',quotaEnergyAmount:billing?.energyAmount,quotaTokenAmount:billing?.tokenAmount})});
-    if(!response.ok){const payload=await response.json().catch(()=>({}));const error=new Error(payload?.error||'Não foi possível concluir a resposta agora.');error.status=response.status;error.quotaDenied=response.status===402;throw error;}
+    if(!response.ok){const payload=await response.json().catch(()=>({}));const error=new Error(payload?.error||'Não foi possível concluir a resposta agora.');error.status=response.status;error.quotaDenied=response.status===402;if(payload?.quota)error.quota=payload.quota;throw error;}
     if(thinkingMode==='deep'){
       const contentType=response.headers.get('content-type')||'';
       if(contentType.includes('text/event-stream'))return await readDeepAnswerStream(response);
@@ -3203,7 +3220,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         if(!responseState.stopped)await streamReply(payload.answer,payload);
       }catch(error){
         if(responseState.stopped)return;
-        if(state.user?.id)await syncServerQuota(true);
+        if(error?.quota){applyServerQuota(error.quota);refreshQuotaUI();}
+        else if(state.user?.id)await syncServerQuota(true);
         if(error?.quotaDenied||error?.status===402||error?.status===503){
           setResponseUI(false);showResponseStatus(error?.message||'Não há saldo suficiente para esta mensagem.');setTimeout(()=>showResponseStatus(''),4600);return;
         }

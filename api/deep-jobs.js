@@ -20,6 +20,19 @@ function safeList(value, limit, max) {
   return Array.isArray(value) ? value.map((item) => text(item, max)).filter(Boolean).slice(0, limit) : [];
 }
 
+function safeQuota(value) {
+  const raw = value && typeof value === 'object' ? value : {};
+  const energy = Number(raw.energy);
+  const tokenBalance = Number(raw.tokenBalance ?? raw.token_balance);
+  const attachmentsUsed = Number(raw.attachmentsUsed ?? raw.attachments_used);
+  return {
+    energy: Number.isFinite(energy) ? Math.max(0, Math.min(100, energy)) : 0,
+    resetAt: raw.resetAt || raw.reset_at || null,
+    tokenBalance: Number.isFinite(tokenBalance) ? Math.max(0, tokenBalance) : 0,
+    attachmentsUsed: Number.isFinite(attachmentsUsed) ? Math.max(0, Math.min(3, attachmentsUsed)) : 0
+  };
+}
+
 function safePlan(value) {
   const raw = value && typeof value === 'object' ? value : {};
   const steps = (Array.isArray(raw.steps) ? raw.steps : []).map((step, index) => ({
@@ -72,11 +85,13 @@ function safeProgress(value) {
   if (raw.question) progress.question = text(raw.question, 700);
   if (raw.options) progress.options = safeList(raw.options, 4, 180);
   if (raw.resumeAnswer) progress.resumeAnswer = text(raw.resumeAnswer, 1200);
+  if (raw.quota && typeof raw.quota === 'object') progress.quota = safeQuota(raw.quota);
   return progress;
 }
 
 function safeJob(row) {
   if (!row) return null;
+  const progress = safeProgress(row.progress);
   return {
     id: row.id,
     chatId: row.chat_id,
@@ -85,7 +100,8 @@ function safeJob(row) {
     mode: row.mode === 'expert' ? 'expert' : 'chat',
     status: row.status,
     complexity: row.complexity,
-    progress: safeProgress(row.progress),
+    progress,
+    quota: progress.quota || null,
     result: row.status === 'completed' ? (row.result || {}) : {},
     errorMessage: row.status === 'failed' ? row.error_message || 'Não foi possível concluir a resposta.' : null,
     createdAt: row.created_at,
@@ -187,9 +203,18 @@ export async function processClaimedJob({ admin, running, resumeAnswer = '' }) {
     return { id: running.id, status: 'completed' };
   } catch (error) {
     const attempt = Number(running.attempt_count || 1);
-    const retry = attempt < 3;
-    await admin.from('deep_jobs').update({ status: retry ? 'queued' : 'failed', error_message: text(error?.message || 'Falha no processamento.', 500), progress: safeProgress({ ...initialProgress, phase: retry ? 'retrying' : 'failed', label: retry ? 'A etapa será retomada automaticamente.' : 'Não foi possível concluir esta tarefa.', updates: [...(initialProgress.updates || []), text(error?.message || 'A execução encontrou um erro observável.', 280)].filter(Boolean).slice(-10) }), completed_at: retry ? null : new Date().toISOString() }).eq('id', running.id).eq('status', 'processing');
-    if (!retry) await admin.from('user_notifications').insert({ user_id: running.user_id, notification_type: 'ai_response_complete', title: isExpert ? 'O Modo Especialista não foi concluído' : 'A resposta não foi concluída', body: isExpert ? 'O plano Especialista encontrou um erro. Você pode tentar novamente.' : 'O Klipza não conseguiu terminar esta resposta. Tente novamente.', metadata: { job_id: running.id, chat_id: running.chat_id, message_id: running.message_id, failed: true, mode: running.mode || 'chat' } });
+    const quotaDenied = error?.quotaDenied === true || Number(error?.status) === 402;
+    const retry = !quotaDenied && attempt < 3;
+    const quotaErrorMessage = quotaDenied ? 'Sua cota diária foi atingida.' : text(error?.message || 'Falha no processamento.', 500);
+    const nextProgress = safeProgress({
+      ...initialProgress,
+      phase: quotaDenied ? 'quota_exhausted' : retry ? 'retrying' : 'failed',
+      label: quotaDenied ? 'Sua cota diária foi atingida.' : retry ? 'A etapa será retomada automaticamente.' : 'Não foi possível concluir esta tarefa.',
+      quota: quotaDenied ? error?.quota : null,
+      updates: [...(initialProgress.updates || []), quotaDenied ? 'O Supabase confirmou que a cota disponível acabou.' : text(error?.message || 'A execução encontrou um erro observável.', 280)].filter(Boolean).slice(-10)
+    });
+    await admin.from('deep_jobs').update({ status: retry ? 'queued' : 'failed', error_message: quotaErrorMessage, progress: nextProgress, completed_at: retry ? null : new Date().toISOString() }).eq('id', running.id).eq('status', 'processing');
+    if (!retry) await admin.from('user_notifications').insert({ user_id: running.user_id, notification_type: 'ai_response_complete', title: quotaDenied ? 'Limite de cota atingido' : isExpert ? 'O Modo Especialista não foi concluído' : 'A resposta não foi concluída', body: quotaDenied ? 'Sua cota diária foi atingida. O próximo horário de reset está indicado na conversa.' : isExpert ? 'O plano Especialista encontrou um erro. Você pode tentar novamente.' : 'O Klipza não conseguiu terminar esta resposta. Tente novamente.', metadata: { job_id: running.id, chat_id: running.chat_id, message_id: running.message_id, failed: true, mode: running.mode || 'chat', quota: quotaDenied ? error?.quota || null : null } });
     return { id: running.id, status: retry ? 'queued' : 'failed' };
   }
 }
