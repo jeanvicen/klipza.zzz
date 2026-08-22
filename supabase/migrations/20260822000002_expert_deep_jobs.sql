@@ -14,10 +14,10 @@ drop constraint if exists deep_jobs_status_check;
 
 alter table public.deep_jobs
 add constraint deep_jobs_status_check
-check (status in ('queued', 'processing', 'awaiting_user', 'completed', 'failed', 'canceled'));
+check (status in ('awaiting_confirmation', 'queued', 'processing', 'awaiting_user', 'completed', 'failed', 'canceled'));
 
 create index if not exists deep_jobs_expert_waiting_idx
   on public.deep_jobs (user_id, updated_at desc)
-  where mode = 'expert' and status = 'awaiting_user';
+  where mode = 'expert' and status in ('awaiting_confirmation', 'awaiting_user');
 
 commit;

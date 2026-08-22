@@ -1553,11 +1553,11 @@ body.prime-modal-open{overflow:hidden}
     if(!payload?.expertPlan)throw new Error('O plano Especialista veio vazio.');
     return payload;
   }
-  async function queueExpertJob({chat,chatId,messageIdValue,message,history,plan,start=true}){
+  async function queueExpertJob({chat,chatId,messageIdValue,message,history,plan,start=false,eventKey=''}){
     const payload=await deepJobsRequest({action:'create',chatId,messageId:messageIdValue,message,history,complexity:plan.complexity||'standard',provider:'auto',mode:'expert',plan});
     const job=payload?.job;if(!job?.id)throw new Error('O plano Especialista não pôde ser iniciado.');
     state.backgroundJobs[job.id]=job;renderHistory();renderBackgroundResponseBanner();
-    if(start){startDeepJobPolling();void deepJobsRequest({action:'start',jobId:job.id}).then(()=>refreshDeepJobs()).catch(error=>{console.warn('O Modo Especialista não iniciou agora.',error);refreshDeepJobs();});}
+    if(start){startDeepJobPolling();void deepJobsRequest({action:'start',jobId:job.id,eventKey:eventKey||undefined}).then(()=>refreshDeepJobs()).catch(error=>{console.warn('O Modo Especialista não iniciou agora.',error);refreshDeepJobs();});}
     return job;
   }
   function hasActiveExpertPlan(){
@@ -1601,15 +1601,16 @@ body.prime-modal-open{overflow:hidden}
     const expert=planMessage.expert;if(expert.state!=='awaiting_confirmation')return;
     expertPlanBusy=true;planMessage.expert={...expert,state:'starting'};persistIfNeeded();renderMessages();
     const eventKey=`expert:${state.user?.id||'user'}:${planMessage.id}`;
-    let job=null;let consumed=null;
+    let job=null;let startPayload=null;
     try{
       const originChatId=chat.id;const history=chat.messages.filter(item=>item.id!==planMessage.id).slice(-16).map(item=>({role:item.role,content:item.content}));
       job=await queueExpertJob({chat,chatId:originChatId,messageIdValue:planMessage.id,message:expert.requestMessage,history,plan:expert.plan,start:false});
-      consumed=await expertModeRequest({action:'consume',eventKey});
-      if(!consumed.allowed&&!consumed.alreadyProcessed){await deepJobsRequest({action:'cancel',jobId:job.id}).catch(()=>{});delete state.backgroundJobs[job.id];throw new Error(expertQuotaCopy(consumed.quota||{}));}
-      refreshExpertMenuPill(consumed.quota||{});planMessage.expert={...expert,state:'running',jobId:job.id,quota:consumed.quota||expert.quota||null,usage:consumed.quota||null};chat.updated=Date.now();persistIfNeeded();renderMessages();
-      startDeepJobPolling();await deepJobsRequest({action:'start',jobId:job.id});await refreshDeepJobs();showResponseStatus('Plano confirmado. O Modo Especialista começou pela primeira etapa.');setTimeout(()=>showResponseStatus(''),3200);
-    }catch(error){if(job&&!consumed?.allowed){await deepJobsRequest({action:'cancel',jobId:job.id}).catch(()=>{});delete state.backgroundJobs[job.id];}planMessage.expert={...expert,state:consumed?.allowed?'running':'awaiting_confirmation',jobId:consumed?.allowed?job?.id:undefined,usage:consumed?.allowed?consumed.quota||null:undefined};persistIfNeeded();renderMessages();showResponseStatus(error?.message||'Não foi possível iniciar o Modo Especialista.');setTimeout(()=>showResponseStatus(''),4600);}
+      startPayload=await deepJobsRequest({action:'start',jobId:job.id,eventKey});
+      if(!startPayload?.started&&startPayload?.allowed===false){await deepJobsRequest({action:'cancel',jobId:job.id}).catch(()=>{});delete state.backgroundJobs[job.id];throw new Error(expertQuotaCopy(startPayload.quota||{}));}
+      if(!startPayload?.started&&startPayload?.allowed!==true)throw new Error('Não foi possível iniciar o Modo Especialista agora. Tente confirmar novamente.');
+      refreshExpertMenuPill(startPayload.quota||{});planMessage.expert={...expert,state:'running',jobId:job.id,quota:startPayload.quota||expert.quota||null,usage:startPayload.quota||null};chat.updated=Date.now();persistIfNeeded();renderMessages();
+      startDeepJobPolling();await refreshDeepJobs();showResponseStatus('Plano confirmado. O Modo Especialista começou pela primeira etapa.');setTimeout(()=>showResponseStatus(''),3200);
+    }catch(error){if(job&&startPayload?.allowed===false){delete state.backgroundJobs[job.id];}planMessage.expert={...expert,state:startPayload?.allowed===true?'running':'awaiting_confirmation',jobId:startPayload?.allowed===true?job?.id:undefined,usage:startPayload?.allowed===true?startPayload.quota||null:undefined};persistIfNeeded();renderMessages();showResponseStatus(error?.message||'Não foi possível iniciar o Modo Especialista.');setTimeout(()=>showResponseStatus(''),4600);}
     finally{expertPlanBusy=false;}
   }
   function cancelExpertPlan(messageIdValue){

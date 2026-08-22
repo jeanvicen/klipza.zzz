@@ -100,6 +100,13 @@ function jobSelect() {
   return 'id,user_id,chat_id,message_id,message,history,provider,complexity,progress,status,attempt_count,started_at,mode,result,error_message,created_at,updated_at,completed_at,delivered_at';
 }
 
+function normalizeExpertQuota(value) {
+  const row = value && typeof value === 'object' ? value : {};
+  const used = Math.max(0, Math.min(3, Number(row.used) || 0));
+  const remaining = Math.max(0, Math.min(3, Number(row.remaining ?? 3 - used) || 0));
+  return { limit: 3, used, remaining, windowHours: 48, nextAvailableAt: row.nextAvailableAt || row.next_available_at || null };
+}
+
 export async function processClaimedJob({ admin, running, resumeAnswer = '' }) {
   const initialProgress = safeProgress(running.progress);
   const isExpert = running.mode === 'expert';
@@ -190,7 +197,7 @@ export default async function handler(request, response) {
     const { client, user } = await requireUser(request);
     if (request.method === 'GET') {
       const chatId = text(request.query?.chatId || '', 140);
-      let query = client.from('deep_jobs').select(jobSelect()).eq('user_id', user.id).in('status', ['queued', 'processing', 'awaiting_user', 'completed', 'failed']).is('delivered_at', null).order('created_at', { ascending: false }).limit(25);
+      let query = client.from('deep_jobs').select(jobSelect()).eq('user_id', user.id).in('status', ['awaiting_confirmation', 'queued', 'processing', 'awaiting_user', 'completed', 'failed']).is('delivered_at', null).order('created_at', { ascending: false }).limit(25);
       if (chatId) query = query.eq('chat_id', chatId);
       const { data, error } = await query;
       if (error) throw error;
@@ -202,15 +209,25 @@ export default async function handler(request, response) {
     if (action === 'start') {
       const jobId = text(body.jobId, 80);
       if (!jobId) throw httpError(400, 'Tarefa inválida.');
-      const { data: queued, error: readError } = await client.from('deep_jobs').select(jobSelect()).eq('id', jobId).eq('user_id', user.id).eq('status', 'queued').maybeSingle();
+      const { data: candidate, error: readError } = await client.from('deep_jobs').select(jobSelect()).eq('id', jobId).eq('user_id', user.id).in('status', ['awaiting_confirmation', 'queued']).maybeSingle();
       if (readError) throw readError;
-      if (!queued) return json(response, 200, { started: false });
-      const { data: claimed, error: claimError } = await client.from('deep_jobs').update({ status: 'processing', started_at: queued.started_at || new Date().toISOString(), attempt_count: Number(queued.attempt_count || 0) + 1, progress: safeProgress({ ...queued.progress, phase: queued.mode === 'expert' ? 'expert_step' : 'thinking', label: queued.mode === 'expert' ? 'Plano confirmado; iniciando a próxima etapa.' : 'Klipza está respondendo em segundo plano.' }) }).eq('id', jobId).eq('user_id', user.id).eq('status', 'queued').select(jobSelect()).maybeSingle();
+      if (!candidate) return json(response, 200, { started: false });
+      let quota = null;
+      if (candidate.mode === 'expert') {
+        const eventKey = text(body.eventKey, 180);
+        if (eventKey.length < 8) throw httpError(400, 'Evento Especialista inválido.');
+        const { data: quotaResult, error: quotaError } = await client.rpc('consume_expert_mode', { p_event_key: eventKey });
+        if (quotaError) throw quotaError;
+        quota = normalizeExpertQuota(quotaResult);
+        if (quotaResult?.allowed !== true && quotaResult?.alreadyProcessed !== true) return json(response, 200, { started: false, allowed: false, consumed: false, quota });
+      }
+      const nextProgress = safeProgress({ ...candidate.progress, phase: candidate.mode === 'expert' ? 'expert_step' : 'thinking', label: candidate.mode === 'expert' ? 'Plano confirmado; iniciando a próxima etapa.' : 'Klipza está respondendo em segundo plano.' });
+      const { data: claimed, error: claimError } = await client.from('deep_jobs').update({ status: 'processing', started_at: candidate.started_at || new Date().toISOString(), attempt_count: Number(candidate.attempt_count || 0) + 1, progress: nextProgress }).eq('id', jobId).eq('user_id', user.id).eq('status', candidate.status).select(jobSelect()).maybeSingle();
       if (claimError) throw claimError;
-      if (!claimed) return json(response, 200, { started: false });
+      if (!claimed) return json(response, 200, { started: false, allowed: quota ? true : undefined, consumed: quota ? true : undefined, quota });
       const admin = serviceClient();
       const result = await processClaimedJob({ admin, running: claimed });
-      return json(response, 200, { started: true, status: result.status });
+      return json(response, 200, { started: true, allowed: quota ? true : undefined, consumed: quota ? true : undefined, quota, status: result.status });
     }
     if (action === 'resume') {
       const jobId = text(body.jobId, 80);
@@ -237,7 +254,7 @@ export default async function handler(request, response) {
     if (action === 'cancel') {
       const jobId = text(body.jobId, 80);
       if (!jobId) throw httpError(400, 'Tarefa inválida.');
-      const { data, error } = await client.from('deep_jobs').update({ status: 'canceled', error_message: 'Cancelada pelo usuário.', completed_at: new Date().toISOString() }).eq('id', jobId).eq('user_id', user.id).in('status', ['queued', 'processing', 'awaiting_user']).select(jobSelect()).maybeSingle();
+      const { data, error } = await client.from('deep_jobs').update({ status: 'canceled', error_message: 'Cancelada pelo usuário.', completed_at: new Date().toISOString() }).eq('id', jobId).eq('user_id', user.id).in('status', ['awaiting_confirmation', 'queued', 'processing', 'awaiting_user']).select(jobSelect()).maybeSingle();
       if (error) throw error;
       return json(response, 200, { job: safeJob(data) });
     }
@@ -254,12 +271,12 @@ export default async function handler(request, response) {
       const sameMessage = await client.from('deep_jobs').select(jobSelect()).eq('user_id', user.id).eq('message_id', messageId).maybeSingle();
       if (sameMessage.error) throw sameMessage.error;
       if (sameMessage.data) return json(response, 200, { job: safeJob(sameMessage.data), existing: true });
-      const activeExpert = await client.from('deep_jobs').select('id').eq('user_id', user.id).eq('mode', 'expert').in('status', ['queued', 'processing', 'awaiting_user']).limit(1);
+      const activeExpert = await client.from('deep_jobs').select('id').eq('user_id', user.id).eq('mode', 'expert').in('status', ['awaiting_confirmation', 'queued', 'processing', 'awaiting_user']).limit(1);
       if (activeExpert.error) throw activeExpert.error;
       if (activeExpert.data?.length) throw httpError(409, 'Já existe um plano Especialista em andamento nesta conta.');
     }
     const initialProgress = mode === 'expert' ? safeProgress({ phase: 'plan_confirmed', pass: 0, totalPasses: Math.min(15, Math.max(3, Array.isArray(body.plan?.steps) ? body.plan.steps.length : 4)), label: 'Plano confirmado; a primeira etapa será iniciada agora.', updates: ['Plano confirmado pelo usuário; vou começar pela etapa mais importante.'], plan: body.plan, expertState: { stepIndex: 0, completedSteps: [], updates: [] }, currentStep: body.plan?.steps?.[0] }) : safeProgress({ phase: 'queued', pass: 0, totalPasses: complexity === 'high' ? 4 : complexity === 'medium' ? 3 : 2, label: 'Klipza está aguardando o início da análise.', updates: ['Pedido recebido; vou organizar os requisitos antes de responder.'] });
-    const insert = { user_id: user.id, chat_id: chatId, message_id: messageId, message, history, provider, complexity, mode, progress: initialProgress };
+    const insert = { user_id: user.id, chat_id: chatId, message_id: messageId, message, history, provider, complexity, mode, status: mode === 'expert' ? 'awaiting_confirmation' : 'queued', progress: initialProgress };
     const { data, error } = await client.from('deep_jobs').insert(insert).select(jobSelect()).single();
     if (error) {
       if (error.code === '23505') {
