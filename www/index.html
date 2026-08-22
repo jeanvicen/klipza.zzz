@@ -1202,6 +1202,19 @@ body.prime-modal-open{overflow:hidden}
     refreshQuotaUI();
     return payload?.consumed===true;
   }
+  async function refundAccountEnergy(amount,eventKey){
+    if(!state.user?.id||!Number.isInteger(amount)||amount<=0)return false;
+    try{
+      const payload=await quotaRequest({action:'refund',amount,eventKey});
+      if(payload?.result)applyServerQuota(payload.result);
+      refreshQuotaUI();
+      return payload?.refunded===true||payload?.alreadyProcessed===true;
+    }catch(error){
+      console.warn('Não foi possível estornar a energia desta tentativa.',error);
+      await syncServerQuota(true);
+      return false;
+    }
+  }
   async function refreshWallet(){
     await syncServerQuota();
     return state.wallet;
@@ -2647,6 +2660,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         }
       }catch(error){
         if(responseState.stopped)return;
+        if(serverEnergyConsumed)await refundAccountEnergy(requiredEnergy,energyEventKey);
         const fallback=String(error?.message||'Não foi possível concluir a resposta agora.');
         streamReply(fallback,{thinkingMode:state.settings.thinkingMode,thinking:null});
       }
