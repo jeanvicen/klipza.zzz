@@ -126,7 +126,7 @@ img{max-width:100%}
 .nav-label{flex:1}
 .nav-count{font-size:10px;opacity:.65}
 .history-head{padding:12px 14px 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#999;font-weight:700}
-.history{flex:1;overflow:auto;padding:2px 9px 10px}
+.history{flex:1;overflow:auto;padding:2px 9px 10px}.history-limit-note{margin:8px 5px 2px;padding:9px 10px;border:1px solid var(--line2);border-radius:9px;background:var(--bg);color:var(--muted);font-size:10px;line-height:1.4;text-align:center}
 .chat-row{display:flex;align-items:center;gap:6px;min-height:38px;padding:0 7px 0 10px;border-radius:9px;color:#333;margin:2px 0}
 .chat-row:hover{background:var(--hover)}
 .chat-row.active{background:#e9e9e9;color:#000}
@@ -147,14 +147,14 @@ img{max-width:100%}
 .account-email{font-size:10px;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* MAIN */
-.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:var(--bg)}
+.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:var(--bg);position:relative}
 .topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2vw,28px);flex:0 0 auto}
 .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .topbar-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .topbar-sub{font-size:11px;color:#999}
 .topbar-right{display:flex;gap:5px;align-items:center}
 
-.messages{flex:1;overflow:auto;padding:clamp(22px,3vw,38px) 0 18px;scroll-behavior:smooth}
+.messages{flex:1;overflow:auto;padding:clamp(22px,3vw,38px) 0 18px;scroll-behavior:smooth}.jump-to-latest{display:none;position:absolute;right:clamp(16px,3vw,34px);bottom:92px;z-index:5;width:34px;height:34px;border:1px solid var(--line2);border-radius:50%;background:var(--bg);color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);font-size:18px;line-height:1;cursor:pointer}.jump-to-latest.show{display:grid;place-items:center}.jump-to-latest:hover{background:#000;color:#fff;border-color:#000}
 .msg-width{width:min(var(--content),calc(100% - 38px));margin:0 auto}
 .msg{display:flex;gap:12px;margin:0 0 30px}
 .msg:last-child{margin-bottom:4px}
@@ -1772,9 +1772,16 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   function toggleSidebar(){ $('app').classList.toggle('sidebar-collapsed'); }
 
   function createChat(){
+    if(Object.keys(state.chats||{}).length>=MAX_HISTORY_CHATS){
+      const notice=`Você já tem ${MAX_HISTORY_CHATS} conversas. Apague uma conversa antiga para começar outra.`;
+      if(currentView!=='chat')setView('chat');
+      showResponseStatus(notice);setTimeout(()=>showResponseStatus(''),4200);
+      return null;
+    }
     const id=uid('chat');
     state.chats[id]={id,title:'Nova conversa',messages:[],created:Date.now(),updated:Date.now()};
     activeChatId=id; state.activeChatId=id; save(); renderHistory(); setView('chat');
+    return id;
   }
   function openChat(id){activeChatId=id;state.activeChatId=id;save();setView('chat');renderHistory();}
   function deleteChat(id){
@@ -1825,7 +1832,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   function renderHistory(){
     const box=$('history'); const ids=Object.keys(state.chats).sort((a,b)=>state.chats[b].updated-state.chats[a].updated);
     if(!ids.length){box.innerHTML='<div style="padding:22px 12px;color:#999;font-size:12px">Nenhuma conversa.</div>';return}
-    box.innerHTML=ids.map(id=>{
+    const rows=ids.map(id=>{
       const c=state.chats[id];
       const pending=document.hidden?backgroundJobForChat(id):null;
       return `<div class="chat-row ${id===activeChatId?'active':''}" data-chat-id="${id}">
@@ -1836,6 +1843,8 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         </div>
       </div>`;
     }).join('');
+    const limitNote=ids.length>=MAX_HISTORY_CHATS?`<div class="history-limit-note">Limite de ${MAX_HISTORY_CHATS} conversas atingido. Apague uma para começar outra.</div>`:'';
+    box.innerHTML=rows+limitNote;
   }
 
   function renderChat(){
@@ -1855,6 +1864,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       </header>
       <div class="background-response-banner" id="backgroundResponseBanner" aria-live="polite"></div>
       <section class="messages" id="messages"></section>
+      <button class="jump-to-latest" id="jumpToLatest" type="button" aria-label="Ir para o fim da resposta" title="Ir para o fim da resposta" onclick="window.K.jumpToLatest()">↓</button>
       <div class="response-status" id="responseStatus" aria-live="polite"></div>
       <section class="composer-wrap"><div class="composer">
         <div class="anonymous-banner ${anonymousMode?'show':''}" id="anonymousBanner">
@@ -1930,13 +1940,17 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       </div></section>`;
     bindComposer(); renderMessages(); renderBackgroundResponseBanner();
   }
-  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,regenerateCount:0};
+  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0};
   let foregroundResponse=null;
   let foregroundPromotionPromise=null;
   const messageId=()=>`msg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`;
   const codeRequestPattern=/\b(crie|criar|faça|faca|fazer|gere|gerar|escreva|program(e|ar)|código|codigo|arquivo|artefato|html|css|javascript|typescript|python|react|component(e|ar)|script|site|página|pagina|app)\b/i;
   function isCodeRequest(text){return codeRequestPattern.test(String(text||''));}
-  const DEEP_THINKING_STEPS=['Vou entender o objetivo principal do pedido.','Vou separar os tópicos que precisam ser considerados.','Vou conferir a lógica, os riscos e os pontos que podem gerar erro.','Vou comparar as opções e revisar o resultado antes de entregar.'];
+  function deepLiveSteps(message,complexity){
+    const subject=String(message||'o pedido').replace(/\s+/g,' ').trim().slice(0,96);
+    const depth=complexity==='high'?'Há várias dependências neste pedido, então vou validar cada uma antes de escolher.':complexity==='medium'?'Há alguns pontos que precisam ser comparados antes de concluir.':'Vou conferir os pontos essenciais sem criar espera desnecessária.';
+    return [`Recebi “${subject}${subject.length>=96?'…':''}”; vou identificar o resultado esperado.`,`Vou separar os requisitos e o que ainda precisa ser confirmado.`,`Vou mapear as rotas possíveis para chegar ao resultado sem pular etapas.`,depth,'Vou comparar a solução mais direta com uma alternativa mais completa.','Vou revisar a escolha e conferir se a resposta atende exatamente ao pedido.'];
+  }
   function deepThinkingList(items, fallback, limit=7){
     const values=Array.isArray(items)?items.map(item=>String(item||'').trim()).filter(Boolean).slice(0,limit):[];
     return values.length?values:[fallback];
@@ -1973,13 +1987,39 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const meta=active?'agora':durationMs?`${Math.max(1,Math.round(durationMs/1000))}s de análise`:'resumo';
     return `<details class="msg-thinking" ${active?'open':''}><summary><span class="msg-thinking-chevron">›</span><span class="msg-thinking-title">Pensamento profundo</span><span class="msg-thinking-meta">${esc(meta)}</span></summary>${active?`<div class="msg-thinking-live"><span class="msg-thinking-live-dot"></span><span>${esc(operation)}</span></div>`:''}<div class="msg-thinking-body"><div class="msg-thinking-journal"><strong>Conversa da análise</strong><div class="msg-thinking-pass">${esc(complexity)} · ${passes} passagens</div><div class="msg-thinking-dialogue">${dialogue.map((item,itemIndex)=>`<div class="msg-thinking-turn ${active&&itemIndex===Math.min(index,dialogue.length-1)?'active':''}"><span class="msg-thinking-turn-dot"></span><div class="msg-thinking-turn-copy"><span class="msg-thinking-turn-speaker">${esc(dialogueLabel(item,itemIndex))}</span><span class="msg-thinking-turn-text">${esc(item)}</span></div></div>`).join('')}</div></div><details class="msg-thinking-extra"><summary>Ver detalhes da análise</summary><div class="msg-thinking-extra-body"><div><strong>O que foi considerado</strong><ul>${topics.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>O que foi conferido</strong><ul>${checks.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Alternativas avaliadas</strong><ul>${alternatives.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Minha direção provisória</strong><ul>${decisions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div></div></details><div><strong>Resumo</strong><div class="msg-thinking-summary">${esc(summary)}</div></div><div class="msg-thinking-note">Resumo operacional do processo; não exibe pensamentos privados completos.</div></div></details>`;
   }
+  function deepPacingFor(message='',history=[]){
+    const complexity=localDeepComplexity(message,history);
+    if(complexity==='high')return {complexity,steps:6,interval:2300,minimumMs:11000};
+    if(complexity==='medium')return {complexity,steps:5,interval:1750,minimumMs:7600};
+    return {complexity,steps:4,interval:1150,minimumMs:4200};
+  }
+  function messagesNearBottom(box,threshold=96){return !box||box.scrollHeight-box.scrollTop-box.clientHeight<=threshold;}
+  function updateJumpToLatest(){
+    const box=$('messages'),button=$('jumpToLatest');
+    if(!box||!button)return;
+    const show=responseState.active&&!messagesNearBottom(box);
+    button.classList.toggle('show',show);
+    button.setAttribute('aria-hidden',String(!show));
+  }
+  function jumpToLatest(){
+    const box=$('messages');if(!box)return;
+    box.scrollTo({top:box.scrollHeight,behavior:'smooth'});
+    setTimeout(updateJumpToLatest,240);
+  }
+  function bindMessagesScroll(){
+    const box=$('messages');if(!box||box.dataset.scrollBound)return;
+    box.dataset.scrollBound='1';box.addEventListener('scroll',updateJumpToLatest,{passive:true});
+  }
   function ensureThinkingRow(plan=null,active=true,message=responseState.deepMessage,index=responseState.deepStepIndex,durationMs=0){
     const box=$('messages');const wrap=box?.querySelector('.msg-width');if(!wrap)return null;
+    const follow=messagesNearBottom(box);
+    const previousTop=box.scrollTop;
     let row=wrap.querySelector('.msg.ai.thinking-row,.msg.ai.streaming');
     if(!row){row=document.createElement('div');row.className='msg ai thinking-row';row.innerHTML='<div class="msg-avatar">K</div><div class="msg-content"><div class="msg-label">Klipza</div></div>';wrap.appendChild(row);}
     const content=row.querySelector('.msg-content');let block=content?.querySelector('.msg-thinking');
     if(block){const holder=document.createElement('div');holder.innerHTML=thinkingMarkup(plan,active,message,index,durationMs);block.replaceWith(holder.firstElementChild);}else if(content){content.insertAdjacentHTML('beforeend',thinkingMarkup(plan,active,message,index,durationMs));}
-    box.scrollTop=box.scrollHeight;return row;
+    if(follow)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
+    updateJumpToLatest();return row;
   }
   function renderDeepThinkingProgress(step='',plan=null,message=responseState.deepMessage,index=responseState.deepStepIndex){
     const el=$('responseStatus');if(el){el.classList.remove('show','progress-status');el.innerHTML='';}
@@ -1997,14 +2037,16 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     responseState.deepMessage=String(message||'');
     responseState.deepStepIndex=0;
     responseState.deepStartedAt=Date.now();
+    const pacing=responseState.deepThinking?deepPacingFor(responseState.deepMessage,currentChat()?.messages||[]):{complexity:'standard',steps:4,interval:1050,minimumMs:0};
+    responseState.deepComplexity=pacing.complexity;
     el.classList.add('show','progress-status');
-    const steps=responseState.deepThinking?DEEP_THINKING_STEPS:['Analisando o pedido…','Estruturando a solução…','Verificando detalhes do código…','Preparando a resposta…'];
+    const steps=responseState.deepThinking?deepLiveSteps(responseState.deepMessage,pacing.complexity).slice(0,pacing.steps):['Analisando o pedido…','Estruturando a solução…','Verificando detalhes do código…','Preparando a resposta…'];
     const render=()=>{if(responseState.deepThinking)renderDeepThinkingProgress('',responseState.deepPlan,responseState.deepMessage,responseState.deepStepIndex);else el.innerHTML=`<div class="response-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Preparando sua resposta</span><span class="response-progress-step">${steps[responseState.deepStepIndex]}</span></div></div>`;};
     render();
-    responseState.progressTimer=setInterval(()=>{responseState.deepStepIndex=(responseState.deepStepIndex+1)%steps.length;render();},1050);
+    responseState.progressTimer=setInterval(()=>{responseState.deepStepIndex=(responseState.deepStepIndex+1)%steps.length;render();},pacing.interval);
   }
   function stopResponseProgress(){
-    clearInterval(responseState.progressTimer);responseState.progressTimer=null;responseState.codeRequest=false;responseState.deepThinking=false;responseState.deepPlan=null;responseState.deepMessage='';responseState.deepStepIndex=0;responseState.deepStartedAt=0;
+    clearInterval(responseState.progressTimer);responseState.progressTimer=null;responseState.codeRequest=false;responseState.deepThinking=false;responseState.deepPlan=null;responseState.deepMessage='';responseState.deepStepIndex=0;responseState.deepStartedAt=0;responseState.deepComplexity='standard';
     $('responseStatus')?.classList.remove('progress-status');
     $('messages')?.querySelector('.msg.ai.thinking-row')?.remove();
   }
@@ -2023,6 +2065,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(active && $('prompt')) $('prompt').disabled=true;
     if(!active && $('prompt')) $('prompt').disabled=false;
     if(!active && $('prompt')) send.disabled=!$('prompt').value.trim()&&!attached.length;
+    updateJumpToLatest();
   }
   function showResponseStatus(text,emphasis=false){
     const el=$('responseStatus'); if(!el)return;
@@ -2041,8 +2084,11 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       wrap.appendChild(row);
     }else row.classList.add('streaming');
     const stream=row.querySelector('.stream-content')||(()=>{const node=document.createElement('div');node.className='stream-content';row.querySelector('.msg-content')?.appendChild(node);return node;})();
+    const follow=messagesNearBottom(box);
+    const previousTop=box.scrollTop;
     stream.innerHTML=formatMessage(content);
-    box.scrollTop=box.scrollHeight;
+    if(follow)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
+    updateJumpToLatest();
   }
   function stopResponse(){
     if(!responseState.active)return;
@@ -2098,7 +2144,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const chat=currentChat();
     const deepEnabled=meta?.thinkingMode==='deep'||(state.settings.thinkingMode==='deep'&&meta?.thinking!==null);
     const deepPlan=meta?.thinking||null;
-    if(deepEnabled){responseState.deepThinking=true;responseState.deepPlan=deepPlan;clearInterval(responseState.progressTimer);responseState.deepStepIndex=4;renderDeepThinkingProgress('',deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else stopResponseProgress();
+    if(deepEnabled){responseState.deepThinking=true;responseState.deepPlan=deepPlan;responseState.deepComplexity=['standard','medium','high'].includes(deepPlan?.complexity)?deepPlan.complexity:responseState.deepComplexity;clearInterval(responseState.progressTimer);responseState.deepStepIndex=4;renderDeepThinkingProgress('',deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else stopResponseProgress();
     responseState.stopped=false;setResponseUI(true);if(!deepEnabled)showResponseStatus('Klipza está respondendo…');
     const regenCount=responseState.regenerateCount||0;
     let i=0, partial='';
@@ -2177,7 +2223,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     chat.messages.forEach(m=>{if(m.role==='ai'&&!m.id){m.id=messageId();idsAssigned=true;}});
     if(idsAssigned&&!anonymousMode)save();
     if(!chat.messages.length){
-      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta"></span></span><span aria-hidden="true">→</span></button></div></div></div>`; startWelcomeRotator(); return;
+      box.innerHTML=`<div class="welcome"><div class="welcome-inner"><div class="welcome-mark"><img src="/assets/klipza-mark.png" alt="Símbolo Klipza"></div><div class="welcome-kicker" id="welcomeKicker">Klipza.IA</div><h1 id="welcomeTitle">Como posso ajudar?</h1><p id="welcomeSub">Converse, crie e trabalhe com seus arquivos.</p><div class="welcome-prompt-wrap"><button class="welcome-prompt" id="welcomePrompt" type="button" onclick="window.K.useWelcomePrompt()"><span class="welcome-prompt-icon">?</span><span class="welcome-prompt-copy"><span class="welcome-prompt-label">Pergunta do momento</span><span class="welcome-prompt-text" id="welcomePromptText">Descubra algo novo no web.klip</span><span class="welcome-prompt-meta" id="welcomePromptMeta"></span></span><span aria-hidden="true">→</span></button></div></div></div>`; bindMessagesScroll();updateJumpToLatest();startWelcomeRotator(); return;
     }
     const wrap=document.createElement('div');wrap.className='msg-width';
     chat.messages.forEach(m=>{
@@ -2194,7 +2240,12 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       const thinking=m.role==='ai'&&m.thinking?thinkingMarkup(m.thinking,false,'',5,m.thinkingDuration||0):'';
       row.innerHTML=`<div class="msg-avatar">${m.role==='user'?esc(initials(state.user.name)):'K'}</div><div class="msg-content"><div class="msg-label">${m.role==='user'?'Você':'Klipza'}</div>${thinking}${formatMessage(m.content, m.id)}${files?`<div class="msg-attachments">${files}</div>`:''}${actions}</div>`;
       wrap.appendChild(row);
-    }); box.innerHTML='';box.appendChild(wrap);box.scrollTop=box.scrollHeight;
+    });
+    const follow=messagesNearBottom(box);
+    const previousTop=box.scrollTop;
+    box.innerHTML='';box.appendChild(wrap);
+    if(follow)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
+    bindMessagesScroll();updateJumpToLatest();
   }
   function formatMessage(text, msgId){
     let s=esc(text);
@@ -2588,7 +2639,8 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       try{
         const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext);
         if(!responseState.stopped){
-          const minimumDeepTime=state.settings.thinkingMode==='deep'?4200:0;
+          const complexity=payload?.thinking?.complexity||responseState.deepComplexity||'standard';
+          const minimumDeepTime=state.settings.thinkingMode==='deep'?(complexity==='high'?11000:complexity==='medium'?7600:4200):0;
           const remaining=Math.max(0,minimumDeepTime-(Date.now()-thinkingStartedAt));
           if(remaining)await new Promise(resolve=>setTimeout(resolve,remaining));
           if(!responseState.stopped)streamReply(payload.answer,payload);
@@ -2913,7 +2965,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
     renderSettingsPage();
   }
   window.K={enter,logout,toggleSidebar,setView,setSettingsSection,createChat,openChat,deleteChat,renameChat,clearHistory,useSuggestion,send,stopResponse,toggleDictation,toggleAnonymous,toggleAttach,pick,copyCode,feedback,regenerate,createArtifactFromCode,openArtifact,closeArtifact,
-    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal,hydrateMemoryData,exportAllData,deleteMemory,toggleThinkingDetails,toggleDeepThinking,refreshDeepJobs};
+    upcoming,openPrimeModal,closePrimeModal,primeComingSoon,refreshWallet,removeAttach,renderAttached,setTheme,toggleNotifications,toggleSounds,clearAllLocalData,settingsBack,showInstallPrompt,installApp,dismissInstallPrompt,useWelcomePrompt,toggleWebKlipMenu,refreshWebKlip,sendWebKlipToChat,openConfirmModal,closeConfirmModal,setWebKlipCountry,openWebKlipModal,closeWebKlipModal,hydrateMemoryData,exportAllData,deleteMemory,toggleThinkingDetails,toggleDeepThinking,refreshDeepJobs,jumpToLatest};
   $('authEmailForm')?.addEventListener('submit',submitEmailAuth);
   $('authRecoveryForm')?.addEventListener('submit',updateRecoveredPassword);
   $('authModeToggle')?.addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
