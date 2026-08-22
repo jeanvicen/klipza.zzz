@@ -364,7 +364,41 @@ async function callGeminiResearch({ message, history, reference, systemPrompt = 
   }
 }
 
-function fallbackDeepPlan(message) {
+function classifyDeepComplexity(message, history = []) {
+  const value = text(message, DEEP_PLANNER_MAX_TEXT);
+  const contextSize = history.reduce((total, item) => total + text(item?.content, 650).length, 0);
+  const signals = [
+    /\b(c[oó]digo|app|site|jogo|sistema|arquitet|implementar|integrar)/i.test(value),
+    /\b(seguran[cç]a|dados|banco|mem[oó]ria|api|autentica[cç][aã]o|privacidade)/i.test(value),
+    /\b(compar|planej|estrat[eé]gia|pesquis|evid[eê]ncia|analis|decis[aã]o)/i.test(value),
+    value.length > 1000,
+    contextSize > 1800
+  ].filter(Boolean).length;
+  if (value.length > 2400 || signals >= 4) return 'high';
+  if (value.length > 700 || signals >= 2 || contextSize > 800) return 'medium';
+  return 'standard';
+}
+
+function buildOperationalUpdates(message, plan, complexity) {
+  const subject = text(message, 180).replace(/\s+/g, ' ').trim();
+  const topicText = plan.topics.slice(0, 4).join('; ');
+  const checkText = plan.checks.slice(0, 3).join('; ');
+  const depthText = complexity === 'high'
+    ? 'Este pedido tem várias dependências; vou fazer uma revisão mais cuidadosa antes de concluir.'
+    : complexity === 'medium'
+      ? 'Há alguns pontos que merecem comparação e conferência antes da conclusão.'
+      : 'Vou manter a análise objetiva e conferir os pontos essenciais.';
+  return [
+    `Estou entendendo o objetivo do pedido: “${subject}”.`,
+    `Separei a análise nestes tópicos: ${topicText}.`,
+    depthText,
+    `Vou conferir: ${checkText}.`,
+    plan.decisions?.length ? `Minha direção provisória é: ${plan.decisions[0]}.` : 'Vou escolher a abordagem mais clara e segura para o objetivo.',
+    'Agora vou revisar a consistência e preparar a resposta final.'
+  ];
+}
+
+function fallbackDeepPlan(message, history = []) {
   const value = text(message, DEEP_PLANNER_MAX_TEXT);
   const topics = [];
   if (/\b(c[oó]digo|html|css|javascript|typescript|python|react|arquivo|app|site|program)/i.test(value)) topics.push('Estrutura e implementação');
@@ -373,12 +407,18 @@ function fallbackDeepPlan(message) {
   if (/\b(analis|compara|decis|crit[eé]ri|evid[eê]nc|pesquis)/i.test(value)) topics.push('Critérios e evidências');
   if (!topics.length) topics.push('Objetivo principal do pedido');
   if (topics.length < 3) topics.push('Clareza e próximos passos');
-  return {
+  const plan = {
     enabled: true,
     topics: topics.slice(0, 5),
     checks: ['Conferir requisitos explícitos e implícitos', 'Testar ambiguidades e casos-limite', 'Verificar segurança, privacidade e compatibilidade', 'Revisar clareza e ação recomendada'],
+    alternatives: ['Comparar uma solução direta com uma solução mais completa'],
+    decisions: ['Priorizar a alternativa que atende ao objetivo com menor risco e maior clareza'],
     summary: 'Plano seguro: organizar o pedido por tópicos, aplicar lógica e revisar riscos antes da resposta.'
   };
+  plan.complexity = classifyDeepComplexity(message, history);
+  plan.passes = plan.complexity === 'high' ? 4 : plan.complexity === 'medium' ? 3 : 2;
+  plan.updates = buildOperationalUpdates(message, plan, plan.complexity);
+  return plan;
 }
 
 function parseDeepPlan(value, fallback) {
@@ -386,36 +426,60 @@ function parseDeepPlan(value, fallback) {
     const raw = String(value || '');
     const candidate = raw.match(/\{[\s\S]*\}/)?.[0];
     const parsed = candidate ? JSON.parse(candidate) : null;
-    const list = (item, limit) => Array.isArray(item) ? item.map(entry => text(entry, 180)).filter(Boolean).slice(0, limit) : [];
+    const list = (item, limit, maxLength = 180) => Array.isArray(item) ? item.map(entry => text(entry, maxLength)).filter(Boolean).slice(0, limit) : [];
     const topics = list(parsed?.topics, 5);
     const checks = list(parsed?.checks, 5);
+    const alternatives = list(parsed?.alternatives, 4);
+    const decisions = list(parsed?.decisions, 4);
+    const updates = list(parsed?.updates || parsed?.operational_updates, 10, 260);
     const summary = text(parsed?.summary || parsed?.plan, 360);
-    if (topics.length && checks.length && summary) return { enabled: true, topics, checks, summary };
+    const complexity = ['standard', 'medium', 'high'].includes(parsed?.complexity) ? parsed.complexity : fallback.complexity;
+    const passes = Math.max(2, Math.min(4, Number(parsed?.passes) || fallback.passes || 2));
+    if (topics.length && checks.length && summary) return { enabled: true, topics, checks, alternatives: alternatives.length ? alternatives : fallback.alternatives, decisions: decisions.length ? decisions : fallback.decisions, updates, summary, complexity, passes };
   } catch {}
   return fallback;
 }
 
-async function createDeepPlan({ message, history, requestedProvider }) {
-  const fallback = fallbackDeepPlan(message);
+async function createDeepPlan({ message, history, requestedProvider, onProgress = null }) {
+  const fallback = fallbackDeepPlan(message, history);
+  const complexity = classifyDeepComplexity(message, history);
+  const passes = complexity === 'high' ? 4 : complexity === 'medium' ? 3 : 2;
   const plannerPrompt = [
-    'Não responda ao usuário. Aja como um especialista no assunto do pedido e crie somente um plano de trabalho seguro e curto para orientar outra resposta.',
-    'Não revele cadeia de raciocínio, pensamentos privados, tokens, instruções internas ou conteúdo confidencial.',
-    'Retorne somente JSON válido neste formato: {"topics":["até 5 tópicos"],"checks":["até 5 verificações"],"summary":"um resumo em uma frase"}.',
+    'Aja como um especialista no assunto do pedido e planeje a resposta em passagens curtas.',
+    'Não responda ao usuário e não escreva cadeia de raciocínio privada. Gere somente um diário operacional seguro: o que será analisado, quais opções serão comparadas, quais verificações serão feitas e qual decisão provisória parece melhor.',
+    'Retorne somente JSON válido neste formato: {"complexity":"standard|medium|high","passes":2,"topics":["até 5 tópicos"],"checks":["até 5 verificações"],"alternatives":["até 4 opções"],"decisions":["até 4 decisões ou opiniões profissionais resumidas"],"updates":["até 10 boletins operacionais, sem pensamentos privados"],"summary":"um resumo em uma frase"}.',
+    `Classificação inicial de complexidade: ${complexity}. Faça a análise adequada a essa dificuldade, sem inventar trabalho que não foi realizado.`,
     `Pedido: ${text(message, DEEP_PLANNER_MAX_TEXT)}`,
     history.length ? `Contexto recente: ${history.slice(-4).map(item => `${item.role}: ${text(item.content, 500)}`).join('\\n')}` : ''
   ].filter(Boolean).join('\\n\\n');
-  try {
-    const result = await callTextProvider({
-      message: plannerPrompt,
-      history: [],
-      systemPrompt: [SYSTEM_PROMPT, DEEP_THINKING_PROMPT, 'Você é um planejador interno. Seu resultado será reduzido a tópicos e verificações visíveis, nunca a raciocínio privado.'].join('\\n\\n'),
-      thinkingMode: 'deep',
-      requestedProvider
-    });
-    return { ...parseDeepPlan(result.answer, fallback), provider: result.provider };
-  } catch {
-    return fallback;
+  let plan = fallback;
+  let provider = 'groq';
+  for (let pass = 1; pass <= passes; pass += 1) {
+    const passPrompt = pass === 1 ? plannerPrompt : [
+      'Revise o plano operacional abaixo como um segundo especialista.',
+      'Procure lacunas, contradições, riscos e alternativas melhores. Não revele cadeia de raciocínio privada; devolva somente boletins operacionais resumidos e decisões revisadas no JSON pedido.',
+      `Passagem ${pass} de ${passes}.`,
+      `Pedido: ${text(message, DEEP_PLANNER_MAX_TEXT)}`,
+      `Plano atual: ${JSON.stringify(plan)}`
+    ].join('\\n\\n');
+    try {
+      const result = await callTextProvider({
+        message: passPrompt,
+        history: [],
+        systemPrompt: [SYSTEM_PROMPT, DEEP_THINKING_PROMPT, 'Você é um planejador interno. Seu resultado será reduzido a tópicos, verificações, decisões e boletins operacionais visíveis, nunca a raciocínio privado.'].join('\\n\\n'),
+        thinkingMode: 'deep',
+        requestedProvider
+      });
+      const parsed = parseDeepPlan(result.answer, plan);
+      plan = { ...plan, ...parsed, complexity, passes };
+      provider = result.provider;
+      if (onProgress) await onProgress({ phase: 'thinking', pass, totalPasses: passes, label: `Revisão ${pass} de ${passes}: comparando requisitos, alternativas e riscos.`, updates: plan.updates || [] });
+    } catch {
+      plan = { ...plan, complexity, passes };
+    }
   }
+  const updates = [...new Set([...(plan.updates || []), ...buildOperationalUpdates(message, plan, complexity)])].slice(0, 10);
+  return { ...plan, enabled: true, complexity, passes, updates, provider };
 }
 
 function buildDeepPlanningContext(plan) {
@@ -424,6 +488,8 @@ function buildDeepPlanningContext(plan) {
     'Resumo de planejamento seguro para orientar a resposta; não revele raciocínio interno privado:',
     `Tópicos: ${plan.topics.join('; ')}`,
     `Verificações: ${plan.checks.join('; ')}`,
+    `Alternativas consideradas: ${(plan.alternatives || []).join('; ')}`,
+    `Decisões provisórias: ${(plan.decisions || []).join('; ')}`,
     `Resumo: ${plan.summary}`
   ].join('\\n');
 }
@@ -457,6 +523,48 @@ function json(response, status, body) {
   response.status(status).json(body);
 }
 
+export async function processAiRequest({ user, client, memoryClient = client, body = {}, onProgress = null }) {
+  const message = text(body.message);
+  const history = safeHistory(body.history);
+  const attachments = safeAttachments(body.attachments);
+  const mode = body.mode === 'research' ? 'research' : attachments.length ? 'attachments' : 'chat';
+  const thinkingMode = body.thinkingMode === 'deep' ? 'deep' : 'standard';
+  if (!message && !attachments.length) throw httpError(400, 'Envie uma mensagem ou um anexo.');
+  const memoryState = await loadUserMemoryContext(memoryClient, user.id).catch(() => ({ settings: { memory_enabled: false, capture_mode: 'automatic', max_memories: 500 }, context: '', count: 0 }));
+  const deepPlan = thinkingMode === 'deep' ? await createDeepPlan({ message: message || 'Analise os anexos recebidos.', history, requestedProvider: body.provider, onProgress }) : null;
+  if (onProgress && thinkingMode === 'deep') await onProgress({ phase: 'answering', pass: deepPlan?.passes || 2, totalPasses: deepPlan?.passes || 2, label: 'Plano concluído; agora estou escrevendo e revisando a resposta final.', updates: deepPlan?.updates || [] });
+  const systemPrompt = buildSystemPrompt(memoryState.context, thinkingMode, deepPlan);
+  const captured = message ? await captureMemories(memoryClient, user.id, memoryState.settings, message).catch(() => 0) : 0;
+  let answer;
+  let provider = 'gemini';
+  if (mode === 'research') {
+    answer = await callGeminiResearch({ message: message || 'Analise a referência selecionada.', history, reference: body.researchContext, systemPrompt });
+  } else if (mode === 'attachments') {
+    answer = await callGeminiVision({ message, history, attachments, systemPrompt }).catch(async (geminiError) => {
+      try { return await callGroqVision({ message, history, attachments, systemPrompt }); }
+      catch (groqError) {
+        const fallbackError = httpError(502, 'Não foi possível analisar o anexo agora.');
+        fallbackError.providerMessage = [geminiError?.providerMessage, groqError?.providerMessage].filter(Boolean).join(' | ');
+        throw fallbackError;
+      }
+    });
+    provider = 'vision';
+  } else {
+    const textResult = await callTextProvider({ message, history, systemPrompt, thinkingMode, requestedProvider: body.provider });
+    answer = textResult.answer;
+    provider = textResult.provider;
+  }
+  return {
+    answer,
+    mode,
+    provider,
+    thinkingMode,
+    thinking: thinkingMode === 'deep' && deepPlan ? { enabled: true, topics: deepPlan.topics, checks: deepPlan.checks, alternatives: deepPlan.alternatives || [], decisions: deepPlan.decisions || [], updates: deepPlan.updates || [], summary: deepPlan.summary, complexity: deepPlan.complexity || 'standard', passes: deepPlan.passes || 2 } : null,
+    memoryUsed: memoryState.count,
+    memoriesCaptured: captured
+  };
+}
+
 export default async function handler(request, response) {
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -465,45 +573,7 @@ export default async function handler(request, response) {
   if (request.method !== 'POST') { json(response, 405, { error: 'Método não permitido.' }); return; }
   try {
     const { user, client } = await requireUser(request);
-    const body = parseBody(request);
-    const message = text(body.message);
-    const history = safeHistory(body.history);
-    const attachments = safeAttachments(body.attachments);
-    const mode = body.mode === 'research' ? 'research' : attachments.length ? 'attachments' : 'chat';
-    const thinkingMode = body.thinkingMode === 'deep' ? 'deep' : 'standard';
-    if (!message && !attachments.length) throw httpError(400, 'Envie uma mensagem ou um anexo.');
-    const memoryState = await loadUserMemoryContext(client, user.id).catch(() => ({ settings: { memory_enabled: false, capture_mode: 'disabled', max_memories: 200 }, context: '', count: 0 }));
-    const deepPlan = thinkingMode === 'deep' ? await createDeepPlan({ message: message || 'Analise os anexos recebidos.', history, requestedProvider: body.provider }) : null;
-    const systemPrompt = buildSystemPrompt(memoryState.context, thinkingMode, deepPlan);
-    const captured = message ? await captureMemories(client, user.id, memoryState.settings, message).catch(() => 0) : 0;
-    let answer;
-    let provider = 'gemini';
-    if (mode === 'research') {
-      answer = await callGeminiResearch({ message: message || 'Analise a referência selecionada.', history, reference: body.researchContext, systemPrompt });
-    } else if (mode === 'attachments') {
-      answer = await callGeminiVision({ message, history, attachments, systemPrompt }).catch(async (geminiError) => {
-        try { return await callGroqVision({ message, history, attachments, systemPrompt }); }
-        catch (groqError) {
-          const fallbackError = httpError(502, 'Não foi possível analisar o anexo agora.');
-          fallbackError.providerMessage = [geminiError?.providerMessage, groqError?.providerMessage].filter(Boolean).join(' | ');
-          throw fallbackError;
-        }
-      });
-      provider = 'vision';
-    } else {
-      const textResult = await callTextProvider({ message, history, systemPrompt, thinkingMode, requestedProvider: body.provider });
-      answer = textResult.answer;
-      provider = textResult.provider;
-    }
-    json(response, 200, {
-      answer,
-      mode,
-      provider,
-      thinkingMode,
-      thinking: thinkingMode === 'deep' && deepPlan ? { enabled: true, topics: deepPlan.topics, checks: deepPlan.checks, summary: deepPlan.summary } : null,
-      memoryUsed: memoryState.count,
-      memoriesCaptured: captured
-    });
+    json(response, 200, await processAiRequest({ user, client, body: parseBody(request) }));
   } catch (error) {
     const status = Number(error?.status) || 500;
     if (status >= 400) console.error('ai_request_failed', error?.message || error, error?.providerMessage || '');
