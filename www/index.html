@@ -302,7 +302,8 @@ body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-
 .confirm-modal.open{display:flex;animation:primeFadeIn .18s ease}.confirm-dialog{width:min(430px,calc(100vw - 28px));background:var(--bg);color:var(--text);border:1px solid var(--line2);border-radius:18px;padding:22px;box-shadow:0 28px 80px rgba(0,0,0,.3)}.confirm-title{font-size:18px;font-weight:780}.confirm-copy{font-size:12px;line-height:1.55;color:var(--muted);margin-top:8px}.confirm-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}.confirm-btn{height:36px;padding:0 14px;border-radius:9px;border:1px solid var(--line2);font-size:11px;font-weight:750}.confirm-btn:hover{background:var(--hover)}.confirm-btn.danger{background:var(--text);color:var(--bg);border-color:var(--text)}
 @media(max-width:720px){.webklip-modal{padding:8px;align-items:flex-end}.webklip-modal-dialog{width:100%;max-height:calc(100dvh - 16px);border-radius:18px 18px 10px 10px}.webklip-modal-head{padding:16px 17px}.webklip-modal-body .webklip-view{padding:15px 14px 22px}.webklip-browser-toolbar{margin-bottom:10px}.webklip-iframe-wrap{height:calc(100dvh - 135px);min-height:360px}.webklip-browser-bar{align-items:stretch;flex-direction:column}.webklip-search-form{width:100%}.webklip-clear-search{width:100%}.webklip-grid{grid-template-columns:1fr}.confirm-modal{padding:10px;align-items:flex-end}.confirm-dialog{width:100%;border-radius:18px 18px 10px 10px;padding:19px}}
 
-.composer-wrap{padding:12px 16px 16px;flex:0 0 auto}
+  .composer-wrap{position:sticky;bottom:0;z-index:20;padding:12px 16px 16px;flex:0 0 auto;background:var(--bg)}
+
 .composer{width:min(var(--content),100%);margin:0 auto}
 .composer-box{position:relative;z-index:6;border:1px solid var(--black);border-radius:16px;background:var(--bg);box-shadow:0 2px 16px rgba(0,0,0,.05)}
 .attach-strip{display:none;padding:10px 11px;border-bottom:1px solid var(--line);gap:7px;flex-wrap:wrap}
@@ -350,7 +351,7 @@ body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-
   .attach-divider{height:1px;background:var(--line);margin:7px 4px}
   .attach-section-label{font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:10px 8px 6px}
   @media(max-width:720px){body.attach-menu-open{overflow:hidden}body.attach-menu-open .composer-box{z-index:75}body.attach-menu-open .attach-menu-scrim{display:block;position:fixed;inset:0;background:rgba(0,0,0,.32);z-index:70}.attach-menu{position:fixed;left:0;right:0;bottom:0;width:100%;max-height:min(86dvh,760px);padding:10px 14px calc(16px + env(safe-area-inset-bottom));border-radius:22px 22px 0 0;box-shadow:0 -20px 60px rgba(0,0,0,.24)}.attach-menu.open{animation:menuSheetMobile .22s cubic-bezier(.2,.8,.2,1)}.attach-menu-head{padding-left:2px;padding-right:2px}.attach-menu-title{font-size:21px}.attach-feature-grid{padding-top:15px}.attach-feature-card{min-height:128px;padding:16px 14px}.attach-option{min-height:58px;padding:11px 8px}.attach-option-icon{width:35px;height:35px}@keyframes menuSheetMobile{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}}
-  @media(max-width:720px){.energy-banner{align-items:flex-start;margin:0 0 9px;width:100%;padding:10px}.energy-banner-copy{flex:1}.energy-prime{height:32px;padding:0 10px;font-size:10px}}
+  @media(max-width:720px){.energy-banner{align-items:flex-start;margin:0 0 9px;width:100%;padding:10px}.energy-banner-copy{flex:1}.energy-prime{height:32px;padding:0 10px;font-size:10px}.composer-wrap{position:sticky}}
   @media(prefers-reduced-motion:reduce){.attach-menu,.attach-feature-card{animation:none!important;transition:none!important}}
 .composer-row{display:flex;align-items:flex-end;gap:7px;padding:7px}
 .plus{width:37px;height:37px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;border:1px solid transparent;transition:.15s}.plus:hover{background:var(--hover);border-color:var(--line)}
@@ -452,7 +453,9 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .energy-card{margin:12px 14px 10px;padding:13px;border:1px solid #e7e7e7;border-radius:14px;background:#fff;transition:opacity .2s,transform .2s}
 .energy-card.energy-empty{border-color:#111;box-shadow:0 8px 22px rgba(0,0,0,.05)}
 .energy-card.energy-empty .energy-meta{color:#111;font-weight:700}
-.energy-banner{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 auto 10px;width:min(var(--content),100%);padding:11px 13px;border:1px solid #111;border-radius:13px;background:var(--panel);box-shadow:0 10px 26px rgba(0,0,0,.06)}
+  .energy-banner{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 auto 10px;width:min(var(--content),100%);padding:11px 13px;border:1px solid #111;border-radius:13px;background:var(--panel);box-shadow:0 10px 26px rgba(0,0,0,.06)}
+  .composer.quota-locked .energy-banner{display:flex}
+
 .energy-banner.show{display:flex;animation:energyBannerIn .22s ease}
 .energy-banner-copy{min-width:0}
 .energy-banner-title{font-size:12px;font-weight:750;color:var(--text)}
@@ -1281,12 +1284,14 @@ body.prime-modal-open{overflow:hidden}
   function applyServerQuota(value){
     const row=value&&typeof value==='object'?value:{};
     const resetAt=Number(row.resetAt)||Date.parse(row.resetAt||'')||Date.now()+CYCLE_MS;
-    const nextQuota={...(state.quota||{}),energy:Math.max(0,Math.min(ENERGY_MAX,Number(row.energy)||0)),resetAt};
+    const energy=Math.max(0,Math.min(ENERGY_MAX,Number(row.energy)||0));
+    const tokenBalance=Math.max(0,Number(row.tokenBalance)||0);
+    const nextQuota={...(state.quota||{}),energy,resetAt};
     const attachmentValue=row.attachmentsUsed??row.attachUsed;
     if(attachmentValue!==undefined&&attachmentValue!==null)nextQuota.attachUsed=Math.max(0,Math.min(FREE_ATTACH_LIMIT,Number(attachmentValue)||0));
     nextQuota.synced=true;
     state.quota=nextQuota;
-    state.wallet={...(state.wallet||{}),tokenBalance:Math.max(0,Number(row.tokenBalance)||0),primeStatus:row.primeStatus||state.wallet?.primeStatus||'inactive'};
+    state.wallet={...(state.wallet||{}),tokenBalance,primeStatus:row.primeStatus||state.wallet?.primeStatus||'inactive'};
     return state.quota;
   }
   let lastServerQuotaSync=0;
@@ -1379,6 +1384,7 @@ body.prime-modal-open{overflow:hidden}
   }
   function applyQuotaLock(){
     const locked=quotaIsExhausted();
+    document.querySelector('.composer')?.classList.toggle('quota-locked',locked);
     const input=document.getElementById('prompt');
     const sendButton=document.getElementById('sendBtn');
     const plusButton=document.getElementById('plusBtn');
@@ -1417,9 +1423,10 @@ body.prime-modal-open{overflow:hidden}
     const text=document.getElementById('energyEmptyText');
     if(!banner)return;
     ensureQuota();
-    if(!quotaReady()){banner.classList.remove('show');if(text)text.textContent='Sincronizando o saldo oficial desta conta…';return;}
+    if(!quotaReady()){banner.classList.remove('show');banner.setAttribute('aria-hidden','true');if(text)text.textContent='Sincronizando o saldo oficial desta conta…';return;}
     const empty=quotaIsExhausted();
     banner.classList.toggle('show',empty);
+    banner.setAttribute('aria-hidden',String(!empty));
     if(empty&&text)text.textContent=quotaResetMessage();
   }
   function paintEnergyValue(value){
@@ -2233,11 +2240,12 @@ body.prime-modal-open{overflow:hidden}
           <div><strong>Mensagens anônimas</strong> · esta conversa não será salva no histórico. Anexos ficam desativados neste modo.</div>
           <button class="anonymous-exit" type="button" onclick="window.K.toggleAnonymous(false)">Sair</button>
         </div>
-        <div class="energy-banner" id="energyEmptyBanner" role="status" aria-live="polite">
+        <div class="energy-banner" id="energyEmptyBanner" role="status" aria-live="polite" aria-hidden="true">
           <div class="energy-banner-copy">
             <div class="energy-banner-title">Limite de uso atingido</div>
             <div class="energy-banner-sub" id="energyEmptyText">Sua cota será resetada no próximo ciclo.</div>
           </div>
+          <button class="energy-prime" type="button" onclick="window.K.openPrimeModal('prime')">Mude para Klipza.Prime</button>
         </div>
         <div class="voice-panel" id="voicePanel" aria-live="polite" aria-hidden="true">
           <div class="voice-orb" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="3" width="8" height="12" rx="4"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg></div>
