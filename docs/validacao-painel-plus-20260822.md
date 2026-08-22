@@ -39,3 +39,11 @@ O botão expõe `aria-expanded` e `aria-controls`. A abertura move o foco para o
 | Smoke público | `/` retornou 200; `POST /api/ai` sem bearer retornou 401; `/api/memory` sem bearer retornou 401. |
 
 A publicação foi enviada para `main` e o conteúdo público já contém `attach-feature-grid` e o título `Adicionar ao chat`. Nenhuma migração Supabase foi aplicada como parte desta alteração visual.
+
+## Correção complementar do mobile
+
+Na revisão posterior, foi localizado um segundo bloco responsivo que sobrescrevia a folha com `bottom:58px`, largura automática, altura menor e cantos inferiores arredondados. Essa regra foi removida. A folha mobile agora permanece fixa em `bottom:0`, ocupa toda a largura, adapta a altura com `max-height:min(86dvh,760px)`, mantém rolagem interna e usa arredondamento somente no topo, ficando visualmente grudada à base como uma folha que sobe de baixo para cima.
+
+A seleção de anexos fecha o painel antes de abrir o seletor ou validar a quota. Pesquisa na web também fecha o painel antes da navegação; Pensamento profundo e Modo Especialista preservam o fechamento já existente. O botão `+` continua reabrindo o painel no chat, enquanto o comportamento desktop permanece absoluto acima do compositor.
+
+Essa correção complementar foi validada no commit posterior ao registro original, sem consumo de IA, energia, tokens ou anexos.

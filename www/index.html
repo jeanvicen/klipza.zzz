@@ -410,7 +410,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   .artifact-grid{grid-template-columns:1fr 1fr}
 }
 @media (max-width:720px){
-  .attach-menu{left:0;right:0;bottom:58px;width:auto;max-height:min(70dvh,560px);padding:8px 10px 12px;border-radius:20px 20px 15px 15px}
+  /* O posicionamento mobile da folha fica centralizado no bloco responsivo do painel acima. */
   .attach-menu-handle{display:block}
   .attach-menu::after{display:none}
   .attach-menu-head{padding:7px 8px 10px}
@@ -2090,7 +2090,7 @@ body.prime-modal-open{overflow:hidden}
     if(view==='settings'){ window.__klipzaSettingsMobileDetail=false; renderSettingsPage(); }
     if(window.innerWidth<=720) $('app').classList.add('sidebar-collapsed');
   }
-  function openWebKlipModal(){setView('webklip');}
+  function openWebKlipModal(){closeAttach();setView('webklip');}
   function closeWebKlipModal(restore=true){document.body.classList.remove('webklip-modal-open');if(restore&&currentView==='webklip'){const next=webKlipReturnView==='webklip'?'chat':webKlipReturnView;currentView=next;document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='chat')renderChat();if(next==='artifacts')renderArtifactsPage();if(next==='settings'){window.__klipzaSettingsMobileDetail=false;renderSettingsPage();}if(state.user?.id)void syncServerQuota(true);}}
   function toggleSidebar(){ $('app').classList.toggle('sidebar-collapsed'); }
 
@@ -3274,13 +3274,13 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       createArtifactFromCode(code,name);
       return;
     }
+    closeAttach();
     if(state.user?.id){
       const synced=await syncServerQuota(true);
       if(!synced){showResponseStatus('Não foi possível sincronizar o limite de anexos da sua conta. Tente novamente.');return;}
     }
     ensureQuota();
     if(!primeActive() && state.quota.attachUsed>=FREE_ATTACH_LIMIT){ alert('Você já usou os 3 anexos deste ciclo de 24 horas. Assine o Klipza.Prime para anexos ilimitados.'); openPrimeModal('prime'); return; }
-    closeAttach();
     const input=kind==='camera'?$('cameraInput'):kind==='image'?$('imageInput'):$('fileInput');
     input.value='';
     input.multiple = kind!=='camera';
