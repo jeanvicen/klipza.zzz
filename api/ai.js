@@ -383,6 +383,7 @@ function buildOperationalUpdates(message, plan, complexity) {
   const subject = text(message, 180).replace(/\s+/g, ' ').trim();
   const topicText = plan.topics.slice(0, 4).join('; ');
   const checkText = plan.checks.slice(0, 3).join('; ');
+  const solutionText = (plan.solutions || []).slice(0, 3).join('; ');
   const route = /\b(c[oó]digo|html|css|javascript|typescript|python|react|arquivo|app|site|program)/i.test(subject)
     ? 'estrutura e implementação'
     : /\b(compar|melhor|op[cç][aã]o|alternativ|decis)/i.test(subject)
@@ -399,6 +400,7 @@ function buildOperationalUpdates(message, plan, complexity) {
     `Pedido identificado: “${subject}”. O resultado precisa respeitar: ${topicText}.`,
     depthText,
     `Vou validar primeiro estes pontos: ${checkText}.`,
+    solutionText ? `Agora vou montar as soluções aplicáveis: ${solutionText}.` : 'Agora vou montar as soluções aplicáveis e eliminar as que não atendem aos requisitos.',
     plan.alternatives?.length ? `Também vou comparar esta alternativa: ${plan.alternatives[0]}.` : 'Se houver outra rota viável, vou compará-la antes de escolher.',
     plan.decisions?.length ? `Minha escolha provisória será: ${plan.decisions[0]}.` : 'Depois da validação, vou escolher a rota mais clara e segura.',
     `Revisão final: vou conferir se a solução responde exatamente a “${subject}”.`
@@ -419,6 +421,7 @@ function fallbackDeepPlan(message, history = []) {
     topics: topics.slice(0, 5),
     checks: ['Conferir requisitos explícitos e implícitos', 'Testar ambiguidades e casos-limite', 'Verificar segurança, privacidade e compatibilidade', 'Revisar clareza e ação recomendada'],
     alternatives: ['Comparar uma solução direta com uma solução mais completa'],
+    solutions: ['Definir a rota mínima viável', 'Desenhar uma rota mais completa para os casos-limite', 'Escolher a solução que equilibra segurança, clareza e manutenção'],
     decisions: ['Priorizar a alternativa que atende ao objetivo com menor risco e maior clareza'],
     summary: 'Plano seguro: organizar o pedido por tópicos, aplicar lógica e revisar riscos antes da resposta.'
   };
@@ -437,12 +440,13 @@ function parseDeepPlan(value, fallback) {
     const topics = list(parsed?.topics, 5);
     const checks = list(parsed?.checks, 5);
     const alternatives = list(parsed?.alternatives, 4);
+    const solutions = list(parsed?.solutions || parsed?.solution_paths || parsed?.routes, 4, 260);
     const decisions = list(parsed?.decisions, 4);
     const updates = list(parsed?.updates || parsed?.operational_updates, 10, 260);
     const summary = text(parsed?.summary || parsed?.plan, 360);
     const complexity = ['standard', 'medium', 'high'].includes(parsed?.complexity) ? parsed.complexity : fallback.complexity;
     const passes = Math.max(2, Math.min(4, Number(parsed?.passes) || fallback.passes || 2));
-    if (topics.length && checks.length && summary) return { enabled: true, topics, checks, alternatives: alternatives.length ? alternatives : fallback.alternatives, decisions: decisions.length ? decisions : fallback.decisions, updates, summary, complexity, passes };
+    if (topics.length && checks.length && summary) return { enabled: true, topics, checks, alternatives: alternatives.length ? alternatives : fallback.alternatives, solutions: solutions.length ? solutions : fallback.solutions, decisions: decisions.length ? decisions : fallback.decisions, updates, summary, complexity, passes };
   } catch {}
   return fallback;
 }
@@ -454,7 +458,7 @@ async function createDeepPlan({ message, history, requestedProvider, onProgress 
   const plannerPrompt = [
     'Aja como um especialista no assunto do pedido e planeje a resposta em passagens curtas.',
     'Não responda ao usuário e não escreva cadeia de raciocínio privada. Gere somente um diário operacional seguro: o que será analisado, quais opções serão comparadas, quais verificações serão feitas e qual decisão provisória parece melhor.',
-    'Retorne somente JSON válido neste formato: {"complexity":"standard|medium|high","passes":2,"topics":["até 5 tópicos"],"checks":["até 5 verificações"],"alternatives":["até 4 opções"],"decisions":["até 4 decisões ou opiniões profissionais resumidas"],"updates":["até 10 boletins operacionais, sem pensamentos privados"],"summary":"um resumo em uma frase"}.',
+    'Retorne somente JSON válido neste formato: {"complexity":"standard|medium|high","passes":2,"topics":["até 5 tópicos"],"checks":["até 5 verificações"],"alternatives":["até 4 opções"],"solutions":["até 4 caminhos de solução específicos para este pedido"],"decisions":["até 4 decisões ou opiniões profissionais resumidas"],"updates":["até 10 boletins operacionais, sem pensamentos privados"],"summary":"um resumo em uma frase"}.',
     `Classificação inicial de complexidade: ${complexity}. Faça a análise adequada a essa dificuldade, sem inventar trabalho que não foi realizado.`,
     `Pedido: ${text(message, DEEP_PLANNER_MAX_TEXT)}`,
     history.length ? `Contexto recente: ${history.slice(-4).map(item => `${item.role}: ${text(item.content, 500)}`).join('\\n')}` : ''
@@ -500,6 +504,7 @@ function buildDeepPlanningContext(plan) {
     `Tópicos: ${plan.topics.join('; ')}`,
     `Verificações: ${plan.checks.join('; ')}`,
     `Alternativas consideradas: ${(plan.alternatives || []).join('; ')}`,
+    `Soluções possíveis: ${(plan.solutions || []).join('; ')}`,
     `Decisões provisórias: ${(plan.decisions || []).join('; ')}`,
     `Resumo: ${plan.summary}`
   ].join('\\n');
@@ -570,7 +575,7 @@ export async function processAiRequest({ user, client, memoryClient = client, bo
     mode,
     provider,
     thinkingMode,
-    thinking: thinkingMode === 'deep' && deepPlan ? { enabled: true, topics: deepPlan.topics, checks: deepPlan.checks, alternatives: deepPlan.alternatives || [], decisions: deepPlan.decisions || [], updates: deepPlan.updates || [], summary: deepPlan.summary, complexity: deepPlan.complexity || 'standard', passes: deepPlan.passes || 2 } : null,
+    thinking: thinkingMode === 'deep' && deepPlan ? { enabled: true, topics: deepPlan.topics, checks: deepPlan.checks, alternatives: deepPlan.alternatives || [], solutions: deepPlan.solutions || [], decisions: deepPlan.decisions || [], updates: deepPlan.updates || [], summary: deepPlan.summary, complexity: deepPlan.complexity || 'standard', passes: deepPlan.passes || 2 } : null,
     memoryUsed: memoryState.count,
     memoriesCaptured: captured
   };

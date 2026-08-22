@@ -154,7 +154,7 @@ img{max-width:100%}
 .topbar-sub{font-size:11px;color:#999}
 .topbar-right{display:flex;gap:5px;align-items:center}
 
-.messages{flex:1;overflow:auto;padding:clamp(22px,3vw,38px) 0 18px;scroll-behavior:smooth}.jump-to-latest{display:none;position:absolute;right:clamp(16px,3vw,34px);bottom:92px;z-index:5;width:34px;height:34px;border:1px solid var(--line2);border-radius:50%;background:var(--bg);color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);font-size:18px;line-height:1;cursor:pointer}.jump-to-latest.show{display:grid;place-items:center}.jump-to-latest:hover{background:#000;color:#fff;border-color:#000}
+.messages{flex:1;overflow:auto;padding:clamp(22px,3vw,38px) 0 18px;scroll-behavior:auto;overscroll-behavior:contain}.jump-to-latest{display:none;position:absolute;right:clamp(16px,3vw,34px);bottom:92px;z-index:5;width:34px;height:34px;border:1px solid var(--line2);border-radius:50%;background:var(--bg);color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.12);font-size:18px;line-height:1;cursor:pointer}.jump-to-latest.show{display:grid;place-items:center}.jump-to-latest:hover{background:#000;color:#fff;border-color:#000}
 .msg-width{width:min(var(--content),calc(100% - 38px));margin:0 auto}
 .msg{display:flex;gap:12px;margin:0 0 30px}
 .msg:last-child{margin-bottom:4px}
@@ -1050,6 +1050,18 @@ body.prime-modal-open{overflow:hidden}
   });
 
   function currentChat(){ return anonymousMode ? anonymousChat : state.chats[activeChatId]; }
+  function responseTargetChat(){ return (responseState.chatId ? state.chats?.[responseState.chatId] : null) || responseState.chatRef || currentChat(); }
+  function responseOwnsActiveChat(){
+    const targetId=anonymousMode?'anonymous':responseState.chatId;
+    const openId=anonymousMode?'anonymous':activeChatId;
+    return !!responseState.active && !!targetId && targetId===openId && currentView==='chat';
+  }
+  function foregroundPendingForChat(chatId){ return !!foregroundResponse && !foregroundResponse.promoted && responseState.active && foregroundResponse.chatId===chatId; }
+  function renderForegroundResponseView(){
+    if(!responseOwnsActiveChat())return;
+    if(responseState.deepThinking)ensureThinkingRow(responseState.deepPlan,true,responseState.deepMessage,responseState.deepStepIndex);
+    if(responseState.partial)appendStreamingMessage(responseState.partial);
+  }
   function persistIfNeeded(){ if(!anonymousMode) save(); }
 
   function loadState(){
@@ -1848,8 +1860,9 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const rows=ids.map(id=>{
       const c=state.chats[id];
       const pending=document.hidden?backgroundJobForChat(id):null;
+      const foreground=foregroundPendingForChat(id);
       return `<div class="chat-row ${id===activeChatId?'active':''}" data-chat-id="${id}">
-        <div class="chat-title" onclick="window.K.openChat('${id}')">${esc(c.title)}${pending?'<span class="chat-pending-dot" title="Klipza está respondendo"></span>':''}</div>
+        <div class="chat-title" onclick="window.K.openChat('${id}')">${esc(c.title)}${pending||foreground?'<span class="chat-pending-dot" title="Klipza está respondendo nesta conversa"></span>':''}</div>
         <div class="row-actions">
           <button class="row-action" title="Renomear" onclick="event.stopPropagation();window.K.renameChat('${id}')">✎</button>
           <button class="row-action" title="Apagar" onclick="event.stopPropagation();window.K.deleteChat('${id}')">×</button>
@@ -1951,9 +1964,9 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         </div>
         <div class="composer-note">Klipza.IA pode cometer erros. Verifique informações importantes.</div>
       </div></section>`;
-    bindComposer(); renderMessages(); renderBackgroundResponseBanner();
+    bindComposer(); renderMessages(); renderForegroundResponseView(); renderBackgroundResponseBanner(); setResponseUI(responseState.active && responseOwnsActiveChat(),true);
   }
-  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0};
+  let responseState={active:false,timer:null,progressTimer:null,stopped:false,codeRequest:false,deepThinking:false,deepPlan:null,deepMessage:'',deepStepIndex:0,deepStartedAt:0,deepComplexity:'standard',regenerateCount:0,chatId:null,chatRef:null,messageId:null,partial:'',manualScrollLock:false};
   let foregroundResponse=null;
   let foregroundPromotionPromise=null;
   const messageId=()=>`msg_${Date.now().toString(36)}_${Math.random().toString(36).slice(2,9)}`;
@@ -1970,13 +1983,16 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   }
   function deepOperationText(index,message,plan){
     const topics=deepThinkingList(plan?.topics,'os tópicos relevantes');
+    const solutions=deepThinkingList(plan?.solutions,'os caminhos de solução possíveis',4);
+    const alternatives=deepThinkingList(plan?.alternatives,'uma abordagem direta e uma abordagem mais completa',3);
+    const decisions=deepThinkingList(plan?.decisions,'a direção que melhor equilibra clareza e segurança',3);
     const subject=String(message||'o pedido').replace(/\s+/g,' ').trim().slice(0,90);
     if(index===0)return `Vou entender o objetivo: “${subject}${subject.length>=90?'…':''}”.`;
     if(index===1)return `Vou separar os tópicos: ${topics.slice(0,2).join(' e ')}.`;
     if(index===2)return 'Vou conferir a lógica, os riscos e os pontos que podem gerar erro.';
-    if(index===3)return 'Vou comparar as opções e organizar a resposta de forma clara.';
-    if(index===4)return 'Vou revisar o resultado e conferir se ele atende ao que foi pedido.';
-    return 'Resultado pronto: vou entregar a resposta organizada agora.';
+    if(index===3)return `Agora vou rascunhar as soluções possíveis: ${solutions.slice(0,2).join(' · ')}.`;
+    if(index===4)return `Vou comparar estas rotas: ${alternatives.slice(0,2).join(' · ')}.`;
+    return `Depois da revisão, a direção mais adequada parece ser: ${decisions[0]}.`;
   }
   function thinkingMarkup(plan=null,active=true,message=responseState.deepMessage,index=responseState.deepStepIndex,durationMs=0){
     const topics=deepThinkingList(plan?.topics,'Objetivo principal do pedido');
@@ -1985,11 +2001,13 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const closedFallback=plan?.summary?`Análise concluída: ${String(plan.summary).trim()}`:topics[0]?`Análise concluída com foco em ${topics[0]}.`:'Análise concluída após conferir os pontos principais.';
     const updates=deepThinkingList(sourceUpdates,active?deepOperationText(index,message,plan):closedFallback,8);
     const alternatives=deepThinkingList(plan?.alternatives,'Comparar a solução direta com uma alternativa mais completa',4);
+    const solutions=deepThinkingList(plan?.solutions,'Definir uma rota mínima e uma rota mais completa para os casos-limite',4);
     const decisions=deepThinkingList(plan?.decisions,'Escolher a abordagem mais clara e segura',4);
     const summary=plan?.summary?String(plan.summary).trim():'Vou organizar o pedido, conferir os pontos importantes e revisar o resultado antes de responder.';
     const operation=updates[Math.min(index,updates.length-1)]||deepOperationText(index,message,plan);
     const dialogueSource=[...updates];
     const dialogueText=dialogueSource.join(' ').toLowerCase();
+    if(!/soluç|caminho|rota|alternativ|opç[aã]o/.test(dialogueText))dialogueSource.push(`Vou montar as soluções possíveis, começando por: ${solutions[0]}.`);
     if(!/rota|alternativ|opç[aã]o|caminho/.test(dialogueText))dialogueSource.push(`Vou comparar as rotas possíveis, começando por: ${alternatives[0]}.`);
     if(!/valid|confer|chec|risco|compatib/.test(dialogueText))dialogueSource.push(`Antes de decidir, vou verificar: ${checks[0]}.`);
     if(!/decis|direção|melhor|escolh/.test(dialogueText))dialogueSource.push(`A direção provisória é: ${decisions[0]}.`);
@@ -1998,7 +2016,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const complexity=plan?.complexity==='high'?'análise extensa':plan?.complexity==='medium'?'análise detalhada':'análise objetiva';
     const passes=Math.max(2,Math.min(4,Number(plan?.passes)||2));
     const meta=active?'agora':durationMs?`${Math.max(1,Math.round(durationMs/1000))}s de análise`:'resumo';
-    return `<details class="msg-thinking" ${active?'open':''}><summary><span class="msg-thinking-chevron">›</span><span class="msg-thinking-title">Pensamento profundo</span><span class="msg-thinking-meta">${esc(meta)}</span></summary>${active?`<div class="msg-thinking-live"><span class="msg-thinking-live-dot"></span><span>${esc(operation)}</span></div>`:''}<div class="msg-thinking-body"><div class="msg-thinking-journal"><strong>Conversa da análise</strong><div class="msg-thinking-pass">${esc(complexity)} · ${passes} passagens</div><div class="msg-thinking-dialogue">${dialogue.map((item,itemIndex)=>`<div class="msg-thinking-turn ${active&&itemIndex===Math.min(index,dialogue.length-1)?'active':''}"><span class="msg-thinking-turn-dot"></span><div class="msg-thinking-turn-copy"><span class="msg-thinking-turn-speaker">${esc(dialogueLabel(item,itemIndex))}</span><span class="msg-thinking-turn-text">${esc(item)}</span></div></div>`).join('')}</div></div><details class="msg-thinking-extra"><summary>Ver detalhes da análise</summary><div class="msg-thinking-extra-body"><div><strong>O que foi considerado</strong><ul>${topics.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>O que foi conferido</strong><ul>${checks.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Alternativas avaliadas</strong><ul>${alternatives.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Minha direção provisória</strong><ul>${decisions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div></div></details><div><strong>Resumo</strong><div class="msg-thinking-summary">${esc(summary)}</div></div><div class="msg-thinking-note">Resumo operacional do processo; não exibe pensamentos privados completos.</div></div></details>`;
+    return `<details class="msg-thinking" ${active?'open':''}><summary><span class="msg-thinking-chevron">›</span><span class="msg-thinking-title">Pensamento profundo</span><span class="msg-thinking-meta">${esc(meta)}</span></summary>${active?`<div class="msg-thinking-live"><span class="msg-thinking-live-dot"></span><span>${esc(operation)}</span></div>`:''}<div class="msg-thinking-body"><div class="msg-thinking-journal"><strong>Conversa da análise</strong><div class="msg-thinking-pass">${esc(complexity)} · ${passes} passagens</div><div class="msg-thinking-dialogue">${dialogue.map((item,itemIndex)=>`<div class="msg-thinking-turn ${active&&itemIndex===Math.min(index,dialogue.length-1)?'active':''}"><span class="msg-thinking-turn-dot"></span><div class="msg-thinking-turn-copy"><span class="msg-thinking-turn-speaker">${esc(dialogueLabel(item,itemIndex))}</span><span class="msg-thinking-turn-text">${esc(item)}</span></div></div>`).join('')}</div></div><details class="msg-thinking-extra"><summary>Ver detalhes da análise</summary><div class="msg-thinking-extra-body"><div><strong>O que foi considerado</strong><ul>${topics.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>O que foi conferido</strong><ul>${checks.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Soluções que estou avaliando</strong><ul>${solutions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Alternativas avaliadas</strong><ul>${alternatives.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div><div><strong>Minha direção provisória</strong><ul>${decisions.map(item=>`<li>${esc(item)}</li>`).join('')}</ul></div></div></details><div><strong>Resumo</strong><div class="msg-thinking-summary">${esc(summary)}</div></div><div class="msg-thinking-note">Resumo operacional do processo; não exibe pensamentos privados completos.</div></div></details>`;
   }
   function deepPacingFor(message='',history=[]){
     const complexity=localDeepComplexity(message,history);
@@ -2010,22 +2028,30 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   function updateJumpToLatest(){
     const box=$('messages'),button=$('jumpToLatest');
     if(!box||!button)return;
-    const show=responseState.active&&!messagesNearBottom(box);
+    const show=responseOwnsActiveChat()&&!messagesNearBottom(box);
     button.classList.toggle('show',show);
     button.setAttribute('aria-hidden',String(!show));
   }
   function jumpToLatest(){
     const box=$('messages');if(!box)return;
+    responseState.manualScrollLock=false;
     box.scrollTo({top:box.scrollHeight,behavior:'smooth'});
-    setTimeout(updateJumpToLatest,240);
+    setTimeout(()=>{if(box.isConnected){box.scrollTop=box.scrollHeight;updateJumpToLatest();}},420);
   }
   function bindMessagesScroll(){
     const box=$('messages');if(!box||box.dataset.scrollBound)return;
-    box.dataset.scrollBound='1';box.addEventListener('scroll',updateJumpToLatest,{passive:true});
+    box.dataset.scrollBound='1';
+    box.addEventListener('scroll',()=>{
+      if(responseOwnsActiveChat()&&!messagesNearBottom(box))responseState.manualScrollLock=true;
+      if(messagesNearBottom(box))responseState.manualScrollLock=false;
+      updateJumpToLatest();
+    },{passive:true});
+    box.addEventListener('wheel',event=>{if(responseOwnsActiveChat()&&event.deltaY<0)responseState.manualScrollLock=true;},{passive:true});
+    box.addEventListener('touchmove',()=>{if(responseOwnsActiveChat()&&!messagesNearBottom(box))responseState.manualScrollLock=true;},{passive:true});
   }
   function ensureThinkingRow(plan=null,active=true,message=responseState.deepMessage,index=responseState.deepStepIndex,durationMs=0){
     const box=$('messages');const wrap=box?.querySelector('.msg-width');if(!wrap)return null;
-    const follow=messagesNearBottom(box);
+    const follow=!responseState.manualScrollLock&&messagesNearBottom(box);
     const previousTop=box.scrollTop;
     let row=wrap.querySelector('.msg.ai.thinking-row,.msg.ai.streaming');
     if(!row){row=document.createElement('div');row.className='msg ai thinking-row';row.innerHTML='<div class="msg-avatar">K</div><div class="msg-content"><div class="msg-label">Klipza</div></div>';wrap.appendChild(row);}
@@ -2035,13 +2061,14 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     updateJumpToLatest();return row;
   }
   function renderDeepThinkingProgress(step='',plan=null,message=responseState.deepMessage,index=responseState.deepStepIndex){
+    if(!responseOwnsActiveChat())return;
     const el=$('responseStatus');if(el){el.classList.remove('show','progress-status');el.innerHTML='';}
     ensureThinkingRow(plan,true,message,index);
   }
   function toggleThinkingDetails(){
     const details=$('messages')?.querySelector('.msg-thinking');if(details)details.open=!details.open;
   }
-  function startResponseProgress(message=''){
+  function startResponseProgress(message='',targetChatId=responseState.chatId){
     const el=$('responseStatus');if(!el)return;
     clearInterval(responseState.progressTimer);
     responseState.codeRequest=true;
@@ -2050,13 +2077,13 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     responseState.deepMessage=String(message||'');
     responseState.deepStepIndex=0;
     responseState.deepStartedAt=Date.now();
-    const pacing=responseState.deepThinking?deepPacingFor(responseState.deepMessage,currentChat()?.messages||[]):{complexity:'standard',steps:4,interval:1050,minimumMs:0};
+    const pacing=responseState.deepThinking?deepPacingFor(responseState.deepMessage,state.chats?.[targetChatId]?.messages||[]):{complexity:'standard',steps:4,interval:1050,minimumMs:0};
     responseState.deepComplexity=pacing.complexity;
     el.classList.add('show','progress-status');
     const steps=responseState.deepThinking?deepLiveSteps(responseState.deepMessage,pacing.complexity).slice(0,pacing.steps):['Analisando o pedido…','Estruturando a solução…','Verificando detalhes do código…','Preparando a resposta…'];
-    const render=()=>{if(responseState.deepThinking)renderDeepThinkingProgress('',responseState.deepPlan,responseState.deepMessage,responseState.deepStepIndex);else el.innerHTML=`<div class="response-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Preparando sua resposta</span><span class="response-progress-step">${steps[responseState.deepStepIndex]}</span></div></div>`;};
+    const render=()=>{if(responseState.deepThinking){if(responseOwnsActiveChat())renderDeepThinkingProgress('',responseState.deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else if(responseOwnsActiveChat())el.innerHTML=`<div class="response-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Preparando sua resposta</span><span class="response-progress-step">${steps[responseState.deepStepIndex]}</span></div></div>`;};
     render();
-    responseState.progressTimer=setInterval(()=>{responseState.deepStepIndex=(responseState.deepStepIndex+1)%steps.length;render();},pacing.interval);
+    responseState.progressTimer=setInterval(()=>{if(responseState.deepStepIndex<steps.length-1){responseState.deepStepIndex+=1;render();}else{clearInterval(responseState.progressTimer);responseState.progressTimer=null;}},pacing.interval);
   }
   function stopResponseProgress(){
     clearInterval(responseState.progressTimer);responseState.progressTimer=null;responseState.codeRequest=false;responseState.deepThinking=false;responseState.deepPlan=null;responseState.deepMessage='';responseState.deepStepIndex=0;responseState.deepStartedAt=0;responseState.deepComplexity='standard';
@@ -2069,8 +2096,8 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     input.addEventListener('input',()=>{input.style.height='auto';input.style.height=Math.min(180,input.scrollHeight)+'px';send.disabled=responseState.active || (!input.value.trim()&&!attached.length);});
     input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(!responseState.active && !send.disabled)window.K.send()}});
   }
-  function setResponseUI(active){
-    responseState.active=active;
+  function setResponseUI(active,preserveResponseState=false){
+    if(!preserveResponseState)responseState.active=active;
     const send=$('sendBtn'), stop=$('stopBtn'), mic=$('micBtn');
     if(send) send.style.display=active?'none':'flex';
     if(stop) stop.style.display=active?'flex':'none';
@@ -2087,7 +2114,9 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     el.innerHTML=text?`<span>${emphasis?'<strong>'+esc(text)+'</strong>':esc(text)}</span>`:'';
   }
   function appendStreamingMessage(content){
-    const box=$('messages'); const chat=currentChat();
+    responseState.partial=String(content||'');
+    if(!responseOwnsActiveChat())return;
+    const box=$('messages'); const chat=responseTargetChat();
     const wrap=box.querySelector('.msg-width');
     if(!wrap){renderMessages();return;}
     let row=wrap.querySelector('.msg.ai.thinking-row,.msg.ai.streaming');
@@ -2097,27 +2126,35 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       wrap.appendChild(row);
     }else row.classList.add('streaming');
     const stream=row.querySelector('.stream-content')||(()=>{const node=document.createElement('div');node.className='stream-content';row.querySelector('.msg-content')?.appendChild(node);return node;})();
-    const follow=messagesNearBottom(box);
+    const follow=!responseState.manualScrollLock&&messagesNearBottom(box);
     const previousTop=box.scrollTop;
     stream.innerHTML=formatMessage(content);
-    if(follow)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
+    if(follow&&!responseState.manualScrollLock)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
     updateJumpToLatest();
   }
   function stopResponse(){
     if(!responseState.active)return;
     const stoppedPlan=responseState.deepPlan;const stoppedDeep=responseState.deepThinking;const stoppedMessage=responseState.deepMessage;const stoppedDuration=stoppedDeep?Math.max(0,Date.now()-(responseState.deepStartedAt||Date.now())):0;
+    const chat=responseTargetChat();
+    const wasActiveChat=responseOwnsActiveChat();
+    const row=wasActiveChat?$('messages')?.querySelector('.msg.ai.streaming,.msg.ai.thinking-row'):null;
+    const text=responseState.partial||row?.querySelector('.stream-content')?.textContent?.trim()||'';
     foregroundResponse=null;
     clearInterval(responseState.timer); responseState.timer=null; stopResponseProgress(); responseState.active=false; responseState.stopped=true;
-    const row=$('messages')?.querySelector('.msg.ai.streaming,.msg.ai.thinking-row');
-    if(row){row.classList.remove('streaming'); const text=row.querySelector('.stream-content')?.textContent?.trim()||''; if(text){const chat=currentChat();         const thinking=stoppedDeep&&stoppedPlan?{enabled:true,topics:stoppedPlan.topics,checks:stoppedPlan.checks,updates:stoppedPlan.updates||[],alternatives:stoppedPlan.alternatives||[],decisions:stoppedPlan.decisions||[],summary:stoppedPlan.summary,complexity:stoppedPlan.complexity||'standard',passes:stoppedPlan.passes||2}:null;
- chat.messages.push({id:messageId(),role:'ai',content:text,stopped:true,regenCount:responseState.regenerateCount||0,thinking,thinkingDuration:stoppedDuration}); chat.updated=Date.now(); autoCreateArtifactsFromReply(text); persistIfNeeded();} row.remove(); renderMessages();}
-    responseState.regenerateCount=0; setResponseUI(false); showResponseStatus('Você parou a resposta.'); setTimeout(()=>showResponseStatus(''),3200);
+    if(row)row.remove();
+    if(chat&&text){
+      const thinking=stoppedDeep&&stoppedPlan?{enabled:true,topics:stoppedPlan.topics,checks:stoppedPlan.checks,solutions:stoppedPlan.solutions||[],updates:stoppedPlan.updates||[],alternatives:stoppedPlan.alternatives||[],decisions:stoppedPlan.decisions||[],summary:stoppedPlan.summary,complexity:stoppedPlan.complexity||'standard',passes:stoppedPlan.passes||2}:null;
+      chat.messages.push({id:messageId(),role:'ai',content:text,stopped:true,regenCount:responseState.regenerateCount||0,thinking,thinkingDuration:stoppedDuration});chat.updated=Date.now();autoCreateArtifactsFromReply(text);persistIfNeeded();
+    }
+    responseState.partial='';responseState.chatId=null;responseState.chatRef=null;responseState.messageId=null;responseState.manualScrollLock=false;
+    if(wasActiveChat)renderMessages();
+    setResponseUI(false);showResponseStatus('Você parou a resposta.');setTimeout(()=>showResponseStatus(''),3200);
   }
-  async function requestAIAnswer(message, aiAttachments, mode, researchContext){
+  async function requestAIAnswer(message, aiAttachments, mode, researchContext,targetChatId=responseState.chatId){
     const sessionResult=await supabaseClient?.auth.getSession();
     const accessToken=sessionResult?.data?.session?.access_token;
     if(!accessToken) throw new Error('Sua sessão expirou. Entre novamente para continuar.');
-    const chat=currentChat();
+    const chat=state.chats?.[targetChatId]||currentChat();
     const history=chat.messages.slice(0,-1).slice(-16).map(item=>({role:item.role,content:item.content}));
     const thinkingMode=state.settings.thinkingMode==='deep'?'deep':'standard';
     const provider=['auto','groq','qwen','hermes'].includes(state.settings.provider)?state.settings.provider:'auto';
@@ -2147,6 +2184,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     save();renderArtifactsCount();return blocks.length;
   }
   function finalizeDeepThinking(plan,message,durationMs){
+    if(!responseOwnsActiveChat())return;
     const row=$('messages')?.querySelector('.msg.ai.thinking-row,.msg.ai.streaming');if(!row)return;
     row.classList.remove('streaming');
     row.querySelector('.stream-content')?.remove();
@@ -2154,26 +2192,28 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(block){const holder=document.createElement('div');holder.innerHTML=thinkingMarkup(plan,false,message,5,durationMs);block.replaceWith(holder.firstElementChild);}
   }
   function streamReply(reply,meta=null){
-    const chat=currentChat();
+    const chat=responseTargetChat();
     const deepEnabled=meta?.thinkingMode==='deep'||(state.settings.thinkingMode==='deep'&&meta?.thinking!==null);
     const deepPlan=meta?.thinking||null;
     if(deepEnabled){responseState.deepThinking=true;responseState.deepPlan=deepPlan;responseState.deepComplexity=['standard','medium','high'].includes(deepPlan?.complexity)?deepPlan.complexity:responseState.deepComplexity;clearInterval(responseState.progressTimer);responseState.deepStepIndex=4;renderDeepThinkingProgress('',deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else stopResponseProgress();
     responseState.stopped=false;setResponseUI(true);if(!deepEnabled)showResponseStatus('Klipza está respondendo…');
     const regenCount=responseState.regenerateCount||0;
     let i=0, partial='';
+    responseState.partial='';
     responseState.timer=setInterval(()=>{
       if(responseState.stopped){clearInterval(responseState.timer);responseState.timer=null;return;}
-      partial+=reply[i++]||''; appendStreamingMessage(partial);
+      partial+=reply[i++]||''; responseState.partial=partial; appendStreamingMessage(partial);
       if(i>=reply.length){
         clearInterval(responseState.timer); responseState.timer=null;
-        const row=$('messages')?.querySelector('.msg.ai.streaming'); if(row){row.querySelector('.stream-content')?.remove();row.classList.remove('streaming');}
-        const thinking=deepEnabled&&deepPlan?{enabled:true,topics:deepPlan.topics,checks:deepPlan.checks,updates:deepPlan.updates||[],alternatives:deepPlan.alternatives||[],decisions:deepPlan.decisions||[],summary:deepPlan.summary,complexity:deepPlan.complexity||'standard',passes:deepPlan.passes||2}:null;
+        const wasActiveChat=responseOwnsActiveChat();
+        const row=wasActiveChat ? $('messages')?.querySelector('.msg.ai.streaming') : null; if(row){row.querySelector('.stream-content')?.remove();row.classList.remove('streaming');}
+        const thinking=deepEnabled&&deepPlan?{enabled:true,topics:deepPlan.topics,checks:deepPlan.checks,solutions:deepPlan.solutions||[],updates:deepPlan.updates||[],alternatives:deepPlan.alternatives||[],decisions:deepPlan.decisions||[],summary:deepPlan.summary,complexity:deepPlan.complexity||'standard',passes:deepPlan.passes||2}:null;
         const thinkingDuration=deepEnabled?Math.max(0,Date.now()-(responseState.deepStartedAt||Date.now())):0;
-        chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount,thinking,thinkingDuration}); chat.updated=Date.now(); autoCreateArtifactsFromReply(reply); persistIfNeeded(); renderMessages(); if(!anonymousMode) renderHistory();
+        chat.messages.push({id:messageId(),role:'ai',content:reply,regenCount,thinking,thinkingDuration}); chat.updated=Date.now(); autoCreateArtifactsFromReply(reply); persistIfNeeded(); if(wasActiveChat)renderMessages(); if(!anonymousMode) renderHistory();
         if(foregroundResponse&&!foregroundResponse.promoted)foregroundResponse=null;
-        responseState.regenerateCount=0;
+        responseState.regenerateCount=0;responseState.partial='';responseState.chatId=null;responseState.chatRef=null;responseState.messageId=null;responseState.manualScrollLock=false;
         setResponseUI(false);
-        if(deepEnabled){responseState.deepStepIndex=5;finalizeDeepThinking(deepPlan,responseState.deepMessage,thinkingDuration);setTimeout(()=>{stopResponseProgress(false);showResponseStatus('');},6200);}else showResponseStatus('');
+        if(deepEnabled){responseState.deepStepIndex=5;if(wasActiveChat)finalizeDeepThinking(deepPlan,responseState.deepMessage,thinkingDuration);setTimeout(()=>{stopResponseProgress(false);showResponseStatus('');},6200);}else if(wasActiveChat)showResponseStatus('');
       }
     },18);
   }
@@ -2254,7 +2294,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       row.innerHTML=`<div class="msg-avatar">${m.role==='user'?esc(initials(state.user.name)):'K'}</div><div class="msg-content"><div class="msg-label">${m.role==='user'?'Você':'Klipza'}</div>${thinking}${formatMessage(m.content, m.id)}${files?`<div class="msg-attachments">${files}</div>`:''}${actions}</div>`;
       wrap.appendChild(row);
     });
-    const follow=messagesNearBottom(box);
+    const follow=!responseState.manualScrollLock&&messagesNearBottom(box);
     const previousTop=box.scrollTop;
     box.innerHTML='';box.appendChild(wrap);
     if(follow)box.scrollTop=box.scrollHeight;else box.scrollTop=previousTop;
@@ -2600,6 +2640,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       ensureQuota();
       if(state.user?.restricted){showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');return;}
       const input=$('prompt'); const text=input.value.trim(); if(!text && !attached.length)return;
+      const originChatId=anonymousMode?'anonymous':activeChatId;
       if(anonymousMode && attached.length){attached=[];renderAttached();}
       const deepMode=state.settings.thinkingMode==='deep';
       const requiredEnergy=deepMode?DEEP_MSG_COST:MSG_COST;
@@ -2628,7 +2669,9 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       }else{
         state.quota.energy-=requiredEnergy;
       }
-      const chat=currentChat();
+      const chat=anonymousMode?anonymousChat:(state.chats?.[originChatId]||currentChat());
+      const targetChatId=anonymousMode?'anonymous':(chat?.id||originChatId);
+      responseState.chatId=targetChatId;responseState.chatRef=chat;responseState.messageId=outboundMessageId;responseState.partial='';responseState.manualScrollLock=false;
       const canPromoteToBackground=deepMode&&!pendingResearchContext&&!attached.length&&!anonymousMode&&!!state.user?.id;
       const history=chat.messages.slice(-16).map(item=>({role:item.role,content:item.content}));
       const messageText=text || 'Enviei um anexo.';
@@ -2645,12 +2688,12 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       refreshQuotaUI();
       if(!paidWithTokens)animateEnergyChange(energyBefore,state.quota.energy);
       responseState.stopped=false; setResponseUI(true);
-      if(canPromoteToBackground)foregroundResponse={chat,chatId:activeChatId,messageIdValue:outboundMessageId,message:messageText,history,provider:'auto',promoted:false};
+      if(canPromoteToBackground)foregroundResponse={chat,chatId:targetChatId,messageIdValue:outboundMessageId,message:messageText,history,provider:'auto',promoted:false};
       else foregroundResponse=null;
-      if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(messageText); else showResponseStatus('Klipza está respondendo…');
+      if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(messageText,targetChatId); else showResponseStatus('Klipza está respondendo…');
       const thinkingStartedAt=Date.now();
       try{
-        const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext);
+        const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext,targetChatId);
         if(!responseState.stopped){
           const complexity=payload?.thinking?.complexity||responseState.deepComplexity||'standard';
           const minimumDeepTime=state.settings.thinkingMode==='deep'?(complexity==='high'?11000:complexity==='medium'?7600:4200):0;
