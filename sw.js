@@ -1,4 +1,4 @@
-const CACHE_NAME = 'klipza-shell-v12';
+const CACHE_NAME = 'klipza-shell-v13';
 const APP_SHELL = [
   '/?pwa=1',
   '/index.html',
