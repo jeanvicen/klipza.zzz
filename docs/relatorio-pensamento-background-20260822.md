@@ -55,3 +55,13 @@ A migração foi executada no projeto Supabase de produção e retornou **Succes
 O projeto atual está publicado em Vercel. O fluxo funciona enquanto a chamada serverless estiver em execução e o estado persistido permite recuperar a tarefa ao reabrir o app. A frequência de cron depende do plano da hospedagem; no plano Hobby, jobs frequentes não são permitidos, portanto não foi adicionado um cron que aparentasse garantir execução contínua. Para garantir retomada automática com o app fechado, o próximo passo de infraestrutura é configurar uma fila/worker com frequência permitida e Web Push.
 
 Nenhuma senha, chave de API, token, valor de variável sensível ou instrução privada do modelo está presente neste documento.
+
+## Referências
+
+[1] Vercel, [Usage & Pricing for Cron Jobs](https://vercel.com/docs/cron-jobs/usage-and-pricing), consultado em 22 de agosto de 2026.
+
+[2] Vercel, [Managing Cron Jobs](https://vercel.com/docs/cron-jobs/manage-cron-jobs), consultado em 22 de agosto de 2026.
+
+[3] MDN Web Docs, [Push API](https://developer.mozilla.org/en-US/docs/Web/API/Push_API), referência para notificações Web Push quando o aplicativo está fechado.
+
+[4] MDN Web Docs, [Service Worker API](https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API), referência para execução e notificações em segundo plano no navegador.
