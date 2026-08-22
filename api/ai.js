@@ -383,18 +383,25 @@ function buildOperationalUpdates(message, plan, complexity) {
   const subject = text(message, 180).replace(/\s+/g, ' ').trim();
   const topicText = plan.topics.slice(0, 4).join('; ');
   const checkText = plan.checks.slice(0, 3).join('; ');
+  const route = /\b(c[oó]digo|html|css|javascript|typescript|python|react|arquivo|app|site|program)/i.test(subject)
+    ? 'estrutura e implementação'
+    : /\b(compar|melhor|op[cç][aã]o|alternativ|decis)/i.test(subject)
+      ? 'comparação de caminhos e critérios'
+      : /\b(seguran[cç]a|privacidade|conta|mem[oó]ria|dados|banco)/i.test(subject)
+        ? 'consistência, segurança e limites'
+        : 'entendimento do objetivo e validação dos pontos principais';
   const depthText = complexity === 'high'
-    ? 'Este pedido tem várias dependências; vou fazer uma revisão mais cuidadosa antes de concluir.'
+    ? `A rota ${route} tem várias dependências; vou revisar cada uma antes de concluir.`
     : complexity === 'medium'
-      ? 'Há alguns pontos que merecem comparação e conferência antes da conclusão.'
-      : 'Vou manter a análise objetiva e conferir os pontos essenciais.';
+      ? `A rota ${route} tem alguns pontos que precisam ser comparados.`
+      : `A rota ${route} é suficiente, mas vou conferir os pontos essenciais.`;
   return [
-    `Estou entendendo o objetivo do pedido: “${subject}”.`,
-    `Separei a análise nestes tópicos: ${topicText}.`,
+    `Pedido identificado: “${subject}”. O resultado precisa respeitar: ${topicText}.`,
     depthText,
-    `Vou conferir: ${checkText}.`,
-    plan.decisions?.length ? `Minha direção provisória é: ${plan.decisions[0]}.` : 'Vou escolher a abordagem mais clara e segura para o objetivo.',
-    'Agora vou revisar a consistência e preparar a resposta final.'
+    `Vou validar primeiro estes pontos: ${checkText}.`,
+    plan.alternatives?.length ? `Também vou comparar esta alternativa: ${plan.alternatives[0]}.` : 'Se houver outra rota viável, vou compará-la antes de escolher.',
+    plan.decisions?.length ? `Minha escolha provisória será: ${plan.decisions[0]}.` : 'Depois da validação, vou escolher a rota mais clara e segura.',
+    `Revisão final: vou conferir se a solução responde exatamente a “${subject}”.`
   ];
 }
 
@@ -478,7 +485,11 @@ async function createDeepPlan({ message, history, requestedProvider, onProgress 
       plan = { ...plan, complexity, passes };
     }
   }
-  const updates = [...new Set([...(plan.updates || []), ...buildOperationalUpdates(message, plan, complexity)])].slice(0, 10);
+  const generatedUpdates = [...new Set((plan.updates || []).map((item) => text(item, 260)).filter(Boolean))];
+  const contextualUpdates = buildOperationalUpdates(message, plan, complexity);
+  const updates = (generatedUpdates.length >= 4
+    ? generatedUpdates
+    : [...generatedUpdates, ...contextualUpdates]).filter((item, index, list) => list.indexOf(item) === index).slice(0, 10);
   return { ...plan, enabled: true, complexity, passes, updates, provider };
 }
 
