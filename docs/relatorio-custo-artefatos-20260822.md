@@ -34,3 +34,6 @@ A geração client-side de PDF, DOCX e XLSX permanece sem alteração de custo d
 
 
 O build local atualizado também foi aberto sem autenticação. A tela de login carregou normalmente e `window.K` expôs `createArtifactFromCode`, `openArtifactCanvas` e `downloadArtifact` como funções. Esse teste não consumiu energia nem alterou uma conta.
+
+
+Após o push do commit `1b83d0e`, a produção `https://klipza-zzz.vercel.app/` respondeu HTTP 200 e serviu os marcadores do custo de 15 pontos, da ação `consume_artifact`, do isolamento por `localOwnerId` e do canvas. O endpoint `/api/quota` sem bearer respondeu HTTP 401, como esperado.
