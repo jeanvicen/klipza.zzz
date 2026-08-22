@@ -1,5 +1,8 @@
 {
   "version": 2,
+  "crons": [
+    { "path": "/api/cron-deep-jobs", "schedule": "* * * * *" }
+  ],
   "headers": [
     {
       "source": "/",
