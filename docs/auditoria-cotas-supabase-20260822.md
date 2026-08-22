@@ -108,3 +108,21 @@ A camada de IA não finge possuir um computador cloud, executar testes externos 
 ---
 
 Este relatório descreve somente alterações verificadas no repositório e não afirma uma aplicação de banco que não foi observada.
+
+## Correção adicional: saldo visual sempre confirmado
+
+Após a auditoria, foi corrigido um problema em que o cache local podia mostrar 100 pontos depois de a conta já ter chegado a zero em outro momento ou dispositivo. Ao abrir a página, trocar de conta, voltar ao app, mudar de conversa ou navegar entre áreas, o saldo autenticado é marcado como não confirmado e o painel mostra “Sincronizando energia, tokens e anexos…” em vez de exibir o número antigo. O valor só volta a aparecer como saldo oficial depois de uma leitura bem-sucedida do endpoint autenticado.
+
+A atualização usa três camadas: consulta imediata ao receber foco/`pageshow`, revalidação periódica de até 5 segundos enquanto a sessão está ativa e assinatura Realtime opcional na linha `profiles` da própria conta. A sincronização também possui proteção contra respostas atrasadas após troca de usuário, e animações antigas são canceladas quando o valor deixa de estar confirmado. O Realtime não substitui o polling: se a publicação de mudanças do Supabase não estiver habilitada, o fallback periódico continua mantendo a interface atualizada.
+
+## Correção adicional: artefatos beta
+
+A área de artefatos foi marcada como **BETA — em melhorias**. O contrato de artefatos agora reconhece código, PDF, DOCX, XLSX e ZIP. ZIPs usam um manifesto limitado a oito arquivos, com nomes sanitizados e conteúdo limitado, e são materializados localmente para download. O preview mostra a lista dos arquivos e o PDF possui viewer incorporado após a materialização. Durante a validação foi encontrado e corrigido o alias entre o tipo de artefato `pdf` e a biblioteca `jsPDF`; sem essa correção o preview retornava “biblioteca desconhecida”.
+
+O custo de 15 pontos por artefato foi preservado e continua separado da cobrança da mensagem. Nenhum artefato real foi criado nesta validação; foram usados somente registros sintéticos no navegador local.
+
+## Validação adicional
+
+O teste sintético confirmou que uma conta com `synced:false` exibe `—`, `…` e “Sincronizando quota…”, nunca 100 ou 0 como fato confirmado. A área de Artefatos exibiu três cards sintéticos — código, PDF e ZIP — todos com selo BETA e preview. O PDF abriu viewer incorporado após carregar a biblioteca, o ZIP abriu a lista de arquivos e o download do ZIP retornou sucesso. Nenhuma chamada autenticada, mensagem de IA, energia ou token foi utilizada.
+
+A aplicação das migrações no Supabase de produção continua pendente de execução autorizada; o Realtime e as RPCs só terão efeito completo depois que o SQL correspondente estiver aplicado.

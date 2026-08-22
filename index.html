@@ -845,7 +845,8 @@ body.prime-modal-open{overflow:hidden}
   .msg-actions{opacity:1}
   .mic-btn,.stop-btn{width:38px;height:38px}
   .voice-hint{max-width:140px}
-}
+  }
+  .artifact-beta-badge{display:inline-flex;align-items:center;border:1px solid rgba(0,0,0,.16);border-radius:999px;padding:2px 7px;font-size:9px;line-height:1;font-weight:800;letter-spacing:.08em;color:#555;background:#f5f5f5;vertical-align:middle}.page-beta-badge{margin-left:8px;font-size:10px}.artifact-viewer-frame{display:block;width:100%;min-height:62vh;border:0;background:#fff}.quota-syncing{opacity:.82}.quota-dot-syncing{background:#8a8a8a;animation:quotaPulse 1.4s ease-in-out infinite}@keyframes quotaPulse{0%,100%{opacity:.35}50%{opacity:1}}@media (prefers-reduced-motion:reduce){.quota-dot-syncing{animation:none}}
 </style>
 </head>
 <body>
@@ -994,7 +995,8 @@ body.prime-modal-open{overflow:hidden}
   state.settings = {...{notifications:false,sounds:false,language:'pt-BR',country:'BR',thinkingMode:'standard',provider:'auto',memoryEnabled:true,memoryCaptureMode:'automatic',memoryMax:500,inactivityNotifications:true},...(state.settings||{}),provider:'auto',memoryEnabled:true,memoryCaptureMode:'automatic',memoryMax:500};
   state.memory = {...{memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]},...(state.memory||{})};
   state.backgroundJobs = state.backgroundJobs && typeof state.backgroundJobs==='object' ? state.backgroundJobs : {};
-  const ENERGY_MAX=100, MSG_COST=2, DEEP_EXTRA_ENERGY=5, DEEP_MSG_COST=MSG_COST+DEEP_EXTRA_ENERGY, TOKEN_COST=MSG_COST, FREE_ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000;
+  const ENERGY_MAX=100, MSG_COST=2, DEEP_EXTRA_ENERGY=5, DEEP_MSG_COST=MSG_COST+DEEP_EXTRA_ENERGY, TOKEN_COST=MSG_COST, FREE_ATTACH_LIMIT=3, CYCLE_MS=24*60*60*1000, QUOTA_SYNC_MS=5000;
+  if(state.user?.id)state.quota={...(state.quota||{}),synced:false};
   const currentMessageCost=()=>state.settings.thinkingMode==='deep'?DEEP_MSG_COST:MSG_COST;
   const MAX_HISTORY_CHATS=50;
   let currentView = 'chat';
@@ -1259,8 +1261,9 @@ body.prime-modal-open{overflow:hidden}
 
   state.wallet=state.wallet||{tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
   function primeActive(){return state.wallet?.primeStatus==='active';}
+  function quotaReady(){return !state.user?.id||state.quota?.synced===true;}
   function attachmentLimit(){return primeActive()?Infinity:FREE_ATTACH_LIMIT;}
-  function attachmentLabel(){return primeActive()?'Ilimitado':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} disponíveis`;}
+  function attachmentLabel(){if(!quotaReady())return 'Sincronizando…';return primeActive()?'Ilimitado':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} disponíveis`;}
   async function quotaRequest(body=null){
     if(!supabaseClient||!state.user?.id)throw new Error('Sua sessão expirou.');
     const sessionResult=await supabaseClient.auth.getSession();
@@ -1277,20 +1280,43 @@ body.prime-modal-open{overflow:hidden}
     const nextQuota={...(state.quota||{}),energy:Math.max(0,Math.min(ENERGY_MAX,Number(row.energy)||0)),resetAt};
     const attachmentValue=row.attachmentsUsed??row.attachUsed;
     if(attachmentValue!==undefined&&attachmentValue!==null)nextQuota.attachUsed=Math.max(0,Math.min(FREE_ATTACH_LIMIT,Number(attachmentValue)||0));
+    nextQuota.synced=true;
     state.quota=nextQuota;
     state.wallet={...(state.wallet||{}),tokenBalance:Math.max(0,Number(row.tokenBalance)||0),primeStatus:row.primeStatus||state.wallet?.primeStatus||'inactive'};
     return state.quota;
   }
   let lastServerQuotaSync=0;
   let serverQuotaSyncBusy=false;
+  let serverQuotaSyncUserId=null;
+  let quotaSyncSerial=0;
+  let quotaRealtimeChannel=null;
+  function stopQuotaRealtime(){if(!quotaRealtimeChannel||!supabaseClient){quotaRealtimeChannel=null;return;}const channel=quotaRealtimeChannel;quotaRealtimeChannel=null;void supabaseClient.removeChannel(channel).catch(()=>{});}
+  function startQuotaRealtime(userId){
+    stopQuotaRealtime();
+    if(!supabaseClient?.channel||!userId)return;
+    try{
+      quotaRealtimeChannel=supabaseClient.channel(`quota-${userId}`)
+        .on('postgres_changes',{event:'UPDATE',schema:'public',table:'profiles',filter:`id=eq.${userId}`},()=>{if(state.user?.id===userId)void syncServerQuota(true);})
+        .subscribe();
+    }catch(error){console.warn('Atualização Realtime da quota indisponível; usando sincronização periódica.',error);quotaRealtimeChannel=null;}
+  }
   async function syncServerQuota(force=false){
-    if(!state.user?.id||!supabaseClient)return false;
+    const requestUserId=state.user?.id;
+    if(!requestUserId||!supabaseClient)return false;
     if(serverQuotaSyncBusy)return false;
-    if(!force&&Date.now()-lastServerQuotaSync<15000)return true;
-    serverQuotaSyncBusy=true;
-    try{const payload=await quotaRequest();if(payload?.quota)applyServerQuota(payload.quota);lastServerQuotaSync=Date.now();refreshQuotaUI();return true;}
-    catch(error){console.warn('Não foi possível sincronizar a energia da conta.',error);return false;}
-    finally{serverQuotaSyncBusy=false;}
+    if(!force&&Date.now()-lastServerQuotaSync<QUOTA_SYNC_MS)return true;
+    serverQuotaSyncBusy=true;serverQuotaSyncUserId=requestUserId;const syncSerial=++quotaSyncSerial;
+    try{
+      const payload=await quotaRequest();
+      if(state.user?.id!==requestUserId)return false;
+      if(payload?.quota)applyServerQuota(payload.quota);
+      lastServerQuotaSync=Date.now();refreshQuotaUI();return true;
+    }catch(error){
+      if(state.user?.id===requestUserId){state.quota={...(state.quota||{}),synced:false};refreshQuotaUI();}
+      console.warn('Não foi possível sincronizar a quota da conta.',error);return false;
+    }finally{
+      if(quotaSyncSerial===syncSerial){serverQuotaSyncBusy=false;serverQuotaSyncUserId=null;}
+    }
   }
   async function consumeArtifactEnergy(eventKey){
     const payload=await quotaRequest({action:'consume_artifact',eventKey});
@@ -1312,12 +1338,12 @@ body.prime-modal-open{overflow:hidden}
     }
   }
   async function refreshWallet(){
-    await syncServerQuota();
+    await syncServerQuota(true);
     return state.wallet;
   }
   function ensureQuota(){
     const initialEnergy=state.user?.id?0:ENERGY_MAX;
-    state.quota=state.quota||{energy:initialEnergy,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
+    state.quota=state.quota||{energy:initialEnergy,attachUsed:0,resetAt:Date.now()+CYCLE_MS,synced:!state.user?.id};
     const now=Date.now();
     if(!state.quota.resetAt||now>=Number(state.quota.resetAt)){
       if(state.user?.id)state.quota.energy=0;
@@ -1334,16 +1360,17 @@ body.prime-modal-open{overflow:hidden}
   function energyPercent(){ensureQuota(); return Math.max(0,Math.min(100,state.quota.energy));}
   function quotaHTML(compact=false){
     ensureQuota();
-    const pct=energyPercent();
-    const attachPct=primeActive()?100:Math.max(0,Math.min(100,((FREE_ATTACH_LIMIT-state.quota.attachUsed)/FREE_ATTACH_LIMIT)*100));
+    const ready=quotaReady();
+    const pct=ready?energyPercent():0;
+    const attachPct=ready&&primeActive()?100:ready?Math.max(0,Math.min(100,((FREE_ATTACH_LIMIT-state.quota.attachUsed)/FREE_ATTACH_LIMIT)*100)):0;
     const requiredCost=currentMessageCost();
-    const empty=state.quota.energy<requiredCost;
+    const empty=ready&&state.quota.energy<requiredCost;
     const tokenBalance=Number(state.wallet?.tokenBalance||0);
-    return `<div class="energy-card ${empty?'energy-empty':''}">
-      <div class="energy-head"><div class="energy-title">Energia</div><div class="energy-value">${state.quota.energy}</div></div>
-      <div class="energy-row"><div class="energy-ring" style="--pct:${pct}%"><span>${pct}</span></div><div class="energy-copy"><div class="energy-label">${empty?(tokenBalance>=requiredCost?'Tokens disponíveis':'Ciclo esgotado'):'Uso diário'}</div><div class="energy-meta">${empty?(tokenBalance>=requiredCost?`${tokenBalance} tokens disponíveis`:`São necessários ${requiredCost} pontos para esta mensagem`):'Pronta para a próxima mensagem'}</div></div></div>
+    return `<div class="energy-card ${empty?'energy-empty':''} ${ready?'':'quota-syncing'}">
+      <div class="energy-head"><div class="energy-title">Energia</div><div class="energy-value">${ready?state.quota.energy:'—'}</div></div>
+      <div class="energy-row"><div class="energy-ring" style="--pct:${pct}%"><span>${ready?pct:'…'}</span></div><div class="energy-copy"><div class="energy-label">${!ready?'Sincronizando quota…':empty?(tokenBalance>=requiredCost?'Tokens disponíveis':'Ciclo esgotado'):'Uso diário'}</div><div class="energy-meta">${!ready?'Buscando o saldo mais recente desta conta.':empty?(tokenBalance>=requiredCost?`${tokenBalance} tokens disponíveis`:`São necessários ${requiredCost} pontos para esta mensagem`):'Pronta para a próxima mensagem'}</div></div></div>
       <div class="energy-bar"><span style="width:${pct}%"></span></div>
-      <div class="energy-foot"><span>Recarrega em ${timeLeft(state.quota.resetAt-Date.now())}</span><span>${primeActive()?'Anexos ilimitados':`${state.quota.attachUsed}/${FREE_ATTACH_LIMIT} anexos`}</span></div>
+      <div class="energy-foot"><span>${ready?`Recarrega em ${timeLeft(state.quota.resetAt-Date.now())}`:'Atualizando agora…'}</span><span>${!ready?'Anexos: —':primeActive()?'Anexos ilimitados':`${state.quota.attachUsed}/${FREE_ATTACH_LIMIT} anexos`}</span></div>
     </div>`;
   }
   function updateEnergyBanner(){
@@ -1351,6 +1378,7 @@ body.prime-modal-open{overflow:hidden}
     const text=document.getElementById('energyEmptyText');
     if(!banner)return;
     ensureQuota();
+    if(!quotaReady()){banner.classList.remove('show');if(text)text.textContent='Sincronizando o saldo oficial desta conta…';return;}
     const requiredCost=currentMessageCost();
     const empty=state.quota.energy<requiredCost;
     banner.classList.toggle('show',empty);
@@ -1367,28 +1395,33 @@ body.prime-modal-open{overflow:hidden}
     if(ringText)ringText.textContent=Math.round(pct);
     if(valueText)valueText.textContent=Math.round(pct);
   }
+  let energyAnimationFrame=null;
+  function stopEnergyAnimation(){if(energyAnimationFrame!==null){cancelAnimationFrame(energyAnimationFrame);energyAnimationFrame=null;}}
   function animateEnergyChange(from,to){
+    stopEnergyAnimation();
     const start=Math.max(0,Math.min(100,from)), target=Math.max(0,Math.min(100,to)), t0=performance.now(), dur=1150;
     function frame(now){
       const p=Math.min(1,(now-t0)/dur), eased=1-Math.pow(1-p,3);
       paintEnergyValue(start+(target-start)*eased);
-      if(p<1)requestAnimationFrame(frame);
+      if(p<1)energyAnimationFrame=requestAnimationFrame(frame);else energyAnimationFrame=null;
     }
-    requestAnimationFrame(frame);
+    energyAnimationFrame=requestAnimationFrame(frame);
   }
   function refreshQuotaUI(){
     ensureQuota();
+    if(!quotaReady())stopEnergyAnimation();
     const side=document.getElementById('sideQuota'); if(side) side.innerHTML=quotaHTML(true);
     const energy=document.getElementById('energySettings'); if(energy) energy.innerHTML=renderEnergySettings();
-    const status=document.getElementById('composerQuota'); if(status) status.innerHTML=`<span class="quota-dot"></span> ${state.quota.energy} energia · ${Number(state.wallet?.tokenBalance||0).toLocaleString('pt-BR')} tokens · ${primeActive()?'anexos ilimitados':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} anexos`} · recarrega em ${timeLeft(state.quota.resetAt-Date.now())}`;
+    const status=document.getElementById('composerQuota'); if(status) status.innerHTML=quotaReady()?`<span class="quota-dot"></span> ${state.quota.energy} energia · ${Number(state.wallet?.tokenBalance||0).toLocaleString('pt-BR')} tokens · ${primeActive()?'anexos ilimitados':`${Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed)} anexos`} · recarrega em ${timeLeft(state.quota.resetAt-Date.now())}`:'<span class="quota-dot quota-dot-syncing"></span> Sincronizando energia, tokens e anexos…';
     updateEnergyBanner();
   }
   function renderEnergySettings(){
     ensureQuota();
-    const attachRemaining=primeActive()?FREE_ATTACH_LIMIT:Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed);
-    const attachPercent=primeActive()?100:Math.max(0,Math.min(100,(attachRemaining/FREE_ATTACH_LIMIT)*100));
-    return `<div class="limit-card"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Mensagem normal: ${MSG_COST} pontos. Pensamento profundo: ${DEEP_MSG_COST} pontos. Cada artefato criado: ${ARTIFACT_ENERGY_COST} pontos.</div></div><div class="limit-number">${state.quota.energy}</div></div><div class="limit-track"><span style="width:${energyPercent()}%"></span></div><div class="limit-note">O modo profundo usa ${DEEP_EXTRA_ENERGY} pontos adicionais para planejamento e revisão.</div></div>
-    <div class="limit-card"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário por conta.</div></div><div class="limit-number">${primeActive()?'∞':attachRemaining}</div></div><div class="limit-track"><span style="width:${attachPercent}%"></span></div><div class="limit-note">${primeActive()?'Anexos ilimitados enquanto o plano estiver ativo.':'Você pode usar até 3 anexos por ciclo de 24 horas. O contador permanece na sua conta.'}</div></div>`;
+    const ready=quotaReady();
+    const attachRemaining=ready&&primeActive()?FREE_ATTACH_LIMIT:ready?Math.max(0,FREE_ATTACH_LIMIT-state.quota.attachUsed):0;
+    const attachPercent=ready&&primeActive()?100:ready?Math.max(0,Math.min(100,(attachRemaining/FREE_ATTACH_LIMIT)*100)):0;
+    return `<div class="limit-card ${ready?'':'quota-syncing'}"><div class="limit-top"><div><div class="limit-name">Energia diária</div><div class="limit-caption">100 pontos por ciclo de 24 horas. Mensagem normal: ${MSG_COST} pontos. Pensamento profundo: ${DEEP_MSG_COST} pontos. Cada artefato criado: ${ARTIFACT_ENERGY_COST} pontos.</div></div><div class="limit-number">${ready?state.quota.energy:'—'}</div></div><div class="limit-track"><span style="width:${ready?energyPercent():0}%"></span></div><div class="limit-note">${ready?'O modo profundo usa '+DEEP_EXTRA_ENERGY+' pontos adicionais para planejamento e revisão.':'Sincronizando o saldo oficial desta conta…'}</div></div>
+    <div class="limit-card ${ready?'':'quota-syncing'}"><div class="limit-top"><div><div class="limit-name">Anexos</div><div class="limit-caption">Câmera, fotos e arquivos compartilham o mesmo limite diário por conta.</div></div><div class="limit-number">${ready?(primeActive()?'∞':attachRemaining):'—'}</div></div><div class="limit-track"><span style="width:${attachPercent}%"></span></div><div class="limit-note">${!ready?'Sincronizando o limite oficial desta conta…':primeActive()?'Anexos ilimitados enquanto o plano estiver ativo.':'Você pode usar até 3 anexos por ciclo de 24 horas. O contador permanece na sua conta.'}</div></div>`;
   }
   function applyTheme(){
     const dark=state.theme==='dark';
@@ -1726,6 +1759,8 @@ body.prime-modal-open{overflow:hidden}
     renderHistory();
     if(state.user){void syncServerQuota(true);void refreshDeepJobs();}
   }
+  window.addEventListener('pageshow',()=>{if(state.user?.id)void syncServerQuota(true);});
+  window.addEventListener('storage',(event)=>{if(event.key===KEY&&state.user?.id)void syncServerQuota(true);});
 
   function renderActiveModes(){
     const holder=$('composerActiveModes');if(!holder)return;
@@ -1870,8 +1905,10 @@ body.prime-modal-open{overflow:hidden}
       return;
     }
     state.user={id:user.id,name:profile?.display_name||user.user_metadata?.full_name||user.user_metadata?.name||'Usuário Klipza',email:profile?.email||user.email||'',avatar:profile?.avatar_url||user.user_metadata?.avatar_url||'',country:profile?.country||'BR',language:profile?.language||'pt-BR',status:profile?.status||'active',restricted:profile?.restricted===true,restrictionReason:profile?.restriction_reason||''};
+    startQuotaRealtime(user.id);
     state.localOwnerId=user.id;
-    state.quota={energy:0,attachUsed:0,resetAt:Date.now()+CYCLE_MS};
+    lastServerQuotaSync=0;quotaSyncSerial++;serverQuotaSyncBusy=false;serverQuotaSyncUserId=null;
+    state.quota={energy:0,attachUsed:0,resetAt:Date.now()+CYCLE_MS,synced:false};
     state.wallet={...state.wallet,tokenBalance:Number(profile?.token_balance||0),primeStatus:profile?.prime_status||'inactive',primePlanCode:profile?.prime_plan_code||null,primeSubscriptionId:profile?.prime_subscription_id||null,primeCurrentPeriodEnd:profile?.prime_current_period_end||null};
     save();
     showRecoveryPanel(false);
@@ -1970,7 +2007,9 @@ body.prime-modal-open{overflow:hidden}
   }
   async function logout(){
     stopDeepJobPolling();expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;
+    quotaSyncSerial++;serverQuotaSyncBusy=false;serverQuotaSyncUserId=null;
     authResolved=false; clearTimeout(remoteStateTimer); remoteStateTimer=null;
+    stopQuotaRealtime();
     if(supabaseClient) await supabaseClient.auth.signOut();
     state.user=null; state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS}; state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]}; save(); location.reload();
   }
@@ -1979,7 +2018,7 @@ body.prime-modal-open{overflow:hidden}
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       if(event==='PASSWORD_RECOVERY'){showRecoveryPanel(true);return;}
       if(event==='SIGNED_IN'&&session?.user)setTimeout(()=>finishSupabaseUser(session.user),0);
-      if(event==='SIGNED_OUT'){expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
+      if(event==='SIGNED_OUT'){stopQuotaRealtime();expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
     });
     const {data}=await supabaseClient.auth.getSession();
     if(data.session?.user){
@@ -1987,6 +2026,7 @@ body.prime-modal-open{overflow:hidden}
       if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
       else await finishSupabaseUser(data.session.user);
     }else{
+      stopQuotaRealtime();
       authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state.user=null;state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.memory={memories:[],settings:{memory_enabled:true,capture_mode:'automatic',max_memories:500,inactivity_notifications:true},notifications:[],backups:[]};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};
 save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
       if(window.location.hash.includes('reset-password'))showRecoveryPanel(true);
@@ -2009,6 +2049,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     }
     if(currentView==='webklip')closeWebKlipModal(false);
     currentView=view;
+    if(state.user?.id)void syncServerQuota(true);
     document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
     $('app').classList.toggle('settings-mode',view==='settings');
     if(view==='chat') renderChat();
@@ -2017,7 +2058,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(window.innerWidth<=720) $('app').classList.add('sidebar-collapsed');
   }
   function openWebKlipModal(){setView('webklip');}
-  function closeWebKlipModal(restore=true){document.body.classList.remove('webklip-modal-open');if(restore&&currentView==='webklip'){const next=webKlipReturnView==='webklip'?'chat':webKlipReturnView;currentView=next;document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='chat')renderChat();if(next==='artifacts')renderArtifactsPage();if(next==='settings'){window.__klipzaSettingsMobileDetail=false;renderSettingsPage();}}}
+  function closeWebKlipModal(restore=true){document.body.classList.remove('webklip-modal-open');if(restore&&currentView==='webklip'){const next=webKlipReturnView==='webklip'?'chat':webKlipReturnView;currentView=next;document.querySelectorAll('.nav-btn[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===next));if(next==='chat')renderChat();if(next==='artifacts')renderArtifactsPage();if(next==='settings'){window.__klipzaSettingsMobileDetail=false;renderSettingsPage();}if(state.user?.id)void syncServerQuota(true);}}
   function toggleSidebar(){ $('app').classList.toggle('sidebar-collapsed'); }
 
   function createChat(){
@@ -2032,7 +2073,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     activeChatId=id; state.activeChatId=id; save(); renderHistory(); setView('chat');
     return id;
   }
-  function openChat(id){activeChatId=id;state.activeChatId=id;save();setView('chat');renderHistory();}
+  function openChat(id){activeChatId=id;state.activeChatId=id;save();setView('chat');renderHistory();if(state.user?.id)void syncServerQuota(true);}
   function deleteChat(id){
     delete state.chats[id];
     const ids=Object.keys(state.chats).sort((a,b)=>state.chats[b].updated-state.chats[a].updated);
@@ -2424,8 +2465,10 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   const ARTIFACT_ENERGY_COST=15;
   const ARTIFACT_CDN={
     jspdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+    pdf:'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
     docx:'https://cdn.jsdelivr.net/npm/docx@9.7.1/dist/index.iife.js',
-    xlsx:'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'
+    xlsx:'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js',
+    zip:'https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.js'
   };
   const artifactLibraryPromises={};
   const artifactRuntimeBlobs=new Map();
@@ -2436,7 +2479,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(!url)return Promise.reject(new Error('Biblioteca de artefato desconhecida.'));
     artifactLibraryPromises[name]=new Promise((resolve,reject)=>{
       const existing=document.querySelector(`script[data-artifact-lib="${name}"]`);
-      if(existing){existing.addEventListener('load',()=>resolve(true),{once:true});existing.addEventListener('error',()=>reject(new Error(`Não foi possível carregar ${name}.`)),{once:true});if((name==='jspdf'&&window.jspdf)|| (name==='docx'&&window.docx)|| (name==='xlsx'&&window.XLSX))resolve(true);return;}
+      if(existing){existing.addEventListener('load',()=>resolve(true),{once:true});existing.addEventListener('error',()=>reject(new Error(`Não foi possível carregar ${name}.`)),{once:true});if((name==='jspdf'&&window.jspdf)|| (name==='pdf'&&window.jspdf)|| (name==='docx'&&window.docx)|| (name==='xlsx'&&window.XLSX)|| (name==='zip'&&window.fflate))resolve(true);return;}
       const script=document.createElement('script');script.src=url;script.async=true;script.dataset.artifactLib=name;script.onload=()=>resolve(true);script.onerror=()=>reject(new Error(`Não foi possível carregar a biblioteca de ${name}.`));document.head.appendChild(script);
     });
     return artifactLibraryPromises[name];
@@ -2444,7 +2487,7 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
   function artifactSlug(value){return String(value||'artefato').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,42)||'artefato';}
   function artifactStamp(){const d=new Date();return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${String(d.getHours()).padStart(2,'0')}${String(d.getMinutes()).padStart(2,'0')}`;}
   function artifactFilename(seed,extension){return `klipza-${artifactSlug(seed)}-${artifactStamp()}.${extension}`;}
-  function artifactMime(type){return ({code:'text/plain;charset=utf-8',pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'})[type]||'application/octet-stream';}
+  function artifactMime(type){return ({code:'text/plain;charset=utf-8',pdf:'application/pdf',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',zip:'application/zip'})[type]||'application/octet-stream';}
   function stripMarkdown(value){return String(value||'').replace(/```[\s\S]*?```/g,match=>match.replace(/^```[^\n]*\n?/,'').replace(/```$/,'')).replace(/!\[.*?\]\(.*?\)/g,'').replace(/\[([^\]]+)\]\([^)]*\)/g,'$1').replace(/[*_~`>#]/g,'').replace(/^\s*[-*+]\s+/gm,'• ').replace(/\n{3,}/g,'\n\n').trim();}
   function parseMarkdownTable(value){
     const lines=String(value||'').split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
@@ -2455,15 +2498,23 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(valid.length<2)return [];
     const header=valid[0];return valid.slice(1).map(row=>Object.fromEntries(header.map((key,index)=>[key||`Coluna ${index+1}`,row[index]||''])));
   }
+  function parseZipFiles(value){
+    let parsed=null;try{parsed=JSON.parse(String(value||''));}catch(error){}
+    const raw=Array.isArray(parsed?.files)?parsed.files:[];
+    const files=raw.map((file,index)=>({name:String(file?.name||`arquivo-${index+1}.txt`).replace(/[^a-zA-Z0-9._/-]+/g,'-').replace(/^\/+|\.\.+/g,'').slice(0,120)||`arquivo-${index+1}.txt`,content:String(file?.content||'').slice(0,120000)})).filter(file=>file.content).slice(0,8);
+    return files.length?files:[{name:'README.txt',content:String(value||'').slice(0,120000)}];
+  }
   function parseArtifactMarkers(value){
     const specs=[];let answer=String(value||'');
-    answer=answer.replace(/<<ARTIFACT:type=(code|pdf|docx|xlsx)>>([\s\S]*?)<<END_ARTIFACT>>/gi,(_,type,content)=>{specs.push({type:type.toLowerCase(),content:String(content||'').trim(),explicit:true});return '';});
+    answer=answer.replace(/<<ARTIFACT:type=(code|pdf|docx|xlsx|zip)>>([\s\S]*?)<<END_ARTIFACT>>/gi,(_,type,content)=>{const normalized=type.toLowerCase(),raw=String(content||'').trim();specs.push({type:normalized,content:raw,files:normalized==='zip'?parseZipFiles(raw):undefined,explicit:true});return '';});
     return {answer:answer.replace(/\n{3,}/g,'\n\n').trim(),specs};
   }
   function artifactSpecsForReply(reply,userMessage='',markerSpecs=[]){
     const answer=String(reply||'');const request=String(userMessage||'').toLowerCase();const specs=[...markerSpecs];
+    const wantsZip=/\b(zip|compactar|comprimir|pacote de arquivos|pasta compactada)\b/i.test(request);
     const blocks=extractCodeBlocks(answer);const explicitCode=/\b(cri(e|ar)|fa(ça|ca)|gere|gerar|salva|salvar|arquivo|artefato|c[oó]digo|html|javascript|python|css|json|react)\b/i.test(request);
-    blocks.filter(block=>block.lines>20||explicitCode).forEach(block=>specs.push({type:'code',content:block.code,language:block.language,nameSeed:block.name.replace(/\.[^.]+$/,''),explicit:explicitCode}));
+    const inferredCode=blocks.length?blocks:explicitCode&&/^\s*(<!doctype|<html|import\s|export\s|const\s|let\s|function\s|class\s|def\s|package\s|select\s|#!)/im.test(answer)?[{code:answer.trim(),name:'codigo.txt',language:'txt',extension:'txt',lines:answer.split(/\r?\n/).length,isHTML:/^\s*<!doctype|^\s*<html/i.test(answer)}]:[];
+    if(!wantsZip)inferredCode.filter(block=>block.lines>20||explicitCode).forEach(block=>specs.push({type:'code',content:block.code,language:block.language,nameSeed:block.name.replace(/\.[^.]+$/,''),explicit:explicitCode}));
     const rows=parseMarkdownTable(answer);
     const wantsPdf=/\b(pdf|imprimir|impress[aã]o)\b/i.test(request);
     const wantsXlsx=/\b(planilha|excel|xlsx|dados tabulares|tabela)\b/i.test(request)||(rows.length>=5&&!/\b(apenas|somente)\s+texto\b/i.test(request));
@@ -2472,13 +2523,16 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     if(wantsPdf)specs.push({type:'pdf',content:answer,nameSeed:request.match(/\b(pdf|relat[oó]rio|documento)\b/i)?.[0]||'documento'});
     else if(wantsXlsx&&rows.length>=2)specs.push({type:'xlsx',content:answer,rows,nameSeed:'planilha'});
     else if(wantsDocx||longFormal)specs.push({type:'docx',content:answer,nameSeed:request.match(/\b(relat[oó]rio|documento|word|docx)\b/i)?.[0]||'documento'});
+    if(wantsZip){const zipFiles=inferredCode.length?inferredCode.map(block=>({name:block.name||'codigo.txt',content:block.code})): [{name:'README.txt',content:answer}];specs.push({type:'zip',content:JSON.stringify({files:zipFiles}),files:zipFiles,nameSeed:'pacote'});}
     const seen=new Set();return specs.filter(spec=>{const key=`${spec.type}|${String(spec.content||'').slice(0,180)}`;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,8);
   }
   function artifactRecord(spec){
-    const type=spec.type==='code'?'code':spec.type==='pdf'?'pdf':spec.type==='docx'?'docx':'xlsx';
+    const type=['code','pdf','docx','xlsx','zip'].includes(spec.type)?spec.type:'code';
     const extension=type==='code'?(String(spec.name||'').match(/\.([a-z0-9]+)$/i)?.[1]||({javascript:'js',js:'js',typescript:'ts',ts:'ts',python:'py',py:'py',html:'html',htm:'html',css:'css',json:'json',jsx:'jsx',tsx:'tsx'}[String(spec.language||'').toLowerCase()]||'txt')):type;
     const seed=spec.nameSeed||spec.name||type;const name=spec.filename||artifactFilename(seed,extension);const id='art_'+Math.random().toString(36).slice(2,10);const content=typeof spec.content==='string'?spec.content:'';
-    return {id,name,type,language:spec.language||null,content:content.slice(0,120000),rows:Array.isArray(spec.rows)?spec.rows.slice(0,300):undefined,preview:(type==='xlsx'&&spec.rows?.length?spec.rows.slice(0,6).map(row=>Object.values(row).join('\n')).join('\n'):stripMarkdown(content).slice(0,900)),status:type==='code'?'ready':'pending',created:Date.now()};
+    const files=type==='zip'?parseZipFiles(Array.isArray(spec.files)?JSON.stringify({files:spec.files}):content):undefined;
+    const preview=type==='zip'?files.map(file=>`${file.name} · ${file.content.length.toLocaleString('pt-BR')} caracteres`).join('\n'):type==='xlsx'&&spec.rows?.length?spec.rows.slice(0,6).map(row=>Object.values(row).join('\n')).join('\n'):stripMarkdown(content).slice(0,900);
+    return {id,name,type,language:spec.language||null,content:content.slice(0,120000),files,rows:Array.isArray(spec.rows)?spec.rows.slice(0,300):undefined,preview,status:type==='code'?'ready':'pending',beta:true,created:Date.now()};
   }
   function extractCodeBlocks(value){
     const blocks=[];const source=String(value||'');const pattern=/```([^\n]*)\n?([\s\S]*?)```/g;let match;let index=0;
@@ -2498,8 +2552,8 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
     const list=Array.isArray(ids)?ids.map(id=>state.artifacts?.[id]).filter(Boolean):[];
     return list.map(artifact=>{
       const ready=artifact.status!=='pending'&&artifact.status!=='failed';
-      const label=artifact.status==='pending'?'Preparando arquivo…':artifact.status==='failed'?'Não foi possível gerar este arquivo':artifact.type==='code'?'Código · preview ao vivo':artifact.type.toUpperCase()+' · download direto';
-      return `<section class="artifact-inline-card" data-artifact-id="${esc(artifact.id)}"><div class="artifact-inline-head"><div class="artifact-icon">${artifact.type==='code'?'{}':artifact.type.toUpperCase()}</div><div class="artifact-inline-copy"><span class="artifact-inline-name">${esc(artifact.name)}</span><span class="artifact-inline-meta">${esc(label)}</span></div></div><pre class="artifact-inline-preview">${esc(artifact.preview||'Conteúdo sendo preparado…')}</pre><div class="artifact-inline-actions">${artifact.type==='code'?`<button class="artifact-inline-action" type="button" onclick="window.K.openArtifactCanvas('${artifact.id}')">Abrir canvas</button>`:''}<button class="artifact-inline-action" type="button" ${ready?'':'disabled'} onclick="window.K.downloadArtifact('${artifact.id}')">Baixar arquivo</button></div></section>`;
+      const label=artifact.status==='pending'?'Preparando arquivo…':artifact.status==='failed'?'Não foi possível gerar este arquivo':artifact.type==='code'?'Código · preview ao vivo':artifact.type==='zip'?`ZIP beta · ${Array.isArray(artifact.files)?artifact.files.length:0} arquivo(s)`:`${artifact.type.toUpperCase()} · preview e download`;
+      return `<section class="artifact-inline-card" data-artifact-id="${esc(artifact.id)}"><div class="artifact-inline-head"><div class="artifact-icon">${artifact.type==='code'?'{}':artifact.type.toUpperCase()}</div><div class="artifact-inline-copy"><span class="artifact-inline-name">${esc(artifact.name)} <small class="artifact-beta-badge">BETA</small></span><span class="artifact-inline-meta">${esc(label)}</span></div></div><pre class="artifact-inline-preview">${esc(artifact.preview||'Conteúdo sendo preparado…')}</pre><div class="artifact-inline-actions">${artifact.type==='code'?`<button class="artifact-inline-action" type="button" onclick="window.K.openArtifactCanvas('${artifact.id}')">Abrir canvas</button>`:''}<button class="artifact-inline-action" type="button" ${ready?'':'disabled'} onclick="window.K.downloadArtifact('${artifact.id}')">${artifact.type==='zip'?'Baixar ZIP':'Baixar arquivo'}</button></div></section>`;
     }).join('');
   }
   function persistArtifact(artifact){
@@ -2519,6 +2573,11 @@ save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
         const lib=window.docx;if(!lib?.Document||!lib?.Packer||!lib?.Paragraph)throw new Error('Biblioteca DOCX indisponível.');
         const children=stripMarkdown(artifact.content).split(/\r?\n/).filter(Boolean).slice(0,700).map(line=>new lib.Paragraph({children:[new lib.TextRun({text:line})]}));
         const doc=new lib.Document({sections:[{children:children.length?children:[new lib.Paragraph({text:'Klipza.IA'})]}]});blob=await lib.Packer.toBlob(doc);
+      }else if(artifact.type==='zip'){
+        const lib=window.fflate;if(!lib?.zipSync)throw new Error('Biblioteca ZIP beta indisponível.');
+        const files=Array.isArray(artifact.files)&&artifact.files.length?artifact.files:parseZipFiles(artifact.content);
+        const entries=Object.fromEntries(files.slice(0,8).map((file,index)=>[file.name||`arquivo-${index+1}.txt`,new TextEncoder().encode(String(file.content||'').slice(0,120000))]));
+        blob=new Blob([lib.zipSync(entries,{level:6})],{type:artifactMime('zip')});
       }else{
         const XLSX=window.XLSX;if(!XLSX?.utils)throw new Error('Biblioteca XLSX indisponível.');
         const rows=Array.isArray(artifact.rows)&&artifact.rows.length?artifact.rows:stripMarkdown(artifact.content).split(/\r?\n/).filter(Boolean).map(line=>({Conteúdo:line}));
@@ -3097,15 +3156,16 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
       chat.updated=Date.now(); attached=[]; persistIfNeeded(); renderHistory(); renderMessages();
       input.value='';input.style.height='37px';$('sendBtn').disabled=true;
       renderAttached();
+      if(state.user?.id)state.quota={...(state.quota||{}),synced:false};
       refreshQuotaUI();
-      if(!paidWithTokens)animateEnergyChange(energyBefore,state.quota.energy);
+      if(!paidWithTokens&&quotaReady())animateEnergyChange(energyBefore,state.quota.energy);
       responseState.stopped=false; setResponseUI(true);
       if(canPromoteToBackground)foregroundResponse={chat,chatId:targetChatId,messageIdValue:outboundMessageId,message:messageText,history,provider:'auto',promoted:false};
       else foregroundResponse=null;
       if(state.settings.thinkingMode==='deep'||isCodeRequest(messageText)) startResponseProgress(messageText,targetChatId); else showResponseStatus('Klipza está respondendo…');
       try{
         const payload=await requestAIAnswer(messageText,aiAttachments,mode,researchContext,targetChatId,billing);
-        if(payload?.quota&&state.user?.id){applyServerQuota(payload.quota);refreshQuotaUI();animateEnergyChange(energyBefore,state.quota.energy);}
+        if(state.user?.id){if(payload?.quota){applyServerQuota(payload.quota);refreshQuotaUI();animateEnergyChange(energyBefore,state.quota.energy);}else{await syncServerQuota(true);animateEnergyChange(energyBefore,state.quota.energy);}}
         if(!responseState.stopped)await streamReply(payload.answer,payload);
       }catch(error){
         if(responseState.stopped)return;
@@ -3278,21 +3338,24 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   function renderArtifactsPage(){
     const items=Object.values(state.artifacts).sort((a,b)=>b.created-a.created);
     $('main').innerHTML=`<header class="topbar"><div class="topbar-left"><button class="icon-btn" onclick="window.K.toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="topbar-title">Artefatos</div></div></header>
-      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos</h1><div class="page-sub">O Klipza cria arquivos automaticamente quando o pedido e a resposta justificam código, PDF, DOCX ou XLSX. Cada artefato criado consome 15 pontos de energia.</div>
-      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card" role="button" tabindex="0" onclick="window.K.openArtifact('${a.id}')" onkeydown="if(event.key==='Enter')window.K.openArtifact('${a.id}')"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':String(a.type||'file').toUpperCase()}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)}</div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div><div class="artifact-card-cta">Abrir preview → <button class="artifact-inline-action" type="button" ${(a.status==='pending'||a.status==='failed')?'disabled':''} onclick="event.stopPropagation();window.K.downloadArtifact('${a.id}')">Baixar</button></div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>
+      <section class="artifacts-view"><div class="artifacts-inner"><h1 class="page-title">Artefatos <small class="artifact-beta-badge page-beta-badge">BETA</small></h1><div class="page-sub">Área de artefatos em melhorias. O Klipza cria código, PDF, DOCX, XLSX e pacotes ZIP quando o pedido e a resposta justificam um arquivo. Cada artefato criado consome 15 pontos de energia.</div>
+      ${items.length?`<div class="artifact-grid">${items.map(a=>`<article class="artifact-card" role="button" tabindex="0" onclick="window.K.openArtifact('${a.id}')" onkeydown="if(event.key==='Enter')window.K.openArtifact('${a.id}')"><div class="artifact-head"><div class="artifact-icon">${a.type==='code'?'{}':String(a.type||'file').toUpperCase()}</div><div style="min-width:0"><div class="artifact-name">${esc(a.name)} <small class="artifact-beta-badge">BETA</small></div><div class="artifact-meta">${esc(a.type)} · ${new Date(a.created).toLocaleDateString('pt-BR')}</div></div></div><div class="artifact-preview">${esc(a.preview||'Artefato gerado pelo Klipza.IA.')}</div><div class="artifact-card-cta">Abrir preview → <button class="artifact-inline-action" type="button" ${(a.status==='pending'||a.status==='failed')?'disabled':''} onclick="event.stopPropagation();window.K.downloadArtifact('${a.id}')">${a.type==='zip'?'Baixar ZIP':'Baixar'}</button></div></article>`).join('')}</div>`:'<div class="empty-page">Nenhum artefato ainda.</div>'}</div></section>
       <div class="artifact-viewer" id="artifactViewer" aria-hidden="true"><div class="artifact-viewer-dialog" role="dialog" aria-modal="true" aria-labelledby="artifactViewerTitle"><div class="artifact-viewer-head"><div class="artifact-viewer-title" id="artifactViewerTitle">Artefato</div><button class="artifact-viewer-close" type="button" onclick="window.K.closeArtifact()" aria-label="Fechar preview">×</button></div><div class="artifact-viewer-body" id="artifactViewerBody"></div></div></div>`;
   }
-  function openArtifact(id){
+  async function openArtifact(id){
     const artifact=state.artifacts?.[id];if(!artifact)return;
     if(artifact.type==='code'){openArtifactCanvas(id);return;}
+    if(artifact.type==='pdf'&&!artifactRuntimeBlobs.has(id))await materializeArtifact(artifact);
     const viewer=$('artifactViewer'),body=$('artifactViewerBody'),title=$('artifactViewerTitle');
     if(!viewer||!body)return;
-    title.textContent=artifact.name||'Artefato';body.innerHTML='';
-    const preview=document.createElement('pre');preview.className='artifact-viewer-code';preview.textContent=String(artifact.preview||artifact.content||'');body.appendChild(preview);
+    title.textContent=`${artifact.name||'Artefato'} · BETA`;body.innerHTML='';
+    const blob=artifactRuntimeBlobs.get(id);
+    if(artifact.type==='pdf'&&blob){const frame=document.createElement('iframe');frame.className='artifact-viewer-frame';frame.title='Preview do PDF';frame.src=URL.createObjectURL(blob);viewer.dataset.previewUrl=frame.src;body.appendChild(frame);}
+    else{const preview=document.createElement('pre');preview.className='artifact-viewer-code';preview.textContent=artifact.type==='zip'&&Array.isArray(artifact.files)?artifact.files.map(file=>`${file.name}\n${file.content}`).join('\n\n'):String(artifact.preview||artifact.content||'');body.appendChild(preview);}
     const actions=document.createElement('div');actions.className='artifact-inline-actions';actions.innerHTML=`<button class="artifact-inline-action" type="button" onclick="window.K.downloadArtifact('${artifact.id}')">Baixar ${String(artifact.type||'arquivo').toUpperCase()}</button>`;body.appendChild(actions);
     viewer.classList.add('open');viewer.setAttribute('aria-hidden','false');
   }
-  function closeArtifact(){const viewer=$('artifactViewer');if(!viewer)return;viewer.classList.remove('open');viewer.setAttribute('aria-hidden','true');const body=$('artifactViewerBody');if(body)body.innerHTML='';}
+  function closeArtifact(){const viewer=$('artifactViewer');if(!viewer)return;const previewUrl=viewer.dataset.previewUrl;if(previewUrl){URL.revokeObjectURL(previewUrl);delete viewer.dataset.previewUrl;}viewer.classList.remove('open');viewer.setAttribute('aria-hidden','true');const body=$('artifactViewerBody');if(body)body.innerHTML='';}
 
   function renderSettingsPage(){
     const ini=initials(state.user?.name||'K');
@@ -3486,7 +3549,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
   document.addEventListener('visibilitychange',handleAppVisibility);
   window.addEventListener('pagehide',()=>{if(document.hidden)void promoteForegroundResponseToBackground();});
   window.addEventListener('focus',()=>{if(state.user)void syncServerQuota(true);});
-  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); touchSupabaseActivity(); if(Date.now()-lastServerQuotaSync>=60000)void syncServerQuota(); } }, 1000);
+  setInterval(()=>{ if(state.user){ ensureQuota(); refreshQuotaUI(); touchSupabaseActivity(); if(Date.now()-lastServerQuotaSync>=QUOTA_SYNC_MS)void syncServerQuota(true); } }, 1000);
   applyTheme();
   registerAppShell();
   setAuthMode('signin');

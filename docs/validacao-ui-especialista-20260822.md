@@ -43,3 +43,11 @@ A renderização completa sem conta real funcionou quando foi injetado um usuár
 Com Pensamento profundo já ativo, o menu `+` foi reaberto e o Modo Especialista foi ativado. O chip apareceu ao lado do chip de Pensamento profundo, ambos acima da caixa de escrita, e o placeholder mudou para orientar o pedido específico do Especialista.
 
 Como o teste usava um usuário apenas no `localStorage` e não havia sessão Supabase, a chamada foi interrompida com `Sua sessão expirou.`; nenhuma mensagem, plano real, RPC de quota ou energia foi consumido. O estado visual permaneceu correto, com os dois botões `×` disponíveis para desativação.
+
+## Validação de quota e artefatos beta — 22/08/2026
+
+Foi montado um estado sintético local com conta, quota `synced:false` e três artefatos: código, PDF e ZIP. Sem sessão real, o painel exibiu `—`, `…`, “Sincronizando quota…” e “Sincronizando energia, tokens e anexos…”, sem mostrar 100 como saldo confirmado.
+
+A área de Artefatos exibiu os três cards com selo **BETA**, preview e ação correspondente. O PDF abriu o viewer incorporado depois do carregamento da biblioteca de materialização. O ZIP exibiu o manifesto `README.txt` e o download local retornou sucesso. O teste não chamou IA, não consumiu energia/tokens, não usou RPC autenticada e não alterou o Supabase.
+
+Também foi corrigido durante o teste o alias do carregador de PDF (`pdf` → `jsPDF`), que anteriormente produzia “Biblioteca de artefato desconhecida”.
