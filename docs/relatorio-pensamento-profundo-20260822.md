@@ -41,3 +41,6 @@ O build publicado continua sendo gerado em `www/index.html` a partir do `index.h
 [1]: ../index.html "Aplicação principal single-file do Klipza.IA"
 [2]: ../api/ai.js "Endpoint de IA e planejador do Pensamento profundo"
 [3]: ../api/deep-jobs.js "Endpoint de jobs em segundo plano"
+
+
+Depois da propagação automática do commit `e2b025f`, a produção respondeu HTTP 200 e passou a servir o leitor SSE do Pensamento profundo. O marcador `window.K.pick('artifact')` não está mais presente no HTML publicado, enquanto `autoCreateArtifactsFromReply` continua presente. O endpoint de IA sem autenticação continua protegido e não foi usada uma mensagem real para o teste.
