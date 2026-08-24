@@ -1,908 +1,1179 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0c10">
-  <meta name="description" content="Studio Klip — crie, edite e visualize seus projetos dentro do Klipza.IA.">
-  <meta name="application-name" content="Studio Klip">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="icon" href="/assets/klipza-mark.png" type="image/png">
-  <link rel="apple-touch-icon" href="/assets/icon-192.png">
-  <script src="/vendor/supabase.js"></script>
-  <title>Studio Klip — Klipza</title>
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #0b0c10;
-      --panel: #111319;
-      --panel-raised: #171a22;
-      --panel-hover: #1d212c;
-      --panel-soft: #0f1117;
-      --ink: #f2f3f7;
-      --ink-soft: #a7abb8;
-      --ink-faint: #676d7c;
-      --line: rgba(255,255,255,.085);
-      --line-strong: rgba(255,255,255,.15);
-      --accent: #a295ff;
-      --accent-strong: #c8c0ff;
-      --accent-soft: rgba(162,149,255,.13);
-      --cyan: #66d9e8;
-      --green: #7fe1a9;
-      --orange: #efb16d;
-      --yellow: #f3d375;
-      --danger: #ff8d9a;
-      --topbar: 62px;
-      --rail: 244px;
-      --assistant: 334px;
-      --mono: "SFMono-Regular", "Cascadia Code", "Roboto Mono", Consolas, monospace;
-      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      --ease: cubic-bezier(.23,1,.32,1);
-    }
-    * { box-sizing: border-box; }
-    html, body { width: 100%; min-height: 100%; margin: 0; overflow: hidden; }
-    body { min-height: 100dvh; background: var(--bg); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
-    body.modal-open { overflow: hidden; }
-    button, input, textarea, select { font: inherit; color: inherit; }
-    button { border: 0; cursor: pointer; }
-    button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    a { color: inherit; text-decoration: none; }
-    svg { display: block; flex: 0 0 auto; }
-    img { max-width: 100%; }
-    .hidden { display: none !important; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0b0c10">
+<title>Studio Klip — Klipza</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0b0c10;--panel:#111319;--panel-raised:#171a22;--panel-hover:#1d212c;
+  --ink:#f2f3f7;--ink-soft:#a7abb8;--ink-faint:#676d7c;
+  --line:rgba(255,255,255,.085);--line-strong:rgba(255,255,255,.15);
+  --accent:#a295ff;--accent-strong:#c8c0ff;--accent-soft:rgba(162,149,255,.13);
+  --cyan:#66d9e8;--green:#7fe1a9;--orange:#efb16d;--yellow:#f3d375;--danger:#ff8d9a;
+  --topbar:56px;--rail:240px;--assistant:320px;
+  --mono:"SFMono-Regular","Cascadia Code","Roboto Mono",Consolas,monospace;
+  --sans:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+*{box-sizing:border-box}
+html,body{width:100%;height:100%;margin:0;overflow:hidden}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body.modal-open{overflow:hidden}
+button,input,textarea,select{font:inherit;color:inherit}
+button{border:0;cursor:pointer;background:transparent}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+svg{display:block;flex:0 0 auto}
+img{max-width:100%}
+.hidden{display:none!important}
 
-    .auth-gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 5%, rgba(162,149,255,.16), transparent 38%), var(--bg); }
-    .auth-card { width: min(430px,100%); padding: 36px 32px; border: 1px solid var(--line-strong); border-radius: 22px; background: rgba(17,19,25,.94); box-shadow: 0 30px 100px rgba(0,0,0,.38); text-align: center; }
-    .auth-mark { width: 54px; height: 54px; margin: 0 auto 18px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 16px; background: #08090c; }
-    .auth-mark img { width: 32px; height: 32px; object-fit: contain; }
-    .auth-card h1 { margin: 0; font-size: 24px; letter-spacing: -.7px; }
-    .auth-card p { margin: 9px 0 22px; color: var(--ink-soft); font-size: 13px; line-height: 1.6; }
-    .auth-card a { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; padding: 0 16px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 12px; font-weight: 800; }
+/* AUTH */
+.auth-gate{min-height:100dvh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 5%,rgba(162,149,255,.16),transparent 38%),var(--bg)}
+.auth-card{width:min(420px,100%);padding:34px 30px;border:1px solid var(--line-strong);border-radius:20px;background:rgba(17,19,25,.94);box-shadow:0 30px 100px rgba(0,0,0,.38);text-align:center}
+.auth-mark{width:52px;height:52px;margin:0 auto 18px;display:grid;place-items:center;border:1px solid var(--line-strong);border-radius:15px;background:#08090c;font:800 18px var(--mono);color:var(--accent-strong)}
+.auth-card h1{margin:0;font-size:22px;letter-spacing:-.6px}
+.auth-card p{margin:8px 0 20px;color:var(--ink-soft);font-size:13px;line-height:1.6}
+.auth-card a{min-height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 16px;border-radius:10px;background:var(--ink);color:var(--bg);font-size:12px;font-weight:800;text-decoration:none}
+.auth-card a:hover{background:var(--accent);color:#14121f}
 
-    .studio-shell { height: 100dvh; display: flex; flex-direction: column; background: var(--bg); }
-    .topbar { height: var(--topbar); display: flex; align-items: center; gap: 16px; padding: 0 17px; border-bottom: 1px solid var(--line); background: rgba(11,12,16,.92); backdrop-filter: blur(18px); z-index: 40; }
-    .brand { min-width: var(--rail); display: flex; align-items: center; gap: 10px; }
-    .brand-mark { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-strong); border-radius: 9px; background: #07080b; }
-    .brand-mark img { width: 18px; height: 18px; object-fit: contain; }
-    .brand-copy { display: grid; gap: 2px; min-width: 0; }
-    .brand-name { font-size: 14px; font-weight: 850; letter-spacing: -.35px; }
-    .brand-path { display: flex; align-items: center; gap: 5px; color: var(--ink-soft); font: 9px var(--mono); }
-    .brand-path strong { color: var(--accent-strong); font-weight: 650; }
-    .brand-badge { padding: 3px 6px; border: 1px solid rgba(162,149,255,.33); border-radius: 5px; color: var(--accent-strong); font: 800 8px var(--sans); letter-spacing: .12em; }
-    .topbar-center { min-width: 0; flex: 1; display: flex; align-items: center; gap: 8px; color: var(--ink-soft); font-size: 11px; }
-    .status-dot { width: 6px; height: 6px; flex: 0 0 auto; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px rgba(127,225,169,.08); }
-    .topbar-center span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .topbar-actions { display: flex; align-items: center; gap: 7px; }
-    .topbar-button, .ghost-button { min-height: 33px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 10px; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--ink-soft); font-size: 10px; font-weight: 750; transition: background .16s, border-color .16s, color .16s, transform .16s; }
-    .topbar-button:hover, .ghost-button:hover { border-color: var(--line-strong); background: var(--panel-hover); color: var(--ink); }
-    .topbar-button:active, .ghost-button:active, .primary-button:active, .file-button:active, .icon-button:active { transform: scale(.97); }
-    .topbar-button svg, .ghost-button svg { width: 14px; height: 14px; }
-    .topbar-button.primary { border-color: transparent; background: var(--accent); color: #13111e; }
-    .topbar-button.primary:hover { background: var(--accent-strong); color: #13111e; }
-    .account-mini { display: flex; align-items: center; gap: 8px; padding-left: 8px; border-left: 1px solid var(--line); }
-    .account-avatar { width: 27px; height: 27px; display: grid; place-items: center; border-radius: 50%; background: linear-gradient(135deg,#8d7eff,#d9d5ff); color: #151225; font-size: 9px; font-weight: 900; }
-    .account-copy { display: grid; gap: 2px; max-width: 125px; }
-    .account-copy strong, .account-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .account-copy strong { font-size: 10px; }
-    .account-copy span { color: var(--ink-faint); font-size: 9px; }
-    .mobile-toggle { display: none; width: 33px; height: 33px; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: transparent; color: var(--ink-soft); }
-    .mobile-toggle svg { width: 15px; height: 15px; }
+/* SHELL */
+.studio-shell{height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+.topbar{height:var(--topbar);display:flex;align-items:center;gap:14px;padding:0 14px;border-bottom:1px solid var(--line);background:rgba(11,12,16,.92);backdrop-filter:blur(18px);z-index:40}
+.brand{min-width:var(--rail);display:flex;align-items:center;gap:9px}
+.brand-mark{width:28px;height:28px;display:grid;place-items:center;border:1px solid var(--line-strong);border-radius:8px;background:#07080b;font:800 11px var(--mono);color:var(--accent-strong)}
+.brand-copy{display:grid;gap:1px;min-width:0}
+.brand-name{font-size:13px;font-weight:850;letter-spacing:-.3px}
+.brand-path{display:flex;align-items:center;gap:5px;color:var(--ink-soft);font:9px var(--mono)}
+.brand-path strong{color:var(--accent-strong);font-weight:650}
+.brand-badge{padding:2px 5px;border:1px solid rgba(162,149,255,.33);border-radius:5px;color:var(--accent-strong);font:800 8px var(--sans);letter-spacing:.12em}
+.topbar-center{min-width:0;flex:1;display:flex;align-items:center;gap:7px;color:var(--ink-soft);font-size:11px}
+.status-dot{width:6px;height:6px;flex:0 0 auto;border-radius:50%;background:var(--green);box-shadow:0 0 0 4px rgba(127,225,169,.08)}
+.topbar-center span:last-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar-actions{display:flex;align-items:center;gap:6px}
+.topbar-button,.ghost-button{min-height:32px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--ink-soft);font-size:10px;font-weight:750;text-decoration:none;transition:all .16s}
+.topbar-button:hover,.ghost-button:hover{border-color:var(--line-strong);background:var(--panel-hover);color:var(--ink)}
+.topbar-button:active,.ghost-button:active{transform:scale(.97)}
+.topbar-button svg,.ghost-button svg{width:13px;height:13px}
+.account-mini{display:flex;align-items:center;gap:7px;padding-left:8px;border-left:1px solid var(--line)}
+.account-avatar{width:26px;height:26px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg,#8d7eff,#d9d5ff);color:#151225;font-size:9px;font-weight:900}
+.account-copy{display:grid;gap:1px;max-width:120px}
+.account-copy strong,.account-copy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.account-copy strong{font-size:10px}
+.account-copy span{color:var(--ink-faint);font-size:9px}
+.mobile-toggle{display:none;width:32px;height:32px;place-items:center;border:1px solid var(--line);border-radius:8px;color:var(--ink-soft)}
+.mobile-toggle svg{width:14px;height:14px}
 
-    .studio-layout { min-height: 0; display: grid; grid-template-columns: var(--rail) minmax(0,1fr) var(--assistant); flex: 1; }
-    .project-rail { min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--line); background: var(--panel); }
-    .rail-head { padding: 15px 12px 10px; }
-    .workspace-card { width: 100%; display: flex; align-items: center; gap: 9px; padding: 9px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel-raised); text-align: left; }
-    .workspace-card:hover { border-color: var(--line-strong); background: var(--panel-hover); }
-    .workspace-mark { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--accent-soft); color: var(--accent-strong); font: 800 10px var(--mono); }
-    .workspace-copy { min-width: 0; flex: 1; display: grid; gap: 2px; }
-    .workspace-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
-    .workspace-copy span { color: var(--ink-faint); font-size: 9px; }
-    .workspace-card > svg { width: 13px; height: 13px; color: var(--ink-faint); }
-    .rail-section { padding: 0 9px; }
-    .rail-label-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 5px 7px; color: var(--ink-faint); font-size: 9px; font-weight: 850; letter-spacing: .13em; }
-    .rail-label-actions { display: flex; align-items: center; gap: 2px; }
-    .rail-label-row button, .icon-button { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 6px; color: var(--ink-faint); background: transparent; }
-    .rail-label-row button:hover, .icon-button:hover { background: var(--panel-hover); color: var(--ink); }
-    .rail-label-row svg, .icon-button svg { width: 13px; height: 13px; }
-    .file-list { display: grid; gap: 2px; }
-    .file-row { min-width: 0; display: flex; align-items: center; gap: 2px; border-radius: 8px; }
-    .file-row.active, .file-row:hover { background: var(--panel-hover); }
-    .file-row.active { background: var(--accent-soft); }
-    .file-button { min-width: 0; min-height: 35px; flex: 1; display: flex; align-items: center; gap: 9px; padding: 0 8px; border-radius: 8px; background: transparent; color: var(--ink-soft); text-align: left; }
-    .file-row.active .file-button { color: var(--accent-strong); }
-    .file-row:hover .file-button { color: var(--ink); }
-    .file-type { width: 18px; height: 18px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 5px; background: rgba(102,217,232,.09); color: var(--cyan); font: 800 8px var(--mono); }
-    .file-type.css, .file-type.scss { background: rgba(239,177,109,.10); color: var(--orange); }
-    .file-type.js, .file-type.ts, .file-type.jsx, .file-type.tsx { background: rgba(243,211,117,.10); color: var(--yellow); }
-    .file-type.py, .file-type.rb, .file-type.php { background: rgba(162,149,255,.11); color: var(--accent-strong); }
-    .file-type.json, .file-type.yaml, .file-type.yml { background: rgba(127,225,169,.10); color: var(--green); }
-    .file-button > span:nth-child(2) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 11px var(--mono); }
-    .file-delete { width: 27px; height: 27px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 7px; background: transparent; color: transparent; }
-    .file-row:hover .file-delete, .file-row.active .file-delete { color: var(--ink-faint); }
-    .file-delete:hover { background: rgba(255,141,154,.12); color: var(--danger) !important; }
-    .file-delete svg { width: 13px; height: 13px; }
-    .empty-files { margin: 5px 2px 0; padding: 16px 11px; border: 1px dashed var(--line-strong); border-radius: 10px; text-align: center; }
-    .empty-files-icon { width: 29px; height: 29px; display: grid; place-items: center; margin: 0 auto 9px; border: 1px solid var(--line); border-radius: 9px; background: var(--panel-raised); color: var(--ink-faint); }
-    .empty-files-icon svg { width: 14px; height: 14px; }
-    .empty-files strong { display: block; font-size: 10px; }
-    .empty-files p { margin: 5px 0 10px; color: var(--ink-faint); font-size: 9px; line-height: 1.45; }
-    .small-primary { min-height: 28px; padding: 0 9px; border-radius: 7px; background: var(--accent); color: #14121f; font-size: 9px; font-weight: 850; }
-    .small-primary:hover { background: var(--accent-strong); }
-    .rail-utility { display: grid; gap: 2px; margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--line); }
-    .rail-action { min-height: 33px; display: flex; align-items: center; gap: 9px; padding: 0 8px; border-radius: 8px; background: transparent; color: var(--ink-soft); text-align: left; font-size: 10px; font-weight: 650; }
-    .rail-action:hover { background: var(--panel-hover); color: var(--ink); }
-    .rail-action svg { width: 14px; height: 14px; color: var(--ink-faint); }
-    .rail-spacer { flex: 1; }
-    .rail-footer { margin: 10px; padding: 11px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel-raised); }
-    .rail-footer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; color: var(--ink-faint); font-size: 8px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
-    .rail-footer-head span:last-child { color: var(--green); letter-spacing: 0; }
-    .memory-track { height: 5px; overflow: hidden; border-radius: 99px; background: rgba(255,255,255,.08); }
-    .memory-track span { display: block; width: 17%; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--accent),var(--cyan)); }
-    .rail-footer p { margin: 7px 0 0; color: var(--ink-faint); font-size: 9px; line-height: 1.4; }
+/* LAYOUT */
+.studio-layout{min-height:0;display:grid;grid-template-columns:var(--rail) minmax(0,1fr) var(--assistant);flex:1}
+.project-rail{min-width:0;display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel)}
+.rail-head{padding:12px 10px 8px}
+.workspace-card{width:100%;display:flex;align-items:center;gap:8px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel-raised);text-align:left}
+.workspace-card:hover{border-color:var(--line-strong);background:var(--panel-hover)}
+.workspace-mark{width:26px;height:26px;display:grid;place-items:center;border-radius:7px;background:var(--accent-soft);color:var(--accent-strong);font:800 10px var(--mono)}
+.workspace-copy{min-width:0;flex:1;display:grid;gap:1px}
+.workspace-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px}
+.workspace-copy span{color:var(--ink-faint);font-size:9px}
+.workspace-card>svg{width:12px;height:12px;color:var(--ink-faint)}
+.rail-section{padding:0 8px}
+.rail-label-row{display:flex;align-items:center;justify-content:space-between;padding:11px 4px 6px;color:var(--ink-faint);font-size:9px;font-weight:850;letter-spacing:.13em}
+.rail-label-actions{display:flex;gap:2px}
+.rail-label-row button,.icon-button{width:22px;height:22px;display:grid;place-items:center;border-radius:6px;color:var(--ink-faint)}
+.rail-label-row button:hover,.icon-button:hover{background:var(--panel-hover);color:var(--ink)}
+.rail-label-row svg,.icon-button svg{width:12px;height:12px}
+.file-list{display:grid;gap:1px}
+.file-row{min-width:0;display:flex;align-items:center;gap:1px;border-radius:7px}
+.file-row.active,.file-row:hover{background:var(--panel-hover)}
+.file-row.active{background:var(--accent-soft)}
+.file-button{min-width:0;min-height:32px;flex:1;display:flex;align-items:center;gap:8px;padding:0 7px;border-radius:7px;color:var(--ink-soft);text-align:left}
+.file-row.active .file-button{color:var(--accent-strong)}
+.file-row:hover .file-button{color:var(--ink)}
+.file-type{width:17px;height:17px;display:grid;place-items:center;flex:0 0 auto;border-radius:4px;background:rgba(102,217,232,.09);color:var(--cyan);font:800 7px var(--mono)}
+.file-type.css,.file-type.scss{background:rgba(239,177,109,.10);color:var(--orange)}
+.file-type.js,.file-type.ts,.file-type.jsx,.file-type.tsx{background:rgba(243,211,117,.10);color:var(--yellow)}
+.file-type.py,.file-type.rb,.file-type.php{background:rgba(162,149,255,.11);color:var(--accent-strong)}
+.file-type.json,.file-type.yaml,.file-type.yml{background:rgba(127,225,169,.10);color:var(--green)}
+.file-button>span:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:10px var(--mono)}
+.file-delete{width:24px;height:24px;display:grid;place-items:center;flex:0 0 auto;border-radius:6px;color:transparent}
+.file-row:hover .file-delete,.file-row.active .file-delete{color:var(--ink-faint)}
+.file-delete:hover{background:rgba(255,141,154,.12);color:var(--danger)!important}
+.file-delete svg{width:12px;height:12px}
+.empty-files{margin:4px 2px 0;padding:14px 10px;border:1px dashed var(--line-strong);border-radius:9px;text-align:center}
+.empty-files-icon{width:26px;height:26px;display:grid;place-items:center;margin:0 auto 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel-raised);color:var(--ink-faint)}
+.empty-files-icon svg{width:13px;height:13px}
+.empty-files strong{display:block;font-size:10px}
+.empty-files p{margin:4px 0 9px;color:var(--ink-faint);font-size:9px;line-height:1.45}
+.small-primary{min-height:26px;padding:0 8px;border-radius:6px;background:var(--accent);color:#14121f;font-size:9px;font-weight:850}
+.small-primary:hover{background:var(--accent-strong)}
+.rail-utility{display:grid;gap:1px;margin-top:10px;padding-top:9px;border-top:1px solid var(--line)}
+.rail-action{min-height:30px;display:flex;align-items:center;gap:8px;padding:0 7px;border-radius:7px;color:var(--ink-soft);text-align:left;font-size:10px;font-weight:650}
+.rail-action:hover{background:var(--panel-hover);color:var(--ink)}
+.rail-action svg{width:13px;height:13px;color:var(--ink-faint)}
+.rail-spacer{flex:1}
+.rail-footer{margin:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--panel-raised)}
+.rail-footer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;color:var(--ink-faint);font-size:8px;font-weight:850;letter-spacing:.1em;text-transform:uppercase}
+.rail-footer-head span:last-child{color:var(--green);letter-spacing:0}
+.memory-track{height:4px;overflow:hidden;border-radius:99px;background:rgba(255,255,255,.08)}
+.memory-track span{display:block;width:17%;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent),var(--cyan))}
+.rail-footer p{margin:6px 0 0;color:var(--ink-faint);font-size:9px;line-height:1.4}
 
-    .main-pane { min-width: 0; display: flex; flex-direction: column; background: var(--bg); }
-    .main-toolbar { min-height: 54px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; border-bottom: 1px solid var(--line); background: var(--panel); }
-    .main-toolbar-copy { min-width: 0; display: grid; gap: 3px; }
-    .main-toolbar-copy strong { font-size: 12px; letter-spacing: -.2px; }
-    .main-toolbar-copy span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-faint); font: 9px var(--mono); }
-    .main-toolbar-actions { display: flex; align-items: center; gap: 5px; }
-    .toolbar-icon { width: 29px; height: 29px; display: grid; place-items: center; border-radius: 7px; color: var(--ink-faint); background: transparent; }
-    .toolbar-icon:hover { background: var(--panel-hover); color: var(--ink); }
-    .toolbar-icon.active { color: var(--accent-strong); background: var(--accent-soft); }
-    .toolbar-icon svg { width: 14px; height: 14px; }
-    .editor-tabs { min-height: 36px; display: flex; align-items: stretch; overflow-x: auto; border-bottom: 1px solid var(--line); background: var(--panel-soft); scrollbar-width: thin; }
-    .editor-tabs:empty { display: none; }
-    .editor-tab { min-width: 112px; max-width: 190px; display: flex; align-items: center; gap: 7px; padding: 0 9px; border-right: 1px solid var(--line); color: var(--ink-faint); font: 10px var(--mono); }
-    .editor-tab.active { border-bottom: 2px solid var(--accent); background: var(--bg); color: var(--ink); }
-    .editor-tab > span:nth-child(2) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .editor-tab .file-type { width: 16px; height: 16px; font-size: 7px; }
-    .tab-close { width: 18px; height: 18px; display: grid; place-items: center; margin-left: auto; border-radius: 5px; color: var(--ink-faint); background: transparent; }
-    .tab-close:hover { background: var(--panel-hover); color: var(--ink); }
-    .tab-close svg { width: 11px; height: 11px; }
-    .empty-stage, .editor-stage { min-height: 0; flex: 1; }
-    .empty-stage { display: grid; place-items: center; overflow: auto; padding: 28px; background: radial-gradient(circle at 50% 0%, rgba(162,149,255,.11), transparent 42%), var(--bg); }
-    .welcome-card { width: min(700px,100%); text-align: center; }
-    .welcome-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid rgba(162,149,255,.28); border-radius: 999px; background: var(--accent-soft); color: var(--accent-strong); font-size: 9px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
-    .welcome-kicker i { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
-    .welcome-card h1 { max-width: 620px; margin: 18px auto 10px; font-size: clamp(31px,4.4vw,53px); line-height: .98; letter-spacing: -.075em; }
-    .welcome-card > p { max-width: 490px; margin: 0 auto; color: var(--ink-soft); font-size: 13px; line-height: 1.65; }
-    .welcome-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 21px; }
-    .primary-button, .secondary-button { min-height: 39px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 13px; border-radius: 10px; font-size: 10px; font-weight: 800; transition: background .16s, border-color .16s, transform .16s; }
-    .primary-button { background: var(--accent); color: #14121f; }
-    .primary-button:hover { background: var(--accent-strong); }
-    .secondary-button { border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink-soft); }
-    .secondary-button:hover { border-color: var(--line-strong); background: var(--panel-hover); color: var(--ink); }
-    .primary-button svg, .secondary-button svg { width: 14px; height: 14px; }
-    .welcome-hints { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 35px; text-align: left; }
-    .hint-card { padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(17,19,25,.72); }
-    .hint-icon { width: 25px; height: 25px; display: grid; place-items: center; margin-bottom: 9px; border-radius: 8px; background: var(--panel-hover); color: var(--accent-strong); }
-    .hint-icon svg { width: 13px; height: 13px; }
-    .hint-card strong { display: block; font-size: 10px; }
-    .hint-card span { display: block; margin-top: 4px; color: var(--ink-faint); font-size: 9px; line-height: 1.45; }
-    .editor-stage { display: grid; grid-template-columns: minmax(0,1fr); overflow: hidden; background: #0e1015; }
-    .editor-stage.with-preview { grid-template-columns: minmax(0,1fr) minmax(280px,46%); }
-    .editor-area { min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-    .editor-toolbar { min-height: 43px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 11px; border-bottom: 1px solid var(--line); background: #101219; }
-    .editor-file-meta { min-width: 0; display: flex; align-items: center; gap: 8px; }
-    .editor-file-meta .file-type { width: 19px; height: 19px; }
-    .editor-file-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 10px var(--mono); }
-    .editor-file-state { color: var(--ink-faint); font-size: 9px; }
-    .editor-toolbar-actions { display: flex; align-items: center; gap: 3px; }
-    .code-wrap { min-height: 0; display: grid; grid-template-columns: 52px minmax(0,1fr); flex: 1; overflow: hidden; }
-    .line-numbers { margin: 0; padding: 17px 11px 20px 0; overflow: hidden; border-right: 1px solid rgba(255,255,255,.045); color: #474c5b; font: 11px/1.72 var(--mono); text-align: right; user-select: none; white-space: pre; }
-    #codeEditor { width: 100%; height: 100%; min-width: 0; min-height: 0; resize: none; overflow: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; border: 0; outline: 0; padding: 17px 20px 24px 15px; background: transparent; color: #d9dcec; caret-color: var(--accent-strong); font: 11px/1.72 var(--mono); tab-size: 2; white-space: pre; overflow-wrap: normal; word-break: normal; }
-    #codeEditor::selection { background: rgba(162,149,255,.27); }
-    .editor-statusbar { min-height: 25px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 0 11px; border-top: 1px solid var(--line); background: #101219; color: var(--ink-faint); font: 8px var(--mono); }
-    .status-left, .status-right { display: flex; align-items: center; gap: 11px; }
-    .status-ready { display: inline-flex; align-items: center; gap: 5px; color: var(--green); }
-    .status-ready i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
-    .preview-pane { min-width: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: #f7f7f8; }
-    .preview-toolbar { min-height: 43px; display: flex; align-items: center; justify-content: space-between; gap: 9px; padding: 0 10px; border-bottom: 1px solid #dedee2; background: #f0f0f2; color: #272831; }
-    .preview-label { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 800; }
-    .preview-label i { width: 6px; height: 6px; border-radius: 50%; background: #27a269; }
-    .preview-actions { display: flex; align-items: center; gap: 3px; }
-    .preview-action { width: 26px; height: 26px; display: grid; place-items: center; border-radius: 6px; color: #656772; }
-    .preview-action:hover { background: #dedee2; color: #25262f; }
-    .preview-action svg { width: 13px; height: 13px; }
-    #previewFrame { width: 100%; min-height: 0; flex: 1; border: 0; background: #fff; }
-    .preview-empty { min-height: 100%; display: grid; place-items: center; align-content: center; gap: 8px; padding: 28px; color: #656772; text-align: center; }
-    .preview-empty strong { color: #282934; font-size: 13px; }
-    .preview-empty span { max-width: 270px; font-size: 10px; line-height: 1.5; }
+/* MAIN */
+.main-pane{min-width:0;display:flex;flex-direction:column;background:var(--bg)}
+.main-toolbar{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:0 12px;border-bottom:1px solid var(--line);background:var(--panel)}
+.main-toolbar-copy{min-width:0;display:grid;gap:2px}
+.main-toolbar-copy strong{font-size:12px;letter-spacing:-.2px}
+.main-toolbar-copy span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-faint);font:9px var(--mono)}
+.main-toolbar-actions{display:flex;align-items:center;gap:4px}
+.toolbar-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:6px;color:var(--ink-faint)}
+.toolbar-icon:hover{background:var(--panel-hover);color:var(--ink)}
+.toolbar-icon.active{color:var(--accent-strong);background:var(--accent-soft)}
+.toolbar-icon svg{width:13px;height:13px}
+.editor-tabs{min-height:34px;display:flex;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--panel);scrollbar-width:thin}
+.editor-tabs:empty{display:none}
+.editor-tab{min-width:100px;max-width:180px;display:flex;align-items:center;gap:6px;padding:0 8px;border-right:1px solid var(--line);color:var(--ink-faint);font:10px var(--mono)}
+.editor-tab.active{border-bottom:2px solid var(--accent);background:var(--bg);color:var(--ink)}
+.editor-tab>span:nth-child(2){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.editor-tab .file-type{width:15px;height:15px;font-size:7px}
+.tab-close{width:16px;height:16px;display:grid;place-items:center;margin-left:auto;border-radius:4px;color:var(--ink-faint)}
+.tab-close:hover{background:var(--panel-hover);color:var(--ink)}
+.tab-close svg{width:10px;height:10px}
+.empty-stage,.editor-stage{min-height:0;flex:1}
+.empty-stage{display:grid;place-items:center;overflow:auto;padding:24px;background:radial-gradient(circle at 50% 0%,rgba(162,149,255,.11),transparent 42%),var(--bg)}
+.welcome-card{width:min(680px,100%);text-align:center}
+.welcome-kicker{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid rgba(162,149,255,.28);border-radius:999px;background:var(--accent-soft);color:var(--accent-strong);font-size:9px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
+.welcome-kicker i{width:4px;height:4px;border-radius:50%;background:var(--accent)}
+.welcome-card h1{max-width:600px;margin:16px auto 8px;font-size:clamp(28px,4vw,48px);line-height:.98;letter-spacing:-.07em}
+.welcome-card>p{max-width:470px;margin:0 auto;color:var(--ink-soft);font-size:13px;line-height:1.65}
+.welcome-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:7px;margin-top:18px}
+.primary-button,.secondary-button{min-height:36px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:0 12px;border-radius:9px;font-size:10px;font-weight:800;transition:all .16s}
+.primary-button{background:var(--accent);color:#14121f}
+.primary-button:hover{background:var(--accent-strong)}
+.secondary-button{border:1px solid var(--line-strong);background:var(--panel);color:var(--ink-soft)}
+.secondary-button:hover{border-color:var(--line-strong);background:var(--panel-hover);color:var(--ink)}
+.primary-button svg,.secondary-button svg{width:13px;height:13px}
+.welcome-hints{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:28px;text-align:left}
+.hint-card{padding:11px;border:1px solid var(--line);border-radius:10px;background:rgba(17,19,25,.72)}
+.hint-icon{width:23px;height:23px;display:grid;place-items:center;margin-bottom:8px;border-radius:7px;background:var(--panel-hover);color:var(--accent-strong)}
+.hint-icon svg{width:12px;height:12px}
+.hint-card strong{display:block;font-size:10px}
+.hint-card span{display:block;margin-top:3px;color:var(--ink-faint);font-size:9px;line-height:1.45}
+.editor-stage{display:grid;grid-template-columns:minmax(0,1fr);overflow:hidden;background:#0e1015}
+.editor-stage.with-preview{grid-template-columns:minmax(0,1fr) minmax(280px,46%)}
+.editor-area{min-width:0;display:flex;flex-direction:column;overflow:hidden}
+.editor-toolbar{min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 10px;border-bottom:1px solid var(--line);background:#101219}
+.editor-file-meta{min-width:0;display:flex;align-items:center;gap:7px}
+.editor-file-meta .file-type{width:18px;height:18px}
+.editor-file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:10px var(--mono)}
+.editor-file-state{color:var(--ink-faint);font-size:9px}
+.editor-toolbar-actions{display:flex;align-items:center;gap:2px}
+.code-wrap{min-height:0;display:grid;grid-template-columns:48px minmax(0,1fr);flex:1;overflow:hidden}
+.line-numbers{margin:0;padding:14px 9px 18px 0;overflow:hidden;border-right:1px solid rgba(255,255,255,.045);color:#474c5b;font:11px/1.72 var(--mono);text-align:right;user-select:none;white-space:pre}
+#codeEditor{width:100%;height:100%;min-width:0;min-height:0;resize:none;overflow:auto;overscroll-behavior:contain;border:0;outline:0;padding:14px 18px 22px 12px;background:transparent;color:#d9dcec;caret-color:var(--accent-strong);font:11px/1.72 var(--mono);tab-size:2;white-space:pre;overflow-wrap:normal;word-break:normal}
+#codeEditor::selection{background:rgba(162,149,255,.27)}
+.editor-statusbar{min-height:24px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 10px;border-top:1px solid var(--line);background:#101219;color:var(--ink-faint);font:8px var(--mono)}
+.status-left,.status-right{display:flex;align-items:center;gap:10px}
+.status-ready{display:inline-flex;align-items:center;gap:4px;color:var(--green)}
+.status-ready i{width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-dirty{color:var(--yellow)}
+.status-dirty i{background:var(--yellow)}
 
-    .assistant-pane { min-width: 0; display: flex; flex-direction: column; border-left: 1px solid var(--line); background: var(--panel); }
-    .assistant-head { min-height: 62px; display: flex; align-items: center; gap: 10px; padding: 0 13px; border-bottom: 1px solid var(--line); }
-    .assistant-avatar { width: 31px; height: 31px; display: grid; place-items: center; border: 1px solid rgba(162,149,255,.35); border-radius: 10px; background: linear-gradient(135deg,rgba(162,149,255,.24),rgba(102,217,232,.12)); color: var(--accent-strong); font: 800 9px var(--mono); }
-    .assistant-title { min-width: 0; flex: 1; display: grid; gap: 3px; }
-    .assistant-title strong { font-size: 12px; letter-spacing: -.25px; }
-    .assistant-title span { color: var(--ink-faint); font-size: 9px; }
-    .assistant-head .icon-button { width: 28px; height: 28px; }
-    .context-card { margin: 12px 12px 0; padding: 9px 10px; border: 1px solid rgba(162,149,255,.19); border-radius: 9px; background: rgba(162,149,255,.06); }
-    .context-label { color: var(--accent-strong); font-size: 8px; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
-    .context-copy { margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-soft); font: 9px var(--mono); }
-    .assistant-messages { min-height: 0; display: flex; flex-direction: column; gap: 13px; overflow: auto; padding: 16px 12px 12px; flex: 1; }
-    .message { display: flex; align-items: flex-start; gap: 8px; }
-    .message.user { flex-direction: row-reverse; }
-    .message-avatar { width: 22px; height: 22px; display: grid; place-items: center; flex: 0 0 auto; border-radius: 7px; background: var(--panel-hover); color: var(--ink-faint); font: 8px var(--mono); font-weight: 800; }
-    .message.assistant .message-avatar { background: var(--accent-soft); color: var(--accent-strong); }
-    .message-bubble { max-width: 87%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel-raised); color: var(--ink-soft); font-size: 10px; line-height: 1.55; }
-    .message.user .message-bubble { border-color: rgba(162,149,255,.23); background: var(--accent-soft); color: var(--ink); }
-    .message-bubble strong { color: var(--ink); font-weight: 800; }
-    .assistant-suggestions { display: flex; flex-wrap: wrap; gap: 5px; margin-left: 30px; }
-    .suggestion { min-height: 26px; padding: 0 8px; border: 1px solid var(--line); border-radius: 7px; background: transparent; color: var(--ink-soft); font-size: 9px; }
-    .suggestion:hover { border-color: rgba(162,149,255,.38); background: var(--accent-soft); color: var(--accent-strong); }
-    .assistant-composer { margin: 0 11px 11px; padding: 8px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--panel-raised); }
-    #assistantInput { width: 100%; min-height: 51px; max-height: 130px; resize: none; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 10px; line-height: 1.5; }
-    #assistantInput::placeholder { color: var(--ink-faint); }
-    .composer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding-top: 5px; }
-    .composer-hint { color: var(--ink-faint); font: 8px var(--mono); }
-    .composer-send { width: 28px; height: 28px; display: grid; place-items: center; border-radius: 8px; background: var(--accent); color: #14121f; }
-    .composer-send:hover { background: var(--accent-strong); }
-    .composer-send svg { width: 13px; height: 13px; }
+/* PREVIEW */
+.preview-pane{min-width:0;display:flex;flex-direction:column;border-left:1px solid var(--line);background:#fff}
+.preview-toolbar{min-height:40px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 9px;border-bottom:1px solid #dedee2;background:#f0f0f2;color:#272831}
+.preview-label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:800}
+.preview-label i{width:6px;height:6px;border-radius:50%;background:#27a269}
+.preview-mode{display:flex;gap:2px;padding:2px;border:1px solid #e0e0e4;border-radius:6px;background:#fff}
+.preview-mode-btn{min-height:22px;padding:0 7px;border-radius:4px;background:transparent;color:#656772;font-size:9px;font-weight:700}
+.preview-mode-btn.active{background:#272831;color:#fff}
+.preview-actions{display:flex;align-items:center;gap:2px}
+.preview-action{width:24px;height:24px;display:grid;place-items:center;border-radius:5px;color:#656772}
+.preview-action:hover{background:#dedee2;color:#25262f}
+.preview-action svg{width:12px;height:12px}
+#previewFrame{width:100%;min-height:0;flex:1;border:0;background:#fff}
+.preview-empty{min-height:100%;display:grid;place-items:center;align-content:center;gap:7px;padding:24px;color:#656772;text-align:center}
+.preview-empty strong{color:#282934;font-size:13px}
+.preview-empty span{max-width:260px;font-size:10px;line-height:1.5}
 
-    .toast { position: fixed; left: 50%; bottom: 22px; z-index: 90; max-width: calc(100% - 32px); padding: 10px 13px; border: 1px solid var(--line-strong); border-radius: 10px; background: #1c2029; box-shadow: 0 14px 40px rgba(0,0,0,.32); color: var(--ink); font-size: 10px; opacity: 0; pointer-events: none; transform: translate(-50%,12px); transition: opacity .18s, transform .18s; }
-    .toast.show { opacity: 1; transform: translate(-50%,0); }
-    .modal-backdrop { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 22px; background: rgba(0,0,0,.62); backdrop-filter: blur(8px); }
-    .modal-card { width: min(430px,100%); overflow: hidden; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--panel-raised); box-shadow: 0 28px 90px rgba(0,0,0,.5); }
-    .modal-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px; border-bottom: 1px solid var(--line); }
-    .modal-head-copy { display: grid; gap: 3px; }
-    .modal-head-copy strong { font-size: 13px; }
-    .modal-head-copy span { color: var(--ink-faint); font-size: 9px; }
-    .modal-body { padding: 16px; }
-    .modal-label { display: grid; gap: 6px; color: var(--ink-soft); font-size: 10px; font-weight: 750; }
-    .modal-input, .modal-select { width: 100%; height: 40px; padding: 0 11px; border: 1px solid var(--line-strong); border-radius: 9px; outline: 0; background: var(--panel); color: var(--ink); font-size: 11px; }
-    .modal-input:focus, .modal-select:focus { border-color: var(--accent); }
-    .modal-grid { display: grid; grid-template-columns: 1.2fr .8fr; gap: 9px; }
-    .modal-error { min-height: 16px; margin-top: 9px; color: var(--danger); font-size: 10px; }
-    .modal-actions { display: flex; justify-content: flex-end; gap: 7px; margin-top: 13px; }
-    .modal-cancel, .modal-submit, .modal-danger { min-height: 34px; padding: 0 11px; border-radius: 8px; font-size: 10px; font-weight: 800; }
-    .modal-cancel { border: 1px solid var(--line); background: transparent; color: var(--ink-soft); }
-    .modal-cancel:hover { background: var(--panel-hover); color: var(--ink); }
-    .modal-submit { background: var(--accent); color: #14121f; }
-    .modal-submit:hover { background: var(--accent-strong); }
-    .modal-danger { background: var(--danger); color: #260e13; }
-    .modal-danger:hover { filter: brightness(1.08); }
-    .command-palette { position: fixed; inset: 0; z-index: 85; display: grid; place-items: start center; padding-top: 14vh; background: rgba(0,0,0,.48); backdrop-filter: blur(6px); }
-    .command-card { width: min(520px,calc(100% - 28px)); overflow: hidden; border: 1px solid var(--line-strong); border-radius: 14px; background: var(--panel-raised); box-shadow: 0 25px 80px rgba(0,0,0,.45); }
-    .command-search { display: flex; align-items: center; gap: 8px; padding: 0 13px; border-bottom: 1px solid var(--line); }
-    .command-search svg { width: 15px; height: 15px; color: var(--ink-faint); }
-    #commandInput { width: 100%; height: 45px; border: 0; outline: 0; background: transparent; font-size: 11px; }
-    .command-list { display: grid; gap: 2px; padding: 7px; }
-    .command-item { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 8px; background: transparent; color: var(--ink-soft); text-align: left; }
-    .command-item:hover { background: var(--accent-soft); color: var(--ink); }
-    .command-item svg { width: 15px; height: 15px; color: var(--accent-strong); }
-    .command-item-copy { display: grid; gap: 2px; }
-    .command-item-copy strong { font-size: 10px; }
-    .command-item-copy span { color: var(--ink-faint); font-size: 9px; }
+/* ASSISTANT */
+.assistant-pane{min-width:0;display:flex;flex-direction:column;border-left:1px solid var(--line);background:var(--panel)}
+.assistant-head{min-height:56px;display:flex;align-items:center;gap:9px;padding:0 12px;border-bottom:1px solid var(--line)}
+.assistant-avatar{width:29px;height:29px;display:grid;place-items:center;border:1px solid rgba(162,149,255,.35);border-radius:9px;background:linear-gradient(135deg,rgba(162,149,255,.24),rgba(102,217,232,.12));color:var(--accent-strong);font:800 9px var(--mono)}
+.assistant-title{min-width:0;flex:1;display:grid;gap:2px}
+.assistant-title strong{font-size:12px;letter-spacing:-.2px}
+.assistant-title span{color:var(--ink-faint);font-size:9px}
+.assistant-head .icon-button{width:26px;height:26px}
+.context-card{margin:10px 10px 0;padding:8px 9px;border:1px solid rgba(162,149,255,.19);border-radius:8px;background:rgba(162,149,255,.06)}
+.context-label{color:var(--accent-strong);font-size:8px;font-weight:850;letter-spacing:.11em;text-transform:uppercase}
+.context-copy{margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink-soft);font:9px var(--mono)}
+.assistant-messages{min-height:0;display:flex;flex-direction:column;gap:11px;overflow:auto;padding:13px 10px 10px;flex:1}
+.message{display:flex;align-items:flex-start;gap:7px}
+.message.user{flex-direction:row-reverse}
+.message-avatar{width:20px;height:20px;display:grid;place-items:center;flex:0 0 auto;border-radius:6px;background:var(--panel-hover);color:var(--ink-faint);font:8px var(--mono);font-weight:800}
+.message.assistant .message-avatar{background:var(--accent-soft);color:var(--accent-strong)}
+.message-bubble{max-width:88%;padding:8px 9px;border:1px solid var(--line);border-radius:9px;background:var(--panel-raised);color:var(--ink-soft);font-size:10px;line-height:1.55;word-wrap:break-word}
+.message.user .message-bubble{border-color:rgba(162,149,255,.23);background:var(--accent-soft);color:var(--ink)}
+.message-bubble strong{color:var(--ink);font-weight:800}
+.message-bubble code{background:rgba(255,255,255,.08);padding:1px 4px;border-radius:3px;font:9px var(--mono);color:var(--accent-strong)}
+.assistant-suggestions{display:flex;flex-wrap:wrap;gap:4px;margin-left:27px}
+.suggestion{min-height:24px;padding:0 7px;border:1px solid var(--line);border-radius:6px;background:transparent;color:var(--ink-soft);font-size:9px}
+.suggestion:hover{border-color:rgba(162,149,255,.38);background:var(--accent-soft);color:var(--accent-strong)}
+.assistant-composer{margin:0 10px 10px;padding:7px;border:1px solid var(--line-strong);border-radius:11px;background:var(--panel-raised)}
+#assistantInput{width:100%;min-height:46px;max-height:120px;resize:none;border:0;outline:0;background:transparent;color:var(--ink);font-size:10px;line-height:1.5}
+#assistantInput::placeholder{color:var(--ink-faint)}
+.composer-bottom{display:flex;align-items:center;justify-content:space-between;gap:7px;padding-top:4px}
+.composer-hint{color:var(--ink-faint);font:8px var(--mono)}
+.composer-send{width:26px;height:26px;display:grid;place-items:center;border-radius:7px;background:var(--accent);color:#14121f}
+.composer-send:hover{background:var(--accent-strong)}
+.composer-send svg{width:12px;height:12px}
 
-    .desktop-gate { min-height: 100dvh; display: grid; place-items: center; padding: 24px; background: radial-gradient(circle at 50% 4%, rgba(162,149,255,.14), transparent 38%), var(--bg); }
-    .desktop-gate-card { width: min(470px,100%); padding: 34px 30px; border: 1px solid var(--line-strong); border-radius: 22px; background: rgba(17,19,25,.95); box-shadow: 0 30px 100px rgba(0,0,0,.42); text-align: center; }
-    .desktop-gate-mark { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 18px; border: 1px solid var(--line-strong); border-radius: 17px; background: #08090c; }
-    .desktop-gate-mark img { width: 34px; height: 34px; object-fit: contain; }
-    .desktop-gate-kicker { color: var(--accent-strong); font: 800 9px var(--mono); letter-spacing: .14em; text-transform: uppercase; }
-    .desktop-gate h1 { margin: 11px 0 9px; font-size: 25px; letter-spacing: -.7px; }
-    .desktop-gate p { max-width: 350px; margin: 0 auto 22px; color: var(--ink-soft); font-size: 13px; line-height: 1.65; }
-    .desktop-gate a { min-height: 41px; display: inline-flex; align-items: center; justify-content: center; padding: 0 17px; border-radius: 10px; background: var(--ink); color: var(--bg); font-size: 11px; font-weight: 850; }
-    .desktop-gate a:hover { background: var(--accent); color: #14121f; }
+/* TOAST */
+.toast{position:fixed;left:50%;bottom:18px;z-index:90;max-width:calc(100% - 28px);padding:9px 12px;border:1px solid var(--line-strong);border-radius:9px;background:#1c2029;box-shadow:0 14px 40px rgba(0,0,0,.32);color:var(--ink);font-size:10px;opacity:0;pointer-events:none;transform:translate(-50%,10px);transition:opacity .18s,transform .18s}
+.toast.show{opacity:1;transform:translate(-50%,0)}
 
-    @media (max-width: 1180px) {
-      :root { --rail: 220px; --assistant: 300px; }
-      .account-copy { display: none; }
-      .brand { min-width: var(--rail); }
-    }
-    @media (max-width: 930px) {
-      .studio-layout { grid-template-columns: var(--rail) minmax(0,1fr); }
-      .assistant-pane { position: fixed; top: var(--topbar); right: 0; bottom: 0; width: min(360px,90vw); z-index: 35; box-shadow: -24px 0 70px rgba(0,0,0,.36); transform: translateX(102%); transition: transform .22s var(--ease); }
-      .assistant-pane.open { transform: translateX(0); }
-      .assistant-pane::before { content: ""; position: fixed; inset: 0 100% 0 -100vw; pointer-events: none; background: rgba(0,0,0,.4); }
-      .topbar-button .button-label, .ghost-button .button-label { display: none; }
-    }
-    @media (max-width: 680px) {
-      :root { --topbar: 57px; --rail: 265px; }
-      .topbar { gap: 8px; padding: 0 10px; }
-      .mobile-toggle { display: grid; }
-      .brand { min-width: 0; flex: 1; }
-      .brand-name { font-size: 12px; }
-      .brand-path { font-size: 8px; }
-      .brand-badge, .topbar-center { display: none; }
-      .topbar-actions { gap: 3px; }
-      .account-mini { padding-left: 4px; }
-      .studio-layout { display: block; position: relative; }
-      .project-rail { position: fixed; top: var(--topbar); left: 0; bottom: 0; width: min(var(--rail),88vw); z-index: 35; box-shadow: 24px 0 70px rgba(0,0,0,.36); transform: translateX(-102%); transition: transform .22s var(--ease); }
-      .project-rail.open { transform: translateX(0); }
-      .main-pane { height: calc(100dvh - var(--topbar)); }
-      .main-toolbar { min-height: 50px; padding: 0 9px; }
-      .editor-stage.with-preview { display: block; position: relative; }
-      .preview-pane { position: absolute; inset: 0; z-index: 10; border: 0; }
-      .editor-stage.with-preview .editor-area { display: none; }
-      .welcome-hints { grid-template-columns: 1fr; max-width: 330px; margin-left: auto; margin-right: auto; margin-top: 25px; }
-      .empty-stage { padding: 22px 15px; align-items: start; padding-top: 52px; }
-      .welcome-card h1 { font-size: 37px; }
-      .status-right { display: none; }
-      .code-wrap { grid-template-columns: 42px minmax(0,1fr); }
-      .line-numbers { padding-right: 8px; font-size: 10px; }
-      #codeEditor { padding-left: 12px; padding-right: 12px; font-size: 10px; }
-      .modal-grid { grid-template-columns: 1fr; }
-      .preview-toolbar { padding: 0 8px; }
-    }
-    @media (max-width: 720px), (max-width: 900px) and (pointer: coarse) {
-      .desktop-gate { display: grid !important; }
-      #authGate, #studioApp { display: none !important; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
-    }
-  </style>
+/* MODALS */
+.modal-backdrop{position:fixed;inset:0;z-index:80;display:grid;place-items:center;padding:20px;background:rgba(0,0,0,.62);backdrop-filter:blur(8px)}
+.modal-card{width:min(420px,100%);overflow:hidden;border:1px solid var(--line-strong);border-radius:15px;background:var(--panel-raised);box-shadow:0 28px 90px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 15px;border-bottom:1px solid var(--line)}
+.modal-head-copy{display:grid;gap:2px}
+.modal-head-copy strong{font-size:13px}
+.modal-head-copy span{color:var(--ink-faint);font-size:9px}
+.modal-body{padding:15px}
+.modal-label{display:grid;gap:5px;color:var(--ink-soft);font-size:10px;font-weight:750}
+.modal-input,.modal-select{width:100%;height:38px;padding:0 10px;border:1px solid var(--line-strong);border-radius:8px;outline:0;background:var(--panel);color:var(--ink);font-size:11px}
+.modal-input:focus,.modal-select:focus{border-color:var(--accent)}
+.modal-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:8px}
+.modal-error{min-height:15px;margin-top:8px;color:var(--danger);font-size:10px}
+.modal-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:12px}
+.modal-cancel,.modal-submit,.modal-danger{min-height:32px;padding:0 10px;border-radius:7px;font-size:10px;font-weight:800}
+.modal-cancel{border:1px solid var(--line);background:transparent;color:var(--ink-soft)}
+.modal-cancel:hover{background:var(--panel-hover);color:var(--ink)}
+.modal-submit{background:var(--accent);color:#14121f}
+.modal-submit:hover{background:var(--accent-strong)}
+.modal-danger{background:var(--danger);color:#260e13}
+.modal-danger:hover{filter:brightness(1.08)}
+.command-palette{position:fixed;inset:0;z-index:85;display:grid;place-items:start center;padding-top:12vh;background:rgba(0,0,0,.48);backdrop-filter:blur(6px)}
+.command-card{width:min(500px,calc(100% - 24px));overflow:hidden;border:1px solid var(--line-strong);border-radius:13px;background:var(--panel-raised);box-shadow:0 25px 80px rgba(0,0,0,.45)}
+.command-search{display:flex;align-items:center;gap:7px;padding:0 12px;border-bottom:1px solid var(--line)}
+.command-search svg{width:14px;height:14px;color:var(--ink-faint)}
+#commandInput{width:100%;height:42px;border:0;outline:0;background:transparent;font-size:11px}
+.command-list{display:grid;gap:1px;padding:6px}
+.command-item{width:100%;display:flex;align-items:center;gap:9px;padding:9px;border-radius:7px;background:transparent;color:var(--ink-soft);text-align:left}
+.command-item:hover{background:var(--accent-soft);color:var(--ink)}
+.command-item svg{width:14px;height:14px;color:var(--accent-strong)}
+.command-item-copy{display:grid;gap:1px}
+.command-item-copy strong{font-size:10px}
+.command-item-copy span{color:var(--ink-faint);font-size:9px}
+
+/* RESPONSIVE */
+@media (max-width:1180px){
+  :root{--rail:220px;--assistant:290px}
+  .account-copy{display:none}
+  .brand{min-width:var(--rail)}
+}
+@media (max-width:930px){
+  .studio-layout{grid-template-columns:var(--rail) minmax(0,1fr)}
+  .assistant-pane{position:fixed;top:var(--topbar);right:0;bottom:0;width:min(340px,90vw);z-index:35;box-shadow:-24px 0 70px rgba(0,0,0,.36);transform:translateX(102%);transition:transform .22s var(--ease)}
+  .assistant-pane.open{transform:translateX(0)}
+  .topbar-button .button-label,.ghost-button .button-label{display:none}
+}
+@media (max-width:680px){
+  :root{--topbar:52px;--rail:260px}
+  .topbar{gap:7px;padding:0 9px}
+  .mobile-toggle{display:grid}
+  .brand{min-width:0;flex:1}
+  .brand-name{font-size:12px}
+  .brand-path{font-size:8px}
+  .brand-badge,.topbar-center{display:none}
+  .topbar-actions{gap:3px}
+  .account-mini{padding-left:4px}
+  .studio-layout{display:block;position:relative}
+  .project-rail{position:fixed;top:var(--topbar);left:0;bottom:0;width:min(var(--rail),88vw);z-index:35;box-shadow:24px 0 70px rgba(0,0,0,.36);transform:translateX(-102%);transition:transform .22s var(--ease)}
+  .project-rail.open{transform:translateX(0)}
+  .main-pane{height:calc(100dvh - var(--topbar))}
+  .main-toolbar{min-height:46px;padding:0 8px}
+  .editor-stage.with-preview{display:block;position:relative}
+  .preview-pane{position:absolute;inset:0;z-index:10;border:0}
+  .editor-stage.with-preview .editor-area{display:none}
+  .welcome-hints{grid-template-columns:1fr;max-width:320px;margin-left:auto;margin-right:auto;margin-top:22px}
+  .empty-stage{padding:20px 14px;align-items:start;padding-top:48px}
+  .welcome-card h1{font-size:34px}
+  .status-right{display:none}
+  .code-wrap{grid-template-columns:40px minmax(0,1fr)}
+  .line-numbers{padding-right:7px;font-size:10px}
+  #codeEditor{padding-left:10px;padding-right:10px;font-size:10px}
+  .modal-grid{grid-template-columns:1fr}
+  .preview-toolbar{padding:0 7px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+}
+</style>
 </head>
 <body>
-  <section id="authGate" class="auth-gate hidden" aria-live="polite">
-    <div class="auth-card">
-      <div class="auth-mark"><img src="/assets/klipza-mark.png" alt="Klipza"></div>
-      <h1>Studio Klip</h1>
-      <p>O Studio usa a mesma sessão do Klipza. Entre pela página principal para continuar com sua conta conectada.</p>
-      <a href="/">Voltar ao Klipza</a>
-    </div>
-  </section>
-  <section id="desktopGate" class="desktop-gate hidden" aria-live="polite">
-    <div class="desktop-gate-card">
-      <div class="desktop-gate-mark"><img src="/assets/klipza-mark.png" alt="Klipza"></div>
-      <div class="desktop-gate-kicker">Studio Klip · Codex</div>
-      <h1>Acesse pelo computador</h1>
-      <p>O Studio Klip foi feito para desktop, com editor amplo, colagem de código, rolagem e preview lado a lado. Abra o Klipza em um computador para continuar.</p>
-      <a href="/">Voltar ao Klipza</a>
-    </div>
-  </section>
 
-  <main id="studioApp" class="studio-shell hidden">
-    <header class="topbar">
-      <button id="railToggle" class="mobile-toggle" type="button" aria-label="Abrir arquivos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
-      <div class="brand">
-        <div class="brand-mark"><img src="/assets/klipza-mark.png" alt="Klipza"></div>
-        <div class="brand-copy"><div class="brand-name">Klipza</div><div class="brand-path"><span>/</span><strong>Studio Klip</strong><span class="brand-badge">CODEX</span></div></div>
+<section id="authGate" class="auth-gate hidden">
+  <div class="auth-card">
+    <div class="auth-mark">SK</div>
+    <h1>Studio Klip</h1>
+    <p>Entre pela página principal do Klipza para continuar com sua conta conectada.</p>
+    <a href="/">Voltar ao Klipza</a>
+  </div>
+</section>
+
+<main id="studioApp" class="studio-shell hidden">
+  <header class="topbar">
+    <button id="railToggle" class="mobile-toggle" type="button" aria-label="Abrir arquivos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+    </button>
+    <div class="brand">
+      <div class="brand-mark">SK</div>
+      <div class="brand-copy">
+        <div class="brand-name">Klipza</div>
+        <div class="brand-path"><span>/</span><strong>Studio Klip</strong><span class="brand-badge">CODEX</span></div>
       </div>
-      <div class="topbar-center"><span class="status-dot"></span><span>Workspace privado · salvo localmente e sincronizado na conta</span></div>
-      <div class="topbar-actions">
-        <button id="assistantToggle" class="topbar-button" type="button" title="Abrir Codex Klip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg><span class="button-label">Codex</span></button>
-        <button id="commandButton" class="topbar-button" type="button" title="Abrir comandos (Ctrl/Cmd + K)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span class="button-label">Comandos</span></button>
-        <a href="/" class="ghost-button" title="Voltar ao Klipza"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18 9 12l6-6M9 12h11"/></svg><span class="button-label">Chat</span></a>
-        <div class="account-mini"><div id="accountAvatar" class="account-avatar">K</div><div class="account-copy"><strong id="accountName">Conta Klipza</strong><span id="accountEmail">conectada</span></div></div>
-      </div>
-    </header>
-
-    <div class="studio-layout">
-      <aside id="projectRail" class="project-rail">
-        <div class="rail-head"><button id="workspaceButton" class="workspace-card" type="button"><span class="workspace-mark">K</span><span class="workspace-copy"><strong>Meu Studio</strong><span>Workspace pessoal</span></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 10 5 5 5-5"/></svg></button></div>
-        <section class="rail-section">
-          <div class="rail-label-row"><span>ARQUIVOS</span><span class="rail-label-actions"><button id="newFileButton" type="button" title="Novo arquivo" aria-label="Novo arquivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></button><button id="refreshButton" type="button" title="Atualizar arquivos" aria-label="Atualizar arquivos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0 1 4"/><path d="M20 5v6h-6"/></svg></button></span></div>
-          <div id="fileList" class="file-list"></div>
-          <div class="rail-utility"><button id="importButton" class="rail-action" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span>Importar arquivos</span></button><input id="importInput" type="file" multiple class="hidden" accept=".html,.htm,.css,.scss,.js,.mjs,.ts,.tsx,.jsx,.json,.md,.txt,.py,.java,.c,.h,.cpp,.hpp,.cs,.go,.rs,.php,.rb,.sql,.yaml,.yml,.xml,.vue,.svelte,.sh"></div>
-        </section>
-        <div class="rail-spacer"></div>
-        <div class="rail-footer"><div class="rail-footer-head"><span>MEMÓRIA LOCAL</span><span>ATIVA</span></div><div class="memory-track"><span></span></div><p>O Studio salva seus rascunhos neste navegador.</p></div>
-      </aside>
-
-      <section class="main-pane" aria-label="Área de trabalho do Studio Klip">
-        <div class="main-toolbar"><div class="main-toolbar-copy"><strong id="mainTitle">Comece uma criação</strong><span id="mainSubtitle">Escolha um arquivo para começar a construir</span></div><div class="main-toolbar-actions"><button id="formatButton" class="toolbar-icon hidden" type="button" title="Formatar arquivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h16"/></svg></button><button id="saveButton" class="toolbar-icon hidden" type="button" title="Salvar (Ctrl/Cmd + S)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h12l2 2v14H5z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg></button><button id="previewButton" class="toolbar-icon hidden" type="button" title="Abrir preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg></button></div></div>
-        <div id="editorTabs" class="editor-tabs"></div>
-        <div id="emptyStage" class="empty-stage">
-          <div class="welcome-card">
-            <span class="welcome-kicker"><i></i>Studio Klip</span>
-            <h1 id="welcomeTitle">Bem-vindo ao seu espaço de criação.</h1>
-            <p>Comece com uma ideia, transforme-a em código e veja o resultado ganhar forma. Você decide quais arquivos entram no projeto.</p>
-            <div class="welcome-actions"><button id="welcomeCreate" class="primary-button" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Criar primeiro arquivo</button><button id="welcomeImport" class="secondary-button" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>Importar projeto</button></div>
-            <div class="welcome-hints"><div class="hint-card"><div class="hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="m8 9 3 3-3 3M13 15h3"/></svg></div><strong>Crie do seu jeito</strong><span>HTML, CSS, JavaScript, Python, Rust e muitas outras linguagens.</span></div><div class="hint-card"><div class="hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h5M8 16h8"/></svg></div><strong>Arquivos sob controle</strong><span>Abra, renomeie pelo nome, salve e exclua seus arquivos quando quiser.</span></div><div class="hint-card"><div class="hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg></div><strong>Preview no mesmo lugar</strong><span>Execute seu projeto em uma área isolada, lado a lado com o editor.</span></div></div>
-          </div>
+    </div>
+    <div class="topbar-center">
+      <span class="status-dot"></span>
+      <span>Workspace privado · salvo localmente</span>
+    </div>
+    <div class="topbar-actions">
+      <button id="assistantToggle" class="topbar-button" type="button" title="Codex Klip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/><path d="M8 9h8M8 12h5"/></svg>
+        <span class="button-label">Codex</span>
+      </button>
+      <button id="commandButton" class="topbar-button" type="button" title="Comandos (Ctrl+K)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <span class="button-label">Comandos</span>
+      </button>
+      <a href="/" class="ghost-button" title="Voltar ao Klipza">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 18 9 12l6-6M9 12h11"/></svg>
+        <span class="button-label">Chat</span>
+      </a>
+      <div class="account-mini">
+        <div id="accountAvatar" class="account-avatar">K</div>
+        <div class="account-copy">
+          <strong id="accountName">Conta Klipza</strong>
+          <span id="accountEmail">conectada</span>
         </div>
-        <div id="editorStage" class="editor-stage hidden">
-          <div class="editor-area"><div class="editor-toolbar"><div class="editor-file-meta"><span id="editorFileType" class="file-type">FI</span><span id="editorFileName" class="editor-file-name">arquivo</span><span id="editorFileState" class="editor-file-state">· salvo</span></div><div class="editor-toolbar-actions"><button id="copyButton" class="toolbar-icon" type="button" title="Copiar código"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg></button><button id="editorPreviewButton" class="toolbar-icon" type="button" title="Abrir preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg></button></div></div><div class="code-wrap"><pre id="lineNumbers" class="line-numbers" aria-hidden="true"></pre><textarea id="codeEditor" spellcheck="false" wrap="off" aria-label="Editor de código"></textarea></div><div class="editor-statusbar"><div class="status-left"><span id="saveStatus" class="status-ready"><i></i>Sincronizado</span><span id="cursorStatus">Ln 1, Col 1</span></div><div class="status-right"><span id="languageStatus">Texto</span><span>UTF-8</span><span>Spaces: 2</span></div></div></div>
-          <div id="previewPane" class="preview-pane hidden"><div class="preview-toolbar"><span class="preview-label"><i></i>Preview local</span><div class="preview-actions"><button id="refreshPreview" class="preview-action" type="button" title="Atualizar preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0 1 4"/><path d="M20 5v6h-6"/></svg></button><button id="closePreview" class="preview-action" type="button" title="Fechar preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div></div><iframe id="previewFrame" title="Preview do projeto" sandbox="allow-scripts"></iframe></div>
+      </div>
+    </div>
+  </header>
+
+  <div class="studio-layout">
+    <aside id="projectRail" class="project-rail">
+      <div class="rail-head">
+        <button id="workspaceButton" class="workspace-card" type="button">
+          <span class="workspace-mark">K</span>
+          <span class="workspace-copy"><strong>Meu Studio</strong><span>Workspace pessoal</span></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m7 10 5 5 5-5"/></svg>
+        </button>
+      </div>
+      <section class="rail-section">
+        <div class="rail-label-row">
+          <span>ARQUIVOS</span>
+          <span class="rail-label-actions">
+            <button id="newFileButton" type="button" title="Novo arquivo" aria-label="Novo arquivo">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </button>
+            <button id="refreshButton" type="button" title="Atualizar" aria-label="Atualizar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0 1 4"/><path d="M20 5v6h-6"/></svg>
+            </button>
+          </span>
+        </div>
+        <div id="fileList" class="file-list"></div>
+        <div class="rail-utility">
+          <button id="importButton" class="rail-action" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>
+            <span>Importar arquivos</span>
+          </button>
+          <input id="importInput" type="file" multiple class="hidden" accept=".html,.htm,.css,.scss,.js,.mjs,.ts,.tsx,.jsx,.json,.md,.txt,.py,.java,.c,.cpp,.cs,.go,.rs,.php,.rb,.sql,.yaml,.yml,.xml,.vue,.svelte,.sh">
         </div>
       </section>
+      <div class="rail-spacer"></div>
+      <div class="rail-footer">
+        <div class="rail-footer-head"><span>MEMÓRIA LOCAL</span><span>ATIVA</span></div>
+        <div class="memory-track"><span></span></div>
+        <p>O Studio salva seus rascunhos neste navegador.</p>
+      </div>
+    </aside>
 
-      <aside id="assistantPane" class="assistant-pane" aria-label="Codex Klip"><div class="assistant-head"><div class="assistant-avatar">CK</div><div class="assistant-title"><strong>Codex Klip</strong><span>Seu parceiro de construção</span></div><button id="assistantClose" class="icon-button" type="button" title="Fechar Codex" aria-label="Fechar Codex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="context-card"><div class="context-label">Contexto ativo</div><div id="contextCopy" class="context-copy">Nenhum arquivo aberto</div></div><div id="assistantMessages" class="assistant-messages"><div class="message assistant"><div class="message-avatar">CK</div><div class="message-bubble">Olá. Eu sou o <strong>Codex Klip</strong>. Este espaço começa vazio para você criar exatamente o que precisa.</div></div><div class="message assistant"><div class="message-avatar">CK</div><div class="message-bubble">Crie seu primeiro arquivo ou importe um projeto. Depois, use o preview para acompanhar o resultado sem sair daqui.</div></div><div class="assistant-suggestions"><button class="suggestion" type="button" data-prompt="Quero criar meu primeiro arquivo">Criar arquivo</button><button class="suggestion" type="button" data-prompt="Como funciona o preview?">Como funciona?</button><button class="suggestion" type="button" data-prompt="Quais linguagens posso usar?">Linguagens</button></div></div><form id="assistantForm" class="assistant-composer"><textarea id="assistantInput" placeholder="Peça uma ideia ao Codex Klip..." rows="2"></textarea><div class="composer-bottom"><span class="composer-hint">Enter envia · Shift+Enter quebra linha</span><button class="composer-send" type="submit" aria-label="Enviar para o Codex Klip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 14-7-4 14-3-6z"/><path d="m12 13 7-8"/></svg></button></div></form></aside>
+    <section class="main-pane" aria-label="Área de trabalho">
+      <div class="main-toolbar">
+        <div class="main-toolbar-copy">
+          <strong id="mainTitle">Comece uma criação</strong>
+          <span id="mainSubtitle">Escolha um arquivo para começar</span>
+        </div>
+        <div class="main-toolbar-actions">
+          <button id="formatButton" class="toolbar-icon hidden" type="button" title="Formatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M4 12h10M4 17h16"/></svg>
+          </button>
+          <button id="saveButton" class="toolbar-icon hidden" type="button" title="Salvar (Ctrl+S)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h12l2 2v14H5z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>
+          </button>
+          <button id="previewButton" class="toolbar-icon hidden" type="button" title="Preview">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div id="editorTabs" class="editor-tabs"></div>
+      <div id="emptyStage" class="empty-stage">
+        <div class="welcome-card">
+          <span class="welcome-kicker"><i></i>Studio Klip</span>
+          <h1 id="welcomeTitle">Bem-vindo ao seu espaço de criação.</h1>
+          <p>Comece com uma ideia, transforme-a em código e veja o resultado ganhar forma no preview ao vivo.</p>
+          <div class="welcome-actions">
+            <button id="welcomeCreate" class="primary-button" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Criar primeiro arquivo
+            </button>
+            <button id="welcomeImport" class="secondary-button" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>
+              Importar projeto
+            </button>
+          </div>
+          <div class="welcome-hints">
+            <div class="hint-card">
+              <div class="hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="m8 9 3 3-3 3M13 15h3"/></svg></div>
+              <strong>Crie do seu jeito</strong>
+              <span>HTML, CSS, JavaScript, Python, Rust e mais.</span>
+            </div>
+            <div class="hint-card">
+              <div class="hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h5M8 16h8"/></svg></div>
+              <strong>Arquivos sob controle</strong>
+              <span>Abra, renomeie, salve e exclua quando quiser.</span>
+            </div>
+            <div class="hint-card">
+              <div class="hint-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg></div>
+              <strong>Preview ao vivo</strong>
+              <span>Veja o resultado enquanto edita o código.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="editorStage" class="editor-stage hidden">
+        <div class="editor-area">
+          <div class="editor-toolbar">
+            <div class="editor-file-meta">
+              <span id="editorFileType" class="file-type">FI</span>
+              <span id="editorFileName" class="editor-file-name">arquivo</span>
+              <span id="editorFileState" class="editor-file-state">· salvo</span>
+            </div>
+            <div class="editor-toolbar-actions">
+              <button id="copyButton" class="toolbar-icon" type="button" title="Copiar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>
+              </button>
+              <button id="editorPreviewButton" class="toolbar-icon" type="button" title="Preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="code-wrap">
+            <pre id="lineNumbers" class="line-numbers" aria-hidden="true"></pre>
+            <textarea id="codeEditor" spellcheck="false" wrap="off" aria-label="Editor de código"></textarea>
+          </div>
+          <div class="editor-statusbar">
+            <div class="status-left">
+              <span id="saveStatus" class="status-ready"><i></i>Sincronizado</span>
+              <span id="cursorStatus">Ln 1, Col 1</span>
+            </div>
+            <div class="status-right">
+              <span id="languageStatus">Texto</span>
+              <span>UTF-8</span>
+              <span>Spaces: 2</span>
+            </div>
+          </div>
+        </div>
+        <div id="previewPane" class="preview-pane hidden">
+          <div class="preview-toolbar">
+            <span class="preview-label"><i></i>Preview</span>
+            <div class="preview-mode">
+              <button class="preview-mode-btn active" data-mode="desktop" type="button">Desktop</button>
+              <button class="preview-mode-btn" data-mode="mobile" type="button">Mobile</button>
+            </div>
+            <div class="preview-actions">
+              <button id="refreshPreview" class="preview-action" type="button" title="Atualizar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 11a8 8 0 1 0 1 4"/><path d="M20 5v6h-6"/></svg>
+              </button>
+              <button id="closePreview" class="preview-action" type="button" title="Fechar">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg>
+              </button>
+            </div>
+          </div>
+          <iframe id="previewFrame" title="Preview" sandbox="allow-scripts allow-modals"></iframe>
+        </div>
+      </div>
+    </section>
+
+    <aside id="assistantPane" class="assistant-pane" aria-label="Codex Klip">
+      <div class="assistant-head">
+        <div class="assistant-avatar">CK</div>
+        <div class="assistant-title">
+          <strong>Codex Klip</strong>
+          <span>Seu parceiro de construção</span>
+        </div>
+        <button id="assistantClose" class="icon-button" type="button" title="Fechar" aria-label="Fechar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+      </div>
+      <div class="context-card">
+        <div class="context-label">Contexto ativo</div>
+        <div id="contextCopy" class="context-copy">Nenhum arquivo aberto</div>
+      </div>
+      <div id="assistantMessages" class="assistant-messages">
+        <div class="message assistant">
+          <div class="message-avatar">CK</div>
+          <div class="message-bubble">Olá! Eu sou o <strong>Codex Klip</strong>. Posso ajudar a criar arquivos, abrir preview, explicar linguagens e organizar seu projeto.</div>
+        </div>
+        <div class="assistant-suggestions">
+          <button class="suggestion" type="button" data-prompt="Criar arquivo HTML">Criar HTML</button>
+          <button class="suggestion" type="button" data-prompt="Como funciona o preview?">Preview</button>
+          <button class="suggestion" type="button" data-prompt="Quais linguagens posso usar?">Linguagens</button>
+          <button class="suggestion" type="button" data-prompt="Crie uma landing page moderna">Landing page</button>
+        </div>
+      </div>
+      <form id="assistantForm" class="assistant-composer">
+        <textarea id="assistantInput" placeholder="Peça algo ao Codex Klip..." rows="2"></textarea>
+        <div class="composer-bottom">
+          <span class="composer-hint">Enter envia · Shift+Enter quebra</span>
+          <button class="composer-send" type="submit" aria-label="Enviar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m5 12 14-7-4 14-3-6z"/><path d="m12 13 7-8"/></svg>
+          </button>
+        </div>
+      </form>
+    </aside>
+  </div>
+</main>
+
+<div id="toast" class="toast" role="status"></div>
+
+<div id="createFileModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-head-copy">
+        <strong>Novo arquivo</strong>
+        <span>Escolha nome e linguagem</span>
+      </div>
+      <button id="createClose" class="icon-button" type="button" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
     </div>
-  </main>
+    <form id="createFileForm" class="modal-body">
+      <div class="modal-grid">
+        <label class="modal-label">Nome do arquivo
+          <input id="newFileName" class="modal-input" type="text" placeholder="ex: index.html" autocomplete="off" required>
+        </label>
+        <label class="modal-label">Linguagem
+          <select id="newFileLanguage" class="modal-select"></select>
+        </label>
+      </div>
+      <div id="createFileError" class="modal-error" role="alert"></div>
+      <div class="modal-actions">
+        <button id="createCancel" class="modal-cancel" type="button">Cancelar</button>
+        <button class="modal-submit" type="submit">Criar arquivo</button>
+      </div>
+    </form>
+  </div>
+</div>
 
-  <div id="toast" class="toast" role="status"></div>
-  <div id="createFileModal" class="modal-backdrop hidden" aria-hidden="true"><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="createFileTitle"><div class="modal-head"><div class="modal-head-copy"><strong id="createFileTitle">Novo arquivo</strong><span>Escolha um nome e uma linguagem para começar.</span></div><button id="createClose" class="icon-button" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><form id="createFileForm" class="modal-body"><div class="modal-grid"><label class="modal-label">Nome do arquivo<input id="newFileName" class="modal-input" type="text" placeholder="ex: index.html" autocomplete="off" required></label><label class="modal-label">Linguagem<select id="newFileLanguage" class="modal-select"></select></label></div><div id="createFileError" class="modal-error" role="alert"></div><div class="modal-actions"><button id="createCancel" class="modal-cancel" type="button">Cancelar</button><button class="modal-submit" type="submit">Criar arquivo</button></div></form></div></div>
-  <div id="deleteFileModal" class="modal-backdrop hidden" aria-hidden="true"><div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deleteFileTitle"><div class="modal-head"><div class="modal-head-copy"><strong id="deleteFileTitle">Excluir arquivo?</strong><span>Esta ação remove o arquivo do workspace local.</span></div><button id="deleteClose" class="icon-button" type="button" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div><div class="modal-body"><p id="deleteFileCopy" style="margin:0;color:var(--ink-soft);font-size:11px;line-height:1.55"></p><div class="modal-actions"><button id="deleteCancel" class="modal-cancel" type="button">Manter arquivo</button><button id="deleteConfirm" class="modal-danger" type="button">Excluir arquivo</button></div></div></div></div>
-  <div id="commandPalette" class="command-palette hidden" aria-hidden="true"><div class="command-card"><div class="command-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input id="commandInput" type="search" placeholder="Buscar uma ação..." autocomplete="off"></div><div class="command-list"><button class="command-item" type="button" data-command="new-file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg><span class="command-item-copy"><strong>Criar novo arquivo</strong><span>Escolha uma linguagem para começar</span></span></button><button class="command-item" type="button" data-command="preview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg><span class="command-item-copy"><strong>Abrir preview</strong><span>Veja o projeto no mesmo workspace</span></span></button><button class="command-item" type="button" data-command="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg><span class="command-item-copy"><strong>Importar arquivos</strong><span>Traga um projeto existente</span></span></button><button class="command-item" type="button" data-command="chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/></svg><span class="command-item-copy"><strong>Voltar ao chat</strong><span>Retornar para a conversa do Klipza</span></span></button></div></div></div>
+<div id="deleteFileModal" class="modal-backdrop hidden" aria-hidden="true">
+  <div class="modal-card" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <div class="modal-head-copy">
+        <strong>Excluir arquivo?</strong>
+        <span>Esta ação remove o arquivo local</span>
+      </div>
+      <button id="deleteClose" class="icon-button" type="button" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p id="deleteFileCopy" style="margin:0;color:var(--ink-soft);font-size:11px;line-height:1.55"></p>
+      <div class="modal-actions">
+        <button id="deleteCancel" class="modal-cancel" type="button">Manter</button>
+        <button id="deleteConfirm" class="modal-danger" type="button">Excluir</button>
+      </div>
+    </div>
+  </div>
+</div>
 
-  <script>
-    (() => {
-      const SUPABASE_URL = 'https://xjvwfytikkxnvuwweqlf.supabase.co';
-      const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_ERwMYbIK-BDyHQ3_sIRPmQ_3a2qBOXi';
-      const supabaseClient = window.supabase?.createClient?.(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true } }) || null;
-      const STORAGE_KEY = 'klipza-studio-workspace-v2';
-      const LANGUAGES = [
-        { key: 'html', label: 'HTML', ext: 'html', type: 'HT', starter: '<!doctype html>\n<html lang="pt-BR">\n  <head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>Meu projeto</title>\n  </head>\n  <body>\n    <main>\n      <h1>Olá, Studio Klip.</h1>\n      <p>Comece a construir sua ideia.</p>\n    </main>\n  </body>\n</html>\n' },
-        { key: 'css', label: 'CSS', ext: 'css', type: 'CS', starter: '/* Estilos do seu projeto */\n\n' },
-        { key: 'scss', label: 'SCSS', ext: 'scss', type: 'SC', starter: '$accent: #a295ff;\n\n/* Estilos do seu projeto */\n' },
-        { key: 'javascript', label: 'JavaScript', ext: 'js', type: 'JS', starter: '// Seu JavaScript começa aqui\n\n' },
-        { key: 'typescript', label: 'TypeScript', ext: 'ts', type: 'TS', starter: '// Seu TypeScript começa aqui\n\n' },
-        { key: 'jsx', label: 'JSX', ext: 'jsx', type: 'JX', starter: 'export default function App() {\n  return <main>Seu componente</main>;\n}\n' },
-        { key: 'tsx', label: 'TSX', ext: 'tsx', type: 'TX', starter: 'export default function App() {\n  return <main>Seu componente</main>;\n}\n' },
-        { key: 'json', label: 'JSON', ext: 'json', type: '{}', starter: '{\n  "name": "meu-projeto",\n  "version": "1.0.0"\n}\n' },
-        { key: 'markdown', label: 'Markdown', ext: 'md', type: 'MD', starter: '# Meu projeto\n\nEscreva sua documentação aqui.\n' },
-        { key: 'python', label: 'Python', ext: 'py', type: 'PY', starter: 'def main():\n    print("Olá, Studio Klip")\n\n\nif __name__ == "__main__":\n    main()\n' },
-        { key: 'java', label: 'Java', ext: 'java', type: 'JV', starter: 'public class Main {\n  public static void main(String[] args) {\n    System.out.println("Olá, Studio Klip");\n  }\n}\n' },
-        { key: 'c', label: 'C', ext: 'c', type: 'C', starter: '#include <stdio.h>\n\nint main(void) {\n  printf("Olá, Studio Klip\\n");\n  return 0;\n}\n' },
-        { key: 'cpp', label: 'C++', ext: 'cpp', type: 'C+', starter: '#include <iostream>\n\nint main() {\n  std::cout << "Olá, Studio Klip\\n";\n}\n' },
-        { key: 'csharp', label: 'C#', ext: 'cs', type: 'C#', starter: 'using System;\n\nConsole.WriteLine("Olá, Studio Klip");\n' },
-        { key: 'go', label: 'Go', ext: 'go', type: 'GO', starter: 'package main\n\nimport "fmt"\n\nfunc main() {\n  fmt.Println("Olá, Studio Klip")\n}\n' },
-        { key: 'rust', label: 'Rust', ext: 'rs', type: 'RS', starter: 'fn main() {\n    println!("Olá, Studio Klip");\n}\n' },
-        { key: 'php', label: 'PHP', ext: 'php', type: 'PH', starter: '<?php\necho "Olá, Studio Klip";\n' },
-        { key: 'ruby', label: 'Ruby', ext: 'rb', type: 'RB', starter: 'puts "Olá, Studio Klip"\n' },
-        { key: 'sql', label: 'SQL', ext: 'sql', type: 'SQ', starter: '-- Sua consulta começa aqui\nSELECT 1;\n' },
-        { key: 'yaml', label: 'YAML', ext: 'yaml', type: 'YA', starter: 'name: meu-projeto\nversion: 1.0.0\n' },
-        { key: 'xml', label: 'XML', ext: 'xml', type: 'XM', starter: '<?xml version="1.0" encoding="UTF-8"?>\n<project>\n  <name>Meu projeto</name>\n</project>\n' },
-        { key: 'vue', label: 'Vue', ext: 'vue', type: 'VU', starter: '<script setup>\nconst title = "Olá, Studio Klip";\n<\/script>\n\n<template>\n  <main>{{ title }}</main>\n</template>\n' },
-        { key: 'svelte', label: 'Svelte', ext: 'svelte', type: 'SV', starter: '<script>\n  const title = "Olá, Studio Klip";\n<\/script>\n\n<main>{title}</main>\n' },
-        { key: 'shell', label: 'Shell', ext: 'sh', type: 'SH', starter: '#!/usr/bin/env bash\necho "Olá, Studio Klip"\n' },
-        { key: 'text', label: 'Texto', ext: 'txt', type: 'TX', starter: '' }
-      ];
-      const LANGUAGE_BY_EXT = Object.fromEntries(LANGUAGES.map((language) => [language.ext, language]));
-      const BROWSER_SCRIPT_EXTS = new Set(['js', 'mjs']);
-      const BROWSER_STYLE_EXTS = new Set(['css']);
-      let files = loadFiles();
-      let activeFile = Object.keys(files)[0] || '';
-      let openFiles = activeFile ? [activeFile] : [];
-      let pendingDelete = '';
-      let saveTimer = null;
-      let toastTimer = null;
-      let studioRemoteTimer = null;
-      let studioRemoteBusy = false;
-      let studioRemotePending = false;
-      let studioAuthResolved = false;
-      let studioUserId = '';
-      const STUDIO_REMOTE_DEBOUNCE_MS = 1600;
+<div id="commandPalette" class="command-palette hidden" aria-hidden="true">
+  <div class="command-card">
+    <div class="command-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="commandInput" type="search" placeholder="Buscar uma ação..." autocomplete="off">
+    </div>
+    <div class="command-list">
+      <button class="command-item" type="button" data-command="new-file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="command-item-copy"><strong>Criar novo arquivo</strong><span>Escolha uma linguagem</span></span>
+      </button>
+      <button class="command-item" type="button" data-command="preview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 5 11 7-11 7V5Z"/></svg>
+        <span class="command-item-copy"><strong>Abrir preview</strong><span>Veja o projeto ao vivo</span></span>
+      </button>
+      <button class="command-item" type="button" data-command="import">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg>
+        <span class="command-item-copy"><strong>Importar arquivos</strong><span>Traga um projeto existente</span></span>
+      </button>
+      <button class="command-item" type="button" data-command="chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v11H8l-4 4z"/></svg>
+        <span class="command-item-copy"><strong>Voltar ao chat</strong><span>Retornar ao Klipza</span></span>
+      </button>
+    </div>
+  </div>
+</div>
 
-      const $ = (selector) => document.querySelector(selector);
-      const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-      const extensionOf = (name) => String(name || '').split('.').pop().toLowerCase();
-      const languageOf = (name) => LANGUAGE_BY_EXT[extensionOf(name)] || LANGUAGES.find((language) => language.key === 'text');
-      const fileTypeClass = (name) => extensionOf(name).replace(/[^a-z0-9_-]/g, '') || 'text';
-      const isBrowserScript = (name) => BROWSER_SCRIPT_EXTS.has(extensionOf(name));
-      const isBrowserStyle = (name) => BROWSER_STYLE_EXTS.has(extensionOf(name));
+<script>
+(()=>{
+const STORAGE_KEY='klipza-studio-workspace-v2';
+const LANGUAGES=[
+  {key:'html',label:'HTML',ext:'html',type:'HT',starter:'<!doctype html>\n<html lang="pt-BR">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Meu projeto</title>\n  <style>\n    body { font-family: system-ui, sans-serif; margin: 0; padding: 40px; }\n    h1 { font-size: 32px; margin-bottom: 8px; }\n  </style>\n</head>\n<body>\n  <h1>Olá, Studio Klip!</h1>\n  <p>Comece a construir sua ideia aqui.</p>\n</body>\n</html>\n'},
+  {key:'css',label:'CSS',ext:'css',type:'CS',starter:'/* Estilos do seu projeto */\n\nbody {\n  font-family: system-ui, sans-serif;\n  margin: 0;\n  padding: 20px;\n}\n'},
+  {key:'scss',label:'SCSS',ext:'scss',type:'SC',starter:'$accent: #a295ff;\n\n/* Estilos */\n'},
+  {key:'javascript',label:'JavaScript',ext:'js',type:'JS',starter:'// Seu JavaScript começa aqui\n\nconsole.log("Olá, Studio Klip");\n'},
+  {key:'typescript',label:'TypeScript',ext:'ts',type:'TS',starter:'// TypeScript\n\nconst greet = (name: string): string => {\n  return `Olá, ${name}`;\n};\n'},
+  {key:'jsx',label:'JSX',ext:'jsx',type:'JX',starter:'export default function App() {\n  return <main>Seu componente</main>;\n}\n'},
+  {key:'tsx',label:'TSX',ext:'tsx',type:'TX',starter:'export default function App() {\n  return <main>Seu componente</main>;\n}\n'},
+  {key:'json',label:'JSON',ext:'json',type:'{}',starter:'{\n  "name": "meu-projeto",\n  "version": "1.0.0"\n}\n'},
+  {key:'markdown',label:'Markdown',ext:'md',type:'MD',starter:'# Meu projeto\n\nEscreva sua documentação aqui.\n'},
+  {key:'python',label:'Python',ext:'py',type:'PY',starter:'def main():\n    print("Olá, Studio Klip")\n\nif __name__ == "__main__":\n    main()\n'},
+  {key:'java',label:'Java',ext:'java',type:'JV',starter:'public class Main {\n  public static void main(String[] args) {\n    System.out.println("Olá");\n  }\n}\n'},
+  {key:'c',label:'C',ext:'c',type:'C',starter:'#include <stdio.h>\n\nint main(void) {\n  printf("Olá\\n");\n  return 0;\n}\n'},
+  {key:'cpp',label:'C++',ext:'cpp',type:'C+',starter:'#include <iostream>\n\nint main() {\n  std::cout << "Olá\\n";\n}\n'},
+  {key:'csharp',label:'C#',ext:'cs',type:'C#',starter:'using System;\nConsole.WriteLine("Olá");\n'},
+  {key:'go',label:'Go',ext:'go',type:'GO',starter:'package main\n\nimport "fmt"\n\nfunc main() {\n  fmt.Println("Olá")\n}\n'},
+  {key:'rust',label:'Rust',ext:'rs',type:'RS',starter:'fn main() {\n    println!("Olá");\n}\n'},
+  {key:'php',label:'PHP',ext:'php',type:'PH',starter:'<?php\necho "Olá";\n'},
+  {key:'ruby',label:'Ruby',ext:'rb',type:'RB',starter:'puts "Olá"\n'},
+  {key:'sql',label:'SQL',ext:'sql',type:'SQ',starter:'-- Sua consulta\nSELECT 1;\n'},
+  {key:'yaml',label:'YAML',ext:'yaml',type:'YA',starter:'name: meu-projeto\nversion: 1.0.0\n'},
+  {key:'xml',label:'XML',ext:'xml',type:'XM',starter:'<?xml version="1.0" encoding="UTF-8"?>\n<project>\n  <name>Meu projeto</name>\n</project>\n'},
+  {key:'vue',label:'Vue',ext:'vue',type:'VU',starter:'<script setup>\nconst title = "Olá";\n<\/script>\n<template>\n  <main>{{ title }}</main>\n</template>\n'},
+  {key:'svelte',label:'Svelte',ext:'svelte',type:'SV',starter:'<script>\n  const title = "Olá";\n<\/script>\n<main>{title}</main>\n'},
+  {key:'shell',label:'Shell',ext:'sh',type:'SH',starter:'#!/usr/bin/env bash\necho "Olá"\n'},
+  {key:'text',label:'Texto',ext:'txt',type:'TX',starter:''}
+];
+const LANGUAGE_BY_EXT=Object.fromEntries(LANGUAGES.map(l=>[l.ext,l]));
+const BROWSER_SCRIPT_EXTS=new Set(['js','mjs']);
+const BROWSER_STYLE_EXTS=new Set(['css']);
 
-      function loadFiles() {
-        try {
-          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
-          if (!stored || typeof stored !== 'object' || Array.isArray(stored)) return {};
-          return Object.fromEntries(Object.entries(stored).filter(([name, value]) => typeof name === 'string' && typeof value === 'string'));
-        } catch (error) { return {}; }
-      }
+let files=loadFiles();
+let activeFile=Object.keys(files)[0]||'';
+let openFiles=activeFile?[activeFile]:[];
+let pendingDelete='';
+let saveTimer=null;
+let toastTimer=null;
+let previewTimer=null;
+let previewMode='desktop';
 
-      function compactFilesForRemote() {
-        const result = {};
-        let total = 0;
-        for (const [name, content] of Object.entries(files)) {
-          const value = String(content ?? '');
-          const remaining = Math.max(0, 900000 - total);
-          if (!remaining) break;
-          result[name] = value.slice(0, Math.min(220000, remaining));
-          total += result[name].length;
-        }
-        return result;
-      }
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const extOf=n=>String(n||'').split('.').pop().toLowerCase();
+const langOf=n=>LANGUAGE_BY_EXT[extOf(n)]||LANGUAGES.find(l=>l.key==='text');
+const ftClass=n=>extOf(n).replace(/[^a-z0-9_-]/g,'')||'text';
 
-      function scheduleStudioRemoteSync() {
-        if (!studioAuthResolved || !studioUserId || !supabaseClient) return;
-        clearTimeout(studioRemoteTimer);
-        studioRemoteTimer = setTimeout(syncStudioRemoteState, STUDIO_REMOTE_DEBOUNCE_MS);
-      }
+function loadFiles(){
+  try{
+    const s=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+    if(!s||typeof s!=='object'||Array.isArray(s))return{};
+    return Object.fromEntries(Object.entries(s).filter(([k,v])=>typeof k==='string'&&typeof v==='string'));
+  }catch(e){return{}}
+}
 
-      async function syncStudioRemoteState() {
-        if (!studioAuthResolved || !studioUserId || !supabaseClient) return;
-        if (studioRemoteBusy) { studioRemotePending = true; return; }
-        studioRemoteBusy = true;
-        try {
-          const result = await Promise.race([
-            supabaseClient.rpc('sync_app_user_state', { p_patch: { studio_files: compactFilesForRemote(), studio_initialized: true } }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('studio_sync_timeout')), 2500))
-          ]);
-          if (result.error) throw result.error;
-        } catch (error) { console.warn('O workspace do Studio continua salvo localmente enquanto a conta sincroniza.', error); }
-        finally {
-          studioRemoteBusy = false;
-          if (studioRemotePending) { studioRemotePending = false; scheduleStudioRemoteSync(); }
-        }
-      }
+function persist(show=true){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(files));}
+  catch(e){if(show)toast('Não foi possível salvar.');}
+}
 
-      window.addEventListener('pagehide', () => { if (studioAuthResolved && studioUserId) syncStudioRemoteState(); });
+function toast(msg){
+  const t=$('#toast');
+  t.textContent=msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
+}
 
-      async function hydrateStudioFiles(user) {
-        if (!supabaseClient || !user?.id) return false;
-        studioUserId = user.id;
-        try {
-          const result = await Promise.race([
-            supabaseClient.from('app_user_state').select('studio_files,studio_initialized').eq('user_id', user.id).maybeSingle(),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('studio_hydrate_timeout')), 1800))
-          ]);
-          if (result.error) throw result.error;
-          const remoteFiles = result.data?.studio_files;
-          if (result.data?.studio_initialized === true && remoteFiles && typeof remoteFiles === 'object' && !Array.isArray(remoteFiles)) {
-            files = Object.fromEntries(Object.entries(remoteFiles).filter(([name, value]) => typeof name === 'string' && typeof value === 'string'));
-            activeFile = Object.keys(files)[0] || '';
-            openFiles = activeFile ? [activeFile] : [];
-            persistFiles(false);
-            return true;
-          }
-          if (Object.keys(files).length) scheduleStudioRemoteSync();
-        } catch (error) { console.warn('O workspace remoto do Studio não está disponível; usando o cache local.', error); }
-        return false;
-      }
+function langOptions(){
+  return LANGUAGES.map(l=>`<option value="${l.ext}">${l.label} · .${l.ext}</option>`).join('');
+}
 
-      function persistFiles(showError = true) {
-        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(files)); } catch (error) { if (showError) showToast('Não foi possível salvar neste navegador.'); }
-        scheduleStudioRemoteSync();
-      }
+function defaultName(ext){
+  const map={html:'index.html',css:'styles.css',scss:'styles.scss',js:'script.js',ts:'main.ts',jsx:'App.jsx',tsx:'App.tsx',json:'package.json',md:'README.md',py:'main.py',java:'Main.java',c:'main.c',cpp:'main.cpp',cs:'Program.cs',go:'main.go',rs:'main.rs',php:'index.php',rb:'main.rb',sql:'query.sql',yaml:'config.yaml',xml:'data.xml',vue:'App.vue',svelte:'App.svelte',sh:'run.sh',txt:'notes.txt'};
+  return map[ext]||'arquivo.txt';
+}
 
-      function showToast(message) {
-        const toast = $('#toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => toast.classList.remove('show'), 2300);
-      }
+function renderFileList(){
+  const list=$('#fileList');
+  const names=Object.keys(files);
+  if(!names.length){
+    list.innerHTML=`<div class="empty-files"><div class="empty-files-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M12 8v8M8 12h8"/></svg></div><strong>Nenhum arquivo</strong><p>Seu workspace começa limpo.</p><button id="emptyCreate" class="small-primary" type="button">Criar arquivo</button></div>`;
+    $('#emptyCreate').addEventListener('click',()=>openCreateModal());
+    return;
+  }
+  list.innerHTML=names.map(name=>{
+    const l=langOf(name);
+    const isA=name===activeFile;
+    return `<div class="file-row ${isA?'active':''}"><button class="file-button" type="button" data-file="${esc(name)}"><span class="file-type ${ftClass(name)}">${esc(l.type)}</span><span>${esc(name)}</span></button><button class="file-delete" type="button" data-delete="${esc(name)}" title="Excluir" aria-label="Excluir"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div>`;
+  }).join('');
+  list.querySelectorAll('[data-file]').forEach(b=>b.addEventListener('click',()=>openFile(b.dataset.file)));
+  list.querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openDeleteModal(b.dataset.delete);}));
+}
 
-      function languageOptions() {
-        return LANGUAGES.map((language) => `<option value="${language.ext}">${language.label} · .${language.ext}</option>`).join('');
-      }
+function renderTabs(){
+  const tabs=$('#editorTabs');
+  openFiles=openFiles.filter(n=>Object.prototype.hasOwnProperty.call(files,n));
+  if(activeFile&&!openFiles.includes(activeFile))openFiles.unshift(activeFile);
+  tabs.innerHTML=openFiles.filter(Boolean).map(name=>{
+    const l=langOf(name);
+    return `<button class="editor-tab ${name===activeFile?'active':''}" type="button" data-tab="${esc(name)}"><span class="file-type ${ftClass(name)}">${esc(l.type)}</span><span>${esc(name)}</span><span class="tab-close" data-close="${esc(name)}" title="Fechar" aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></span></button>`;
+  }).join('');
+  tabs.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>openFile(b.dataset.tab)));
+  tabs.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();closeTab(b.dataset.close);}));
+}
 
-      function renderFileList() {
-        const list = $('#fileList');
-        const names = Object.keys(files);
-        if (!names.length) {
-          list.innerHTML = `<div class="empty-files"><div class="empty-files-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 5h16v14H4z"/><path d="M12 8v8M8 12h8"/></svg></div><strong>Nenhum arquivo ainda</strong><p>Seu workspace começa limpo. Crie o primeiro quando quiser.</p><button id="emptyCreate" class="small-primary" type="button">Criar arquivo</button></div>`;
-          $('#emptyCreate').addEventListener('click', () => openCreateModal());
-          return;
-        }
-        list.innerHTML = names.map((name) => {
-          const language = languageOf(name);
-          const isActive = name === activeFile;
-          return `<div class="file-row ${isActive ? 'active' : ''}"><button class="file-button" type="button" data-file="${escapeHtml(name)}"><span class="file-type ${fileTypeClass(name)}">${escapeHtml(language.type)}</span><span>${escapeHtml(name)}</span></button><button class="file-delete" type="button" data-delete="${escapeHtml(name)}" title="Excluir ${escapeHtml(name)}" aria-label="Excluir ${escapeHtml(name)}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></div>`;
-        }).join('');
-        list.querySelectorAll('[data-file]').forEach((button) => button.addEventListener('click', () => openFile(button.dataset.file)));
-        list.querySelectorAll('[data-delete]').forEach((button) => button.addEventListener('click', (event) => { event.stopPropagation(); openDeleteModal(button.dataset.delete); }));
-      }
+function renderState(){
+  const has=Object.keys(files).length>0;
+  $('#emptyStage').classList.toggle('hidden',has);
+  $('#editorStage').classList.toggle('hidden',!has);
+  ['#formatButton','#saveButton','#previewButton'].forEach(s=>$(s).classList.toggle('hidden',!has));
+  $('#mainTitle').textContent=has?(activeFile||'Workspace'):'Comece uma criação';
+  $('#mainSubtitle').textContent=has?`${Object.keys(files).length} arquivo(s) no workspace`:'Escolha um arquivo para começar';
+  if(!has){$('#editorTabs').innerHTML='';$('#contextCopy').textContent='Nenhum arquivo aberto';return;}
+  renderTabs();
+  updateEditorMeta();
+}
 
-      function renderTabs() {
-        const tabs = $('#editorTabs');
-        openFiles = openFiles.filter((name) => Object.prototype.hasOwnProperty.call(files, name));
-        if (!activeFile || !openFiles.includes(activeFile)) openFiles.unshift(activeFile);
-        tabs.innerHTML = openFiles.filter(Boolean).map((name) => {
-          const language = languageOf(name);
-          return `<button class="editor-tab ${name === activeFile ? 'active' : ''}" type="button" data-tab="${escapeHtml(name)}"><span class="file-type ${fileTypeClass(name)}">${escapeHtml(language.type)}</span><span>${escapeHtml(name)}</span><span class="tab-close" data-close="${escapeHtml(name)}" title="Fechar aba" aria-label="Fechar aba"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 6 12 12M18 6 6 18"/></svg></span></button>`;
-        }).join('');
-        tabs.querySelectorAll('[data-tab]').forEach((button) => button.addEventListener('click', () => openFile(button.dataset.tab)));
-        tabs.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', (event) => { event.stopPropagation(); closeTab(button.dataset.close); }));
-      }
+function syncLineNumbers(){
+  const v=$('#codeEditor').value;
+  const c=Math.max(1,v.split('\n').length);
+  $('#lineNumbers').textContent=Array.from({length:c},(_,i)=>String(i+1).padStart(3,' ')).join('\n');
+}
 
-      function renderState() {
-        const hasFiles = Object.keys(files).length > 0;
-        $('#emptyStage').classList.toggle('hidden', hasFiles);
-        $('#editorStage').classList.toggle('hidden', !hasFiles);
-        ['#formatButton', '#saveButton', '#previewButton'].forEach((selector) => $(selector).classList.toggle('hidden', !hasFiles));
-        $('#mainTitle').textContent = hasFiles ? (activeFile || 'Workspace') : 'Comece uma criação';
-        $('#mainSubtitle').textContent = hasFiles ? `${Object.keys(files).length} arquivo(s) no seu workspace` : 'Escolha um arquivo para começar a construir';
-        if (!hasFiles) { $('#editorTabs').innerHTML = ''; $('#contextCopy').textContent = 'Nenhum arquivo aberto'; return; }
-        renderTabs();
-        updateEditorMeta();
-      }
+function updateCursor(){
+  const e=$('#codeEditor');
+  const before=e.value.slice(0,e.selectionStart);
+  const line=before.split('\n').length;
+  const col=before.length-before.lastIndexOf('\n');
+  $('#cursorStatus').textContent=`Ln ${line}, Col ${col}`;
+}
 
-      function syncLineNumbers() {
-        const value = $('#codeEditor').value;
-        const count = Math.max(1, value.split('\n').length);
-        $('#lineNumbers').textContent = Array.from({ length: count }, (_, index) => String(index + 1).padStart(3, ' ')).join('\n');
-      }
+function updateEditorMeta(){
+  if(!activeFile)return;
+  const l=langOf(activeFile);
+  $('#editorFileType').textContent=l.type;
+  $('#editorFileType').className=`file-type ${ftClass(activeFile)}`;
+  $('#editorFileName').textContent=activeFile;
+  $('#languageStatus').textContent=l.label;
+  $('#contextCopy').textContent=`Meu Studio · ${activeFile}`;
+  updateCursor();
+}
 
-      function updateCursorStatus() {
-        const editor = $('#codeEditor');
-        const before = editor.value.slice(0, editor.selectionStart);
-        const line = before.split('\n').length;
-        const column = before.length - before.lastIndexOf('\n');
-        $('#cursorStatus').textContent = `Ln ${line}, Col ${column}`;
-      }
+function openFile(name){
+  if(!Object.prototype.hasOwnProperty.call(files,name))return;
+  activeFile=name;
+  if(!openFiles.includes(name))openFiles.push(name);
+  $('#codeEditor').value=files[name];
+  $('#editorFileState').textContent='· salvo';
+  const ss=$('#saveStatus');
+  ss.className='status-ready';
+  ss.innerHTML='<i></i>Sincronizado';
+  renderFileList();
+  renderTabs();
+  renderState();
+  syncLineNumbers();
+  updateEditorMeta();
+  closeRailMobile();
+  schedulePreviewUpdate();
+}
 
-      function updateEditorMeta() {
-        if (!activeFile) return;
-        const language = languageOf(activeFile);
-        $('#editorFileType').textContent = language.type;
-        $('#editorFileType').className = `file-type ${fileTypeClass(activeFile)}`;
-        $('#editorFileName').textContent = activeFile;
-        $('#languageStatus').textContent = language.label;
-        $('#contextCopy').textContent = `Meu Studio · ${activeFile}`;
-        updateCursorStatus();
-      }
+function closeTab(name){
+  openFiles=openFiles.filter(f=>f!==name);
+  if(activeFile===name){
+    activeFile=openFiles[openFiles.length-1]||Object.keys(files)[0]||'';
+    if(activeFile)openFile(activeFile);else renderState();
+  }else renderTabs();
+}
 
-      function openFile(name) {
-        if (!Object.prototype.hasOwnProperty.call(files, name)) return;
-        activeFile = name;
-        if (!openFiles.includes(name)) openFiles.push(name);
-        $('#codeEditor').value = files[name];
-        $('#editorFileState').textContent = '· salvo';
-        $('#saveStatus').innerHTML = '<i></i>Sincronizado';
-        renderFileList();
-        renderTabs();
-        renderState();
-        syncLineNumbers();
-        updateEditorMeta();
-        closeRailOnMobile();
-      }
+function markDirty(){
+  if(!activeFile)return;
+  files[activeFile]=$('#codeEditor').value;
+  $('#editorFileState').textContent='· editando';
+  const ss=$('#saveStatus');
+  ss.className='status-ready status-dirty';
+  ss.innerHTML='<i></i>Editando';
+  syncLineNumbers();
+  updateCursor();
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>saveCurrent(false),600);
+  schedulePreviewUpdate();
+}
 
-      function closeTab(name) {
-        openFiles = openFiles.filter((file) => file !== name);
-        if (activeFile === name) {
-          activeFile = openFiles[openFiles.length - 1] || Object.keys(files)[0] || '';
-          if (activeFile) openFile(activeFile); else renderState();
-        } else renderTabs();
-      }
+function saveCurrent(show=true){
+  if(!activeFile)return;
+  files[activeFile]=$('#codeEditor').value;
+  persist();
+  $('#editorFileState').textContent='· salvo';
+  const ss=$('#saveStatus');
+  ss.className='status-ready';
+  ss.innerHTML='<i></i>Sincronizado';
+  if(show)toast(`${activeFile} salvo.`);
+}
 
-      function markDirty() {
-        if (!activeFile) return;
-        files[activeFile] = $('#codeEditor').value;
-        $('#editorFileState').textContent = '· não salvo';
-        $('#saveStatus').innerHTML = '<i style="background:var(--accent)"></i>Editando';
-        syncLineNumbers();
-        updateCursorStatus();
-        clearTimeout(saveTimer);
-        saveTimer = setTimeout(() => saveCurrentFile(false), 700);
-      }
+function openCreateModal(ext='html'){
+  $('#newFileLanguage').innerHTML=langOptions();
+  $('#newFileLanguage').value=ext;
+  $('#newFileName').value=defaultName(ext);
+  $('#createFileError').textContent='';
+  $('#createFileModal').classList.remove('hidden');
+  $('#createFileModal').setAttribute('aria-hidden','false');
+  document.body.classList.add('modal-open');
+  setTimeout(()=>{$('#newFileName').focus();$('#newFileName').select();},40);
+}
 
-      function saveCurrentFile(showMessage = true) {
-        if (!activeFile) return;
-        files[activeFile] = $('#codeEditor').value;
-        persistFiles();
-        $('#editorFileState').textContent = '· salvo';
-        $('#saveStatus').innerHTML = '<i></i>Sincronizado';
-        if (showMessage) showToast(`${activeFile} salvo no workspace.`);
-      }
+function closeCreateModal(){
+  $('#createFileModal').classList.add('hidden');
+  $('#createFileModal').setAttribute('aria-hidden','true');
+  if($('#deleteFileModal').classList.contains('hidden')&&$('#commandPalette').classList.contains('hidden'))document.body.classList.remove('modal-open');
+}
 
-      function defaultNameFor(languageExt) {
-        return ({ html: 'index.html', css: 'styles.css', scss: 'styles.scss', js: 'script.js', ts: 'main.ts', jsx: 'App.jsx', tsx: 'App.tsx', json: 'package.json', md: 'README.md', py: 'main.py', java: 'Main.java', c: 'main.c', cpp: 'main.cpp', cs: 'Program.cs', go: 'main.go', rs: 'main.rs', php: 'index.php', rb: 'main.rb', sql: 'query.sql', yaml: 'config.yaml', xml: 'data.xml', vue: 'App.vue', svelte: 'App.svelte', sh: 'run.sh', txt: 'notes.txt' })[languageExt] || 'arquivo.txt';
-      }
+function createFileFromForm(e){
+  e.preventDefault();
+  const inputName=$('#newFileName').value.trim();
+  const ext=$('#newFileLanguage').value;
+  const l=langOf(`file.${ext}`);
+  if(!inputName){$('#createFileError').textContent='Digite um nome.';return;}
+  let name=inputName.replace(/[^a-zA-Z0-9._-]/g,'-');
+  if(!name.includes('.'))name+=`.${l.ext}`;
+  if(files[name]){$('#createFileError').textContent='Já existe um arquivo com esse nome.';return;}
+  files[name]=l.starter||'';
+  persist();
+  closeCreateModal();
+  activeFile=name;
+  openFiles.push(name);
+  renderFileList();
+  renderState();
+  openFile(name);
+  toast(`${name} criado.`);
+}
 
-      function openCreateModal(languageExt = 'html') {
-        $('#newFileLanguage').innerHTML = languageOptions();
-        $('#newFileLanguage').value = languageExt;
-        $('#newFileName').value = defaultNameFor(languageExt);
-        $('#createFileError').textContent = '';
-        $('#createFileModal').classList.remove('hidden');
-        $('#createFileModal').setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
-        setTimeout(() => { $('#newFileName').focus(); $('#newFileName').select(); }, 40);
-      }
+function openDeleteModal(name){
+  if(!files[name])return;
+  pendingDelete=name;
+  $('#deleteFileCopy').textContent=`Excluir "${name}"? O arquivo será removido apenas deste workspace.`;
+  $('#deleteFileModal').classList.remove('hidden');
+  $('#deleteFileModal').setAttribute('aria-hidden','false');
+  document.body.classList.add('modal-open');
+}
 
-      function closeCreateModal() {
-        $('#createFileModal').classList.add('hidden');
-        $('#createFileModal').setAttribute('aria-hidden', 'true');
-        if ($('#deleteFileModal').classList.contains('hidden') && $('#commandPalette').classList.contains('hidden')) document.body.classList.remove('modal-open');
-      }
+function closeDeleteModal(){
+  pendingDelete='';
+  $('#deleteFileModal').classList.add('hidden');
+  $('#deleteFileModal').setAttribute('aria-hidden','true');
+  if($('#createFileModal').classList.contains('hidden')&&$('#commandPalette').classList.contains('hidden'))document.body.classList.remove('modal-open');
+}
 
-      function createFileFromForm(event) {
-        event.preventDefault();
-        const inputName = $('#newFileName').value.trim();
-        const languageExt = $('#newFileLanguage').value;
-        const language = languageOf(`file.${languageExt}`);
-        if (!inputName) { $('#createFileError').textContent = 'Digite um nome para o arquivo.'; return; }
-        let name = inputName.replace(/[^a-zA-Z0-9._-]/g, '-');
-        if (!name.includes('.')) name += `.${language.ext}`;
-        if (files[name]) { $('#createFileError').textContent = 'Já existe um arquivo com esse nome.'; return; }
-        files[name] = language.starter || '';
-        persistFiles();
-        closeCreateModal();
-        activeFile = name;
+function confirmDelete(){
+  if(!pendingDelete||!files[pendingDelete])return closeDeleteModal();
+  const r=pendingDelete;
+  delete files[r];
+  openFiles=openFiles.filter(n=>n!==r);
+  if(activeFile===r)activeFile=openFiles[openFiles.length-1]||Object.keys(files)[0]||'';
+  persist();
+  closeDeleteModal();
+  if(activeFile)openFile(activeFile);else{renderFileList();renderState();}
+  toast(`${r} excluído.`);
+}
+
+function formatCurrent(){
+  if(!activeFile)return;
+  const ext=extOf(activeFile);
+  if(ext==='json'){
+    try{$('#codeEditor').value=JSON.stringify(JSON.parse($('#codeEditor').value),null,2)+'\n';markDirty();toast('JSON formatado.');}
+    catch(e){toast('JSON inválido.');}
+    return;
+  }
+  $('#codeEditor').value=$('#codeEditor').value.split('\n').map(l=>l.trimEnd()).join('\n').trim()+'\n';
+  markDirty();
+  toast('Formatado.');
+}
+
+function copyCurrent(){
+  if(!activeFile)return;
+  const v=$('#codeEditor').value;
+  if(navigator.clipboard?.writeText)navigator.clipboard.writeText(v).then(()=>toast('Copiado.')).catch(()=>toast('Copie manualmente.'));
+  else toast('Copie manualmente.');
+}
+
+function firstFile(pred){return Object.keys(files).find(pred)||'';}
+
+function buildPreviewDoc(){
+  // Tenta encontrar um arquivo HTML
+  const htmlFile=firstFile(n=>['html','htm'].includes(extOf(n)));
+  
+  if(htmlFile){
+    let doc=files[htmlFile]||'';
+    // Injeta CSS de outros arquivos .css
+    const cssFile=firstFile(n=>BROWSER_STYLE_EXTS.has(extOf(n)));
+    const jsFile=firstFile(n=>BROWSER_SCRIPT_EXTS.has(extOf(n)));
+    const css=cssFile&&cssFile!==htmlFile?files[cssFile]:'';
+    const js=jsFile&&jsFile!==htmlFile?files[jsFile].replace(/<\/script/gi,'<\\/script'):'';
+    
+    if(css&&!doc.includes(css.slice(0,50))){
+      const tag=`<style data-studio="css">${css}</style>`;
+      doc=doc.includes('</head>')?doc.replace('</head>',`${tag}</head>`):`${tag}${doc}`;
+    }
+    if(js){
+      const tag=`<script data-studio="js">${js}<\\/script>`;
+      doc=doc.includes('</body>')?doc.replace('</body>',`${tag}</body>`):`${doc}${tag}`;
+    }
+    return doc;
+  }
+  
+  // Se o arquivo ativo for CSS, mostra preview com HTML base
+  if(activeFile&&BROWSER_STYLE_EXTS.has(extOf(activeFile))){
+    const css=files[activeFile];
+    return `<!doctype html><html><head><style>${css}</style></head><body><div style="padding:30px;font-family:system-ui"><h1>Preview CSS</h1><p>Este é um exemplo para visualizar seus estilos.</p><button class="btn">Botão</button><a href="#">Link</a></div></body></html>`;
+  }
+  
+  // Se for JS, executa em contexto
+  if(activeFile&&BROWSER_SCRIPT_EXTS.has(extOf(activeFile))){
+    const js=files[activeFile].replace(/<\/script/gi,'<\\/script');
+    return `<!doctype html><html><body style="margin:0;padding:20px;font-family:system-ui;background:#0b0c10;color:#f2f3f7"><pre id="out" style="white-space:pre-wrap;font-family:monospace"></pre><script>const _log=console.log;const _out=document.getElementById('out');console.log=(...a)=>{_out.textContent+=a.map(x=>typeof x==='object'?JSON.stringify(x,null,2):String(x)).join(' ')+'\\n';_log(...a);};try{${js}}catch(e){_out.textContent+='\\nErro: '+e.message;}<\/script></body></html>`;
+  }
+  
+  // Fallback: mostra conteúdo formatado
+  const content=activeFile?files[activeFile]:'';
+  return `<!doctype html><html><body style="margin:0;padding:30px;font-family:system-ui;background:#f7f7f8;color:#272831"><h2 style="margin-top:0">${esc(activeFile||'Preview')}</h2><p style="color:#656772;font-size:13px">Este tipo de arquivo não tem preview visual. Crie um arquivo <code>.html</code> para ver o preview ao vivo.</p><pre style="background:#fff;padding:16px;border-radius:8px;border:1px solid #e0e0e4;font-family:monospace;font-size:12px;overflow:auto;max-height:70vh">${esc(content.slice(0,5000))}</pre></body></html>`;
+}
+
+function openPreview(){
+  if(!Object.keys(files).length){toast('Crie um arquivo primeiro.');return;}
+  saveCurrent(false);
+  $('#previewPane').classList.remove('hidden');
+  $('#editorStage').classList.add('with-preview');
+  $('#previewButton').classList.add('active');
+  $('#editorPreviewButton').classList.add('active');
+  updatePreview();
+}
+
+function updatePreview(){
+  if($('#previewPane').classList.contains('hidden'))return;
+  const doc=buildPreviewDoc();
+  const frame=$('#previewFrame');
+  // Ajusta largura para modo mobile/desktop
+  if(previewMode==='mobile'){
+    frame.style.maxWidth='375px';
+    frame.style.margin='0 auto';
+    frame.style.borderLeft='1px solid #e0e0e4';
+    frame.style.borderRight='1px solid #e0e0e4';
+  }else{
+    frame.style.maxWidth='';
+    frame.style.margin='';
+    frame.style.borderLeft='';
+    frame.style.borderRight='';
+  }
+  frame.srcdoc=doc;
+}
+
+function schedulePreviewUpdate(){
+  clearTimeout(previewTimer);
+  previewTimer=setTimeout(updatePreview,500);
+}
+
+function closePreview(){
+  $('#previewPane').classList.add('hidden');
+  $('#editorStage').classList.remove('with-preview');
+  $('#previewButton').classList.remove('active');
+  $('#editorPreviewButton').classList.remove('active');
+  $('#previewFrame').srcdoc='';
+}
+
+function refreshPreview(){
+  if($('#previewPane').classList.contains('hidden'))openPreview();
+  else updatePreview();
+}
+
+// ASSISTANT
+function appendMsg(text,role='assistant'){
+  const w=document.createElement('div');
+  w.className=`message ${role}`;
+  w.innerHTML=`<div class="message-avatar">${role==='assistant'?'CK':'EU'}</div><div class="message-bubble"></div>`;
+  w.querySelector('.message-bubble').innerHTML=text;
+  $('#assistantMessages').appendChild(w);
+  $('#assistantMessages').scrollTop=$('#assistantMessages').scrollHeight;
+}
+
+function codexReply(prompt){
+  const p=prompt.toLowerCase();
+  if(/criar|novo.*arquivo|começar/.test(p)){
+    setTimeout(()=>openCreateModal(),120);
+    return 'Vamos criar um arquivo. Escolha o nome e a linguagem. Posso sugerir: <code>index.html</code> para começar.';
+  }
+  if(/preview|visualizar|ver/.test(p)){
+    if(Object.keys(files).length)setTimeout(openPreview,120);
+    return Object.keys(files).length?'Preview aberto ao lado. O preview atualiza automaticamente enquanto você edita.':'Crie um arquivo HTML primeiro para ver o preview ao vivo.';
+  }
+  if(/linguagem|suporta/.test(p)){
+    return 'Suporto: HTML, CSS, SCSS, JavaScript, TypeScript, JSX, TSX, JSON, Markdown, Python, Java, C, C++, C#, Go, Rust, PHP, Ruby, SQL, YAML, XML, Vue, Svelte, Shell e texto.';
+  }
+  if(/salvar|save/.test(p)){
+    return 'O workspace salva automaticamente. Use <code>Ctrl+S</code> para salvar manualmente. O indicador verde confirma quando está sincronizado.';
+  }
+  if(/excluir|deletar|remover/.test(p)){
+    return 'Clique no ícone de lixeira ao lado do arquivo no explorer. A exclusão pede confirmação.';
+  }
+  if(/landing|página|page/.test(p)){
+    setTimeout(()=>{
+      const name='index.html';
+      if(!files[name]){
+        files[name]=`<!doctype html>\n<html lang="pt-BR">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Landing</title>\n<style>\n*{margin:0;padding:0;box-sizing:border-box}\nbody{font-family:system-ui,sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;display:grid;place-items:center;padding:40px 20px}\n.hero{text-align:center;max-width:600px}\nh1{font-size:clamp(36px,6vw,64px);letter-spacing:-2px;margin-bottom:16px}\np{font-size:16px;color:#999;margin-bottom:32px;line-height:1.6}\n.btn{display:inline-block;padding:14px 28px;background:#fff;color:#000;border-radius:999px;text-decoration:none;font-weight:600}\n</style>\n</head>\n<body>\n<div class="hero">\n<h1>Sua ideia começa aqui.</h1>\n<p>Uma landing page moderna criada no Studio Klip.</p>\n<a href="#" class="btn">Começar</a>\n</div>\n</body>\n</html>`;
+        persist();
+        activeFile=name;
         openFiles.push(name);
         renderFileList();
         renderState();
         openFile(name);
-        showToast(`${name} criado.`);
+        setTimeout(openPreview,200);
       }
+    },120);
+    return 'Criei uma landing page moderna em <code>index.html</code>. O preview abriu ao lado. Edite o código e veja as mudanças em tempo real!';
+  }
+  if(/ajuda|help|o que/.test(p)){
+    return 'Posso ajudar com: <strong>criar arquivos</strong>, <strong>abrir preview</strong>, <strong>explicar linguagens</strong>, <strong>formatar código</strong>, <strong>criar templates</strong> (landing page, portfolio, etc). O que você precisa?';
+  }
+  return `Entendi: "${esc(prompt)}". Estou acompanhando <code>${esc(activeFile||'nenhum arquivo')}</code>. Posso criar arquivos, abrir preview, explicar linguagens ou gerar templates.`;
+}
 
-      function openDeleteModal(name) {
-        if (!files[name]) return;
-        pendingDelete = name;
-        $('#deleteFileCopy').textContent = `Você está prestes a excluir “${name}”. O arquivo será removido apenas deste workspace local.`;
-        $('#deleteFileModal').classList.remove('hidden');
-        $('#deleteFileModal').setAttribute('aria-hidden', 'false');
-        document.body.classList.add('modal-open');
-      }
+function sendPrompt(p){
+  const v=p.trim();
+  if(!v)return;
+  appendMsg(esc(v),'user');
+  $('#assistantInput').value='';
+  setTimeout(()=>appendMsg(codexReply(v)),200);
+}
 
-      function closeDeleteModal() {
-        pendingDelete = '';
-        $('#deleteFileModal').classList.add('hidden');
-        $('#deleteFileModal').setAttribute('aria-hidden', 'true');
-        if ($('#createFileModal').classList.contains('hidden') && $('#commandPalette').classList.contains('hidden')) document.body.classList.remove('modal-open');
-      }
+// NAV
+function toggleRail(f){$('#projectRail').classList.toggle('open',typeof f==='boolean'?f:!$('#projectRail').classList.contains('open'));}
+function closeRailMobile(){if(window.innerWidth<=680)toggleRail(false);}
+function toggleAssistant(f){$('#assistantPane').classList.toggle('open',typeof f==='boolean'?f:!$('#assistantPane').classList.contains('open'));}
+function openCommands(){$('#commandPalette').classList.remove('hidden');$('#commandPalette').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');$('#commandInput').focus();}
+function closeCommands(){$('#commandPalette').classList.add('hidden');$('#commandPalette').setAttribute('aria-hidden','true');if($('#createFileModal').classList.contains('hidden')&&$('#deleteFileModal').classList.contains('hidden'))document.body.classList.remove('modal-open');}
+function handleCommand(c){closeCommands();if(c==='new-file')openCreateModal();if(c==='preview')openPreview();if(c==='import')$('#importInput').click();if(c==='chat')window.location.href='/';}
 
-      function confirmDelete() {
-        if (!pendingDelete || !files[pendingDelete]) return closeDeleteModal();
-        const removed = pendingDelete;
-        delete files[removed];
-        openFiles = openFiles.filter((name) => name !== removed);
-        if (activeFile === removed) activeFile = openFiles[openFiles.length - 1] || Object.keys(files)[0] || '';
-        persistFiles();
-        closeDeleteModal();
-        if (activeFile) openFile(activeFile); else { renderFileList(); renderState(); }
-        showToast(`${removed} excluído.`);
-      }
+// INIT
+$('#newFileLanguage').innerHTML=langOptions();
+$('#newFileLanguage').addEventListener('change',e=>{
+  const cur=$('#newFileName').value.trim();
+  if(!cur||cur===defaultName(extOf(cur)))$('#newFileName').value=defaultName(e.target.value);
+});
+$('#newFileButton').addEventListener('click',()=>openCreateModal());
+$('#welcomeCreate').addEventListener('click',()=>openCreateModal('html'));
+$('#welcomeImport').addEventListener('click',()=>$('#importInput').click());
+$('#importButton').addEventListener('click',()=>$('#importInput').click());
+$('#importInput').addEventListener('change',async e=>{
+  const sel=Array.from(e.target.files||[]);
+  for(const f of sel)files[f.name]=await f.text();
+  if(sel.length){
+    persist();
+    activeFile=sel[0].name;
+    openFiles=[...new Set([...openFiles,...sel.map(f=>f.name)])];
+    renderFileList();
+    renderState();
+    openFile(activeFile);
+    toast(`${sel.length} arquivo(s) importado(s).`);
+  }
+  e.target.value='';
+});
+$('#createFileForm').addEventListener('submit',createFileFromForm);
+$('#createClose').addEventListener('click',closeCreateModal);
+$('#createCancel').addEventListener('click',closeCreateModal);
+$('#createFileModal').addEventListener('click',e=>{if(e.target===$('#createFileModal'))closeCreateModal();});
+$('#deleteClose').addEventListener('click',closeDeleteModal);
+$('#deleteCancel').addEventListener('click',closeDeleteModal);
+$('#deleteConfirm').addEventListener('click',confirmDelete);
+$('#deleteFileModal').addEventListener('click',e=>{if(e.target===$('#deleteFileModal'))closeDeleteModal();});
+$('#workspaceButton').addEventListener('click',()=>toast('Workspace pronto.'));
+$('#refreshButton').addEventListener('click',()=>{
+  files=loadFiles();
+  activeFile=Object.keys(files)[0]||'';
+  openFiles=activeFile?[activeFile]:[];
+  renderFileList();
+  renderState();
+  if(activeFile)openFile(activeFile);
+  toast('Atualizado.');
+});
+$('#codeEditor').addEventListener('input',markDirty);
+$('#codeEditor').addEventListener('scroll',()=>{$('#lineNumbers').scrollTop=$('#codeEditor').scrollTop;});
+['keyup','click','select'].forEach(e=>$('#codeEditor').addEventListener(e,updateCursor));
+$('#codeEditor').addEventListener('keydown',e=>{
+  if(e.key==='Tab'){
+    e.preventDefault();
+    const s=e.target.selectionStart,en=e.target.selectionEnd;
+    e.target.value=e.target.value.slice(0,s)+'  '+e.target.value.slice(en);
+    e.target.selectionStart=e.target.selectionEnd=s+2;
+    markDirty();
+  }
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'){e.preventDefault();saveCurrent();}
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='p'){e.preventDefault();openPreview();}
+});
+$('#formatButton').addEventListener('click',formatCurrent);
+$('#saveButton').addEventListener('click',()=>saveCurrent());
+$('#copyButton').addEventListener('click',copyCurrent);
+$('#previewButton').addEventListener('click',()=>$('#previewPane').classList.contains('hidden')?openPreview():closePreview());
+$('#editorPreviewButton').addEventListener('click',()=>$('#previewPane').classList.contains('hidden')?openPreview():closePreview());
+$('#refreshPreview').addEventListener('click',refreshPreview);
+$('#closePreview').addEventListener('click',closePreview);
+$$('.preview-mode-btn').forEach(b=>b.addEventListener('click',()=>{
+  $$('.preview-mode-btn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  previewMode=b.dataset.mode;
+  updatePreview();
+}));
+$('#railToggle').addEventListener('click',()=>toggleRail());
+$('#assistantToggle').addEventListener('click',()=>toggleAssistant());
+$('#assistantClose').addEventListener('click',()=>toggleAssistant(false));
+$('#assistantForm').addEventListener('submit',e=>{e.preventDefault();sendPrompt($('#assistantInput').value);});
+$$('[data-prompt]').forEach(b=>b.addEventListener('click',()=>sendPrompt(b.dataset.prompt)));
+$$('[data-command]').forEach(b=>b.addEventListener('click',()=>handleCommand(b.dataset.command)));
+$('#commandButton').addEventListener('click',openCommands);
+$('#commandPalette').addEventListener('click',e=>{if(e.target===$('#commandPalette'))closeCommands();});
+$('#commandInput').addEventListener('input',e=>{
+  const q=e.target.value.toLowerCase();
+  $$('.command-item').forEach(i=>i.classList.toggle('hidden',!i.textContent.toLowerCase().includes(q)));
+});
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();openCommands();}
+  if(e.key==='Escape'){closeCommands();closeCreateModal();closeDeleteModal();}
+});
 
-      function formatCurrentFile() {
-        if (!activeFile) return;
-        const extension = extensionOf(activeFile);
-        if (extension === 'json') {
-          try { $('#codeEditor').value = JSON.stringify(JSON.parse($('#codeEditor').value), null, 2) + '\n'; markDirty(); showToast('JSON formatado.'); } catch (error) { showToast('Este JSON ainda precisa de ajustes.'); }
-          return;
-        }
-        $('#codeEditor').value = $('#codeEditor').value.split('\n').map((line) => line.trimEnd()).join('\n').trim() + '\n';
-        markDirty();
-        showToast('Espaços finais removidos.');
-      }
+// Boot
+renderFileList();
+renderState();
+if(activeFile)openFile(activeFile);
 
-      function copyCurrentFile() {
-        if (!activeFile) return;
-        const value = $('#codeEditor').value;
-        if (navigator.clipboard?.writeText) navigator.clipboard.writeText(value).then(() => showToast('Código copiado.')).catch(() => showToast('Selecione e copie manualmente.'));
-        else showToast('Selecione e copie manualmente.');
-      }
+// Tenta hidratar usuário do Klipza (mesma sessão)
+try{
+  const stored=JSON.parse(localStorage.getItem('klipza_pro_v1')||'null');
+  if(stored?.user){
+    const name=stored.user.name||'Conta Klipza';
+    const ini=name.split(/\s+/).filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase()||'K';
+    $('#accountName').textContent=name;
+    $('#accountEmail').textContent=stored.user.email||'conectada';
+    $('#accountAvatar').textContent=ini;
+    $('#welcomeTitle').textContent=`Bem-vindo, ${name.split(/\s+/)[0]||'criador'}.`;
+  }
+}catch(e){}
 
-      function firstFileBy(predicate) { return Object.keys(files).find(predicate) || ''; }
-
-      function buildPreviewDocument() {
-        const htmlFile = firstFileBy((name) => ['html', 'htm'].includes(extensionOf(name)));
-        if (!htmlFile) {
-          const active = activeFile ? files[activeFile] : '';
-          return `<!doctype html><html><body style="margin:0;min-height:100vh;display:grid;place-items:center;background:#f7f7f8;color:#41424b;font:14px system-ui,sans-serif;text-align:center;padding:24px"><div><strong>Preview disponível para HTML</strong><p style="max-width:330px;line-height:1.5">Crie um arquivo .html para visualizar uma página. O editor continua aceitando todas as linguagens do Studio.</p><pre style="max-width:500px;overflow:auto;text-align:left;background:#fff;padding:12px;border-radius:8px;font:11px monospace">${escapeHtml(active.slice(0, 700))}</pre></div></body></html>`;
-        }
-        let documentText = files[htmlFile] || '';
-        const cssFile = firstFileBy((name) => isBrowserStyle(name));
-        const jsFile = firstFileBy((name) => isBrowserScript(name));
-        const css = cssFile ? files[cssFile] : '';
-        const js = jsFile ? files[jsFile].replace(/<\/script/gi, '<\\/script') : '';
-        if (css) {
-          const styleTag = `<style data-studio-klip="styles">${css}</style>`;
-          documentText = documentText.replace(/<link[^>]+href=["'][^"']+["'][^>]*>/gi, (tag) => tag.toLowerCase().includes(cssFile.toLowerCase()) ? '' : tag);
-          documentText = documentText.includes('</head>') ? documentText.replace('</head>', `${styleTag}</head>`) : `${styleTag}${documentText}`;
-        }
-        if (js) {
-          const scriptTag = `<script data-studio-klip="script">${js}<\\/script>`;
-          const scriptPattern = /<script[^>]+src=["'][^"']+["'][^>]*>\s*<\/script>/i;
-          if (scriptPattern.test(documentText)) documentText = documentText.replace(scriptPattern, scriptTag);
-          else documentText = documentText.includes('</body>') ? documentText.replace('</body>', `${scriptTag}</body>`) : `${documentText}${scriptTag}`;
-        }
-        return documentText;
-      }
-
-      function openPreview() {
-        if (!Object.keys(files).length) { showToast('Crie um arquivo antes de abrir o preview.'); return; }
-        saveCurrentFile(false);
-        $('#previewPane').classList.remove('hidden');
-        $('#editorStage').classList.add('with-preview');
-        $('#previewButton').classList.add('active');
-        $('#editorPreviewButton').classList.add('active');
-        $('#previewFrame').srcdoc = buildPreviewDocument();
-      }
-
-      function closePreview() {
-        $('#previewPane').classList.add('hidden');
-        $('#editorStage').classList.remove('with-preview');
-        $('#previewButton').classList.remove('active');
-        $('#editorPreviewButton').classList.remove('active');
-        $('#previewFrame').srcdoc = '';
-      }
-
-      function refreshPreview() { if (!$('#previewPane').classList.contains('hidden')) $('#previewFrame').srcdoc = buildPreviewDocument(); else openPreview(); }
-
-      function appendAssistantMessage(text, role = 'assistant') {
-        const wrapper = document.createElement('div');
-        wrapper.className = `message ${role}`;
-        wrapper.innerHTML = `<div class="message-avatar">${role === 'assistant' ? 'CK' : 'EU'}</div><div class="message-bubble"></div>`;
-        wrapper.querySelector('.message-bubble').textContent = text;
-        $('#assistantMessages').appendChild(wrapper);
-        $('#assistantMessages').scrollTop = $('#assistantMessages').scrollHeight;
-      }
-
-      function codexReply(prompt) {
-        const normalized = prompt.toLowerCase();
-        if (normalized.includes('criar') || normalized.includes('arquivo')) { setTimeout(() => openCreateModal(), 140); return 'Vamos começar. Escolha o nome e a linguagem do seu primeiro arquivo; eu acompanho o contexto aberto no editor.'; }
-        if (normalized.includes('preview') || normalized.includes('visual')) { if (Object.keys(files).length) setTimeout(openPreview, 140); return Object.keys(files).length ? 'Preview aberto ao lado do editor. Para páginas web, use um arquivo HTML e, se quiser, conecte um CSS e um JavaScript pelo nome do arquivo.' : 'Crie um arquivo HTML primeiro. Depois eu abro o preview no mesmo workspace.'; }
-        if (normalized.includes('linguagem') || normalized.includes('linguagens')) return 'Você pode criar HTML, CSS, SCSS, JavaScript, TypeScript, JSX, TSX, JSON, Markdown, Python, Java, C, C++, C#, Go, Rust, PHP, Ruby, SQL, YAML, XML, Vue, Svelte, Shell e texto.';
-        if (normalized.includes('salv')) return 'O workspace salva automaticamente no navegador enquanto você edita. O indicador Sincronizado confirma quando o rascunho foi persistido.';
-        if (normalized.includes('exclu')) return 'Cada arquivo tem uma ação de lixeira no explorer. A exclusão pede confirmação antes de remover o arquivo local.';
-        return `Entendi: “${prompt}”. Estou acompanhando ${activeFile || 'nenhum arquivo'}. Posso ajudar a iniciar um arquivo, abrir o preview, explicar linguagens ou organizar o próximo passo.`;
-      }
-
-      function sendAssistantPrompt(prompt) {
-        const value = prompt.trim();
-        if (!value) return;
-        appendAssistantMessage(value, 'user');
-        $('#assistantInput').value = '';
-        setTimeout(() => appendAssistantMessage(codexReply(value)), 220);
-      }
-
-      function toggleRail(force) { const rail = $('#projectRail'); rail.classList.toggle('open', typeof force === 'boolean' ? force : !rail.classList.contains('open')); }
-      function closeRailOnMobile() { if (window.innerWidth <= 680) toggleRail(false); }
-      function toggleAssistant(force) { const pane = $('#assistantPane'); pane.classList.toggle('open', typeof force === 'boolean' ? force : !pane.classList.contains('open')); }
-      function openCommands() { $('#commandPalette').classList.remove('hidden'); $('#commandPalette').setAttribute('aria-hidden', 'false'); document.body.classList.add('modal-open'); $('#commandInput').focus(); }
-      function closeCommands() { $('#commandPalette').classList.add('hidden'); $('#commandPalette').setAttribute('aria-hidden', 'true'); if ($('#createFileModal').classList.contains('hidden') && $('#deleteFileModal').classList.contains('hidden')) document.body.classList.remove('modal-open'); }
-      function handleCommand(command) { closeCommands(); if (command === 'new-file') openCreateModal(); if (command === 'preview') openPreview(); if (command === 'import') $('#importInput').click(); if (command === 'chat') window.location.href = '/'; }
-
-      function hydrateUser(user) {
-        const name = user.user_metadata?.full_name || user.user_metadata?.name || user.email?.split('@')[0] || 'Conta Klipza';
-        const initials = name.split(/\s+/).filter(Boolean).slice(0,2).map((part) => part[0]).join('').toUpperCase() || 'K';
-        $('#accountName').textContent = name;
-        $('#accountEmail').textContent = user.email || 'conta conectada';
-        $('#accountAvatar').textContent = initials;
-        $('#welcomeTitle').textContent = `Bem-vindo, ${name.split(/\s+/)[0] || 'criador'}.`;
-      }
-
-      function showGate() { studioAuthResolved = false; studioUserId = ''; clearTimeout(studioRemoteTimer); $('#studioApp').classList.add('hidden'); $('#authGate').classList.remove('hidden'); }
-      function showStudio(user) { hydrateUser(user); $('#authGate').classList.add('hidden'); $('#studioApp').classList.remove('hidden'); }
-      function refreshStudioAfterHydrate() { renderFileList(); renderState(); if (activeFile) openFile(activeFile); }
-      function activateStudioUser(user) {
-        studioUserId = user.id;
-        studioAuthResolved = true;
-        showStudio(user);
-        hydrateStudioFiles(user).then(refreshStudioAfterHydrate).catch(() => {});
-      }
-
-      async function initAuth() {
-        if (!supabaseClient) { showGate(); return; }
-        const { data } = await supabaseClient.auth.getSession();
-        if (data.session?.user) activateStudioUser(data.session.user); else showGate();
-        supabaseClient.auth.onAuthStateChange((event, session) => { if (session?.user && event !== 'SIGNED_OUT') activateStudioUser(session.user); if (event === 'SIGNED_OUT') showGate(); });
-      }
-
-      $('#newFileLanguage').innerHTML = languageOptions();
-      $('#newFileLanguage').addEventListener('change', (event) => { if (!$('#newFileName').value.trim() || $('#newFileName').value === defaultNameFor(extensionOf($('#newFileName').value))) $('#newFileName').value = defaultNameFor(event.target.value); });
-      $('#newFileButton').addEventListener('click', () => openCreateModal());
-      $('#welcomeCreate').addEventListener('click', () => openCreateModal('html'));
-      $('#emptyStage').querySelector('#welcomeImport').addEventListener('click', () => $('#importInput').click());
-      $('#importButton').addEventListener('click', () => $('#importInput').click());
-      $('#importInput').addEventListener('change', async (event) => { const selected = Array.from(event.target.files || []); for (const file of selected) files[file.name] = await file.text(); if (selected.length) { persistFiles(); activeFile = selected[0].name; openFiles = [...new Set([...openFiles, ...selected.map((file) => file.name)])]; renderFileList(); renderState(); openFile(activeFile); showToast(`${selected.length} arquivo(s) importado(s).`); } event.target.value = ''; });
-      $('#createFileForm').addEventListener('submit', createFileFromForm);
-      $('#createClose').addEventListener('click', closeCreateModal);
-      $('#createCancel').addEventListener('click', closeCreateModal);
-      $('#createFileModal').addEventListener('click', (event) => { if (event.target === $('#createFileModal')) closeCreateModal(); });
-      $('#deleteClose').addEventListener('click', closeDeleteModal);
-      $('#deleteCancel').addEventListener('click', closeDeleteModal);
-      $('#deleteConfirm').addEventListener('click', confirmDelete);
-      $('#deleteFileModal').addEventListener('click', (event) => { if (event.target === $('#deleteFileModal')) closeDeleteModal(); });
-      $('#workspaceButton').addEventListener('click', () => showToast('Meu Studio está pronto para a próxima ideia.'));
-      $('#refreshButton').addEventListener('click', () => { files = loadFiles(); activeFile = Object.keys(files)[0] || ''; openFiles = activeFile ? [activeFile] : []; renderFileList(); renderState(); if (activeFile) openFile(activeFile); showToast('Workspace atualizado.'); });
-      $('#codeEditor').addEventListener('input', markDirty);
-      $('#codeEditor').addEventListener('paste', () => { requestAnimationFrame(() => { syncLineNumbers(); updateCursorStatus(); $('#lineNumbers').scrollTop = $('#codeEditor').scrollTop; }); });
-      $('#codeEditor').addEventListener('scroll', () => { $('#lineNumbers').scrollTop = $('#codeEditor').scrollTop; });
-      ['keyup', 'click', 'select'].forEach((eventName) => $('#codeEditor').addEventListener(eventName, updateCursorStatus));
-      $('#codeEditor').addEventListener('keydown', (event) => {
-        if (event.key === 'Tab') { event.preventDefault(); const start = event.target.selectionStart; const end = event.target.selectionEnd; event.target.value = `${event.target.value.slice(0,start)}  ${event.target.value.slice(end)}`; event.target.selectionStart = event.target.selectionEnd = start + 2; markDirty(); }
-        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') { event.preventDefault(); saveCurrentFile(); }
-        if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'p') { event.preventDefault(); openPreview(); }
-        if (event.key === 'Enter' && !event.shiftKey && event.target === $('#assistantInput')) { event.preventDefault(); $('#assistantForm').requestSubmit(); }
-      });
-      $('#formatButton').addEventListener('click', formatCurrentFile);
-      $('#saveButton').addEventListener('click', () => saveCurrentFile());
-      $('#copyButton').addEventListener('click', copyCurrentFile);
-      $('#previewButton').addEventListener('click', openPreview);
-      $('#editorPreviewButton').addEventListener('click', openPreview);
-      $('#refreshPreview').addEventListener('click', refreshPreview);
-      $('#closePreview').addEventListener('click', closePreview);
-      $('#railToggle').addEventListener('click', () => toggleRail());
-      $('#assistantToggle').addEventListener('click', () => toggleAssistant());
-      $('#assistantClose').addEventListener('click', () => toggleAssistant(false));
-      $('#assistantForm').addEventListener('submit', (event) => { event.preventDefault(); sendAssistantPrompt($('#assistantInput').value); });
-      document.querySelectorAll('[data-prompt]').forEach((button) => button.addEventListener('click', () => { sendAssistantPrompt(button.dataset.prompt); }));
-      document.querySelectorAll('[data-command]').forEach((button) => button.addEventListener('click', () => handleCommand(button.dataset.command)));
-      $('#commandButton').addEventListener('click', openCommands);
-      $('#commandPalette').addEventListener('click', (event) => { if (event.target === $('#commandPalette')) closeCommands(); });
-      $('#commandInput').addEventListener('input', (event) => { const query = event.target.value.toLowerCase(); document.querySelectorAll('.command-item').forEach((item) => item.classList.toggle('hidden', !item.textContent.toLowerCase().includes(query))); });
-      document.addEventListener('keydown', (event) => { if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') { event.preventDefault(); openCommands(); } if (event.key === 'Escape') { closeCommands(); closeCreateModal(); closeDeleteModal(); } });
-
-      renderFileList();
-      renderState();
-      if (activeFile) openFile(activeFile);
-      initAuth();
-    })();
-  </script>
+// Se não tem sessão, mostra gate
+if(!localStorage.getItem('klipza_pro_v1')){
+  // Permite usar sem login para demo
+  $('#studioApp').classList.remove('hidden');
+}else{
+  $('#studioApp').classList.remove('hidden');
+}
+})();
+</script>
 </body>
 </html>
