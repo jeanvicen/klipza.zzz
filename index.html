@@ -76,7 +76,9 @@ body:not(.dark){--blob-opacity:.7}
   z-index:400;
   align-items:center;
   justify-content:center;
-  pointer-events:none;
+  pointer-events:auto;
+  background:var(--bg);
+  color:var(--text);
 }
 #auto-login-loader.active{display:flex;}
 #auto-login-spinner{
@@ -2155,7 +2157,7 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     try{await supabaseClient.rpc('touch_user_activity');}
     catch(error){console.warn('Não foi possível atualizar a atividade da conta.',error);}
   }
-  async function finishSupabaseUser(user){
+  async function finishSupabaseUser(user, options={}){
     if(!user)return;
     const previousOwner=state.localOwnerId||state.user?.id||null;
     const hasUnscopedCache=Object.keys(state.chats||{}).length>0||Object.keys(state.artifacts||{}).length>0||Array.isArray(state.memory?.memories)&&state.memory.memories.length>0;
@@ -2187,12 +2189,18 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     state.wallet={...state.wallet,tokenBalance:Number(profile?.token_balance||0),primeStatus:profile?.prime_status||'inactive',primePlanCode:profile?.prime_plan_code||null,primeSubscriptionId:profile?.prime_subscription_id||null,primeCurrentPeriodEnd:profile?.prime_current_period_end||null};
     save();
     showRecoveryPanel(false);
-    enter();
+    const deferEnter=Boolean(options.deferEnter);
+    if(!deferEnter) enter();
     refreshWallet();
     const hydrateAccount=async()=>{
       if(state.user?.id!==user.id)return;
       const loaded=await hydrateRemoteState(user);
-      if(!loaded){showResponseStatus('Não foi possível sincronizar os dados desta conta. Tentando novamente…');setTimeout(()=>{if(state.user?.id===user.id)void hydrateAccount();},3000);return;}
+      if(!loaded){
+        showResponseStatus('Sincronizando sua conta…');
+        if(deferEnter){await new Promise(resolve=>setTimeout(resolve,700));return hydrateAccount();}
+        setTimeout(()=>{if(state.user?.id===user.id)void hydrateAccount();},3000);
+        return;
+      }
       save();renderHistory();renderArtifactsCount();if(currentView==='chat')renderChat();
       await hydrateMessageFeedback(user);
       await hydrateMemoryData(user);
@@ -2200,9 +2208,12 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
       await syncServerQuota();
       await refreshDeepJobs();
       startDeepJobPolling();
-      if(state.user?.id===user.id){authResolved=true;remoteSyncSuspended=false;queueRemoteStateSync();showResponseStatus('');}
+      if(state.user?.id===user.id){
+        if(deferEnter) enter();
+        authResolved=true;remoteSyncSuspended=false;queueRemoteStateSync();showResponseStatus('');
+      }
     };
-    void hydrateAccount();
+    if(deferEnter) await hydrateAccount(); else void hydrateAccount();
     if(state.user.restricted) showResponseStatus('Sua conta está temporariamente restrita. Entre em contato com o suporte do Klipza.');
     void touchSupabaseActivity(true);
   }
@@ -2291,24 +2302,28 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     state=emptyLocalAccountState(null);save();location.reload();
   }
   async function bootstrapAuth(){
-    if(!supabaseClient){setAuthStatus('Não foi possível carregar o serviço de contas. Atualize a página.','error');return;}
+    if(!supabaseClient){$('auto-login-loader')?.classList.remove('active');setAuthStatus('Não foi possível carregar o serviço de contas. Atualize a página.','error');return;}
+    const autoLoader=$('auto-login-loader');
+    autoLoader?.classList.add('active');
+    let bootstrapResolving=true;
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       if(event==='PASSWORD_RECOVERY'){showRecoveryPanel(true);return;}
-      if(event==='SIGNED_IN'&&session?.user)setTimeout(()=>finishSupabaseUser(session.user),0);
+      if(event==='SIGNED_IN'&&session?.user&&!bootstrapResolving)setTimeout(()=>finishSupabaseUser(session.user),0);
       if(event==='SIGNED_OUT'){const oldUserId=state.user?.id||state.localOwnerId||null;stopQuotaRealtime();stopAccountNotificationSync();clearLocalAccountResidue(oldUserId);expertModeArmed=false;expertPlanDraft=null;expertPlanBusy=false;authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state=emptyLocalAccountState(null);state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null,orders:[],ledger:[]};save();$('app').classList.add('hidden');$('login').classList.remove('hidden');}
     });
     const {data}=await supabaseClient.auth.getSession();
     if(data.session?.user){
-      const autoLoader=$('auto-login-loader');
-      autoLoader?.classList.add('active');
       const hash=window.location.hash||'';
       if(hash.includes('reset-password')||hash.includes('type=recovery')){showRecoveryPanel(true);$('auto-login-loader')?.classList.remove('active');}
       else {
-        await finishSupabaseUser(data.session.user);
+        await finishSupabaseUser(data.session.user,{deferEnter:true});
+        bootstrapResolving=false;
         const autoLoader=$('auto-login-loader');
         autoLoader?.classList.remove('active');
       }
     }else{
+      bootstrapResolving=false;
+      autoLoader?.classList.remove('active');
       const oldUserId=state.user?.id||state.localOwnerId||null;stopQuotaRealtime();stopAccountNotificationSync();clearLocalAccountResidue(oldUserId);
       authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state=emptyLocalAccountState(null);state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null};
   save();$('login').classList.remove('hidden');$('app').classList.add('hidden');
