@@ -153,42 +153,41 @@ img{max-width:100%}
 /* LOGIN PROFILE TRANSITION */
 #auth-profile-transition{
   position:fixed;inset:0;display:grid;place-items:center;
-  background:rgba(var(--bg-rgb),.62);backdrop-filter:blur(12px) saturate(135%);
-  -webkit-backdrop-filter:blur(12px) saturate(135%);
-  opacity:0;visibility:hidden;pointer-events:none;z-index:70;
-  transition:opacity .28s ease,visibility .28s ease;
+  background:#000;opacity:0;visibility:hidden;pointer-events:none;z-index:200;
+  transition:opacity .55s ease,visibility .55s ease;
 }
 #auth-profile-transition.active{opacity:1;visibility:visible;pointer-events:auto}
 .auth-profile-transition-card{
-  display:flex;align-items:center;gap:14px;min-width:min(360px,calc(100vw - 40px));
-  padding:14px 16px;border:1px solid color-mix(in srgb,var(--line2) 78%,transparent);
-  border-radius:18px;background:color-mix(in srgb,var(--panel) 94%,transparent);
-  box-shadow:0 24px 70px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.45);
-  transform:translateY(12px) scale(.98);transition:transform .36s cubic-bezier(.23,1,.32,1);
+  width:min(430px,calc(100vw - 36px));padding:28px 24px 24px;text-align:center;
+  border:0;background:transparent;box-shadow:none;
+  transform:translateY(14px) scale(.98);transition:transform .55s cubic-bezier(.23,1,.32,1);
 }
 #auth-profile-transition.active .auth-profile-transition-card{transform:translateY(0) scale(1)}
 .auth-profile-coin{
-  width:58px;height:58px;border-radius:50%;display:grid;place-items:center;
-  position:relative;flex:0 0 auto;overflow:hidden;color:#fff;font-weight:800;font-size:19px;
+  width:96px;height:96px;border-radius:50%;display:grid;place-items:center;margin:0 auto 22px;
+  position:relative;overflow:hidden;color:#fff;font-weight:800;font-size:28px;
   background:radial-gradient(circle at 32% 28%,#fff7c7 0 8%,#8ed7ff 22%,#0a84ff 56%,#06336f 100%);
-  border:2px solid rgba(255,255,255,.72);
-  box-shadow:0 10px 25px rgba(10,132,255,.25),inset 0 2px 3px rgba(255,255,255,.65);
+  border:2px solid rgba(255,255,255,.82);
+  box-shadow:0 18px 50px rgba(10,132,255,.28),inset 0 2px 4px rgba(255,255,255,.65);
   transform-style:preserve-3d;
 }
-.auth-profile-coin::before{content:"";position:absolute;inset:7px;border-radius:50%;border:1px solid rgba(255,255,255,.55);opacity:.7}
-.auth-profile-coin.play{animation:authCoinSpin 1.15s cubic-bezier(.45,.05,.55,.95) 1 both}
-.auth-profile-coin span{position:relative;z-index:2;transform:translateZ(4px)}
-.auth-profile-copy{display:grid;gap:3px;min-width:0}
-.auth-profile-copy strong{font-size:15px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.auth-profile-copy span{font-size:10px;color:var(--muted)}
+.auth-profile-coin::before{content:"";position:absolute;inset:8px;border-radius:50%;border:1px solid rgba(255,255,255,.55);opacity:.75}
+.auth-profile-coin.play{animation:authCoinSpin 1.55s cubic-bezier(.45,.05,.55,.95) 1 both}
+.auth-profile-coin span{position:relative;z-index:2;transform:translateZ(6px)}
+.auth-profile-copy{display:grid;gap:8px;min-width:0;justify-items:center;color:#fff}
+.auth-profile-copy strong{font-size:clamp(22px,4vw,30px);line-height:1.15;letter-spacing:-.5px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.auth-profile-copy span{font-size:13px;line-height:1.5;color:rgba(255,255,255,.68);max-width:330px}
+.auth-profile-continue{margin-top:22px;min-width:180px;height:46px;padding:0 22px;border:1px solid rgba(255,255,255,.18);border-radius:12px;background:#fff;color:#050505;font-size:13px;font-weight:750;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.25);transition:transform .18s ease,background .18s ease,box-shadow .18s ease}
+.auth-profile-continue:hover{background:#f3f3f3;transform:translateY(-1px);box-shadow:0 14px 34px rgba(0,0,0,.32)}
+.auth-profile-continue:active{transform:scale(.98)}
 @keyframes authCoinSpin{
-  0%{transform:perspective(500px) rotateY(0deg) rotateX(0deg) scale(.72);opacity:0}
-  18%{transform:perspective(500px) rotateY(180deg) rotateX(16deg) scale(1.08);opacity:1}
-  48%{transform:perspective(500px) rotateY(540deg) rotateX(-10deg) scale(1.02)}
-  78%{transform:perspective(500px) rotateY(900deg) rotateX(8deg) scale(1.04)}
-  100%{transform:perspective(500px) rotateY(1080deg) rotateX(0deg) scale(1)}
+  0%{transform:perspective(700px) rotateY(0deg) rotateX(-12deg) scale(.55);opacity:0}
+  18%{transform:perspective(700px) rotateY(180deg) rotateX(14deg) scale(1.08);opacity:1}
+  45%{transform:perspective(700px) rotateY(540deg) rotateX(-10deg) scale(1.02)}
+  72%{transform:perspective(700px) rotateY(900deg) rotateX(8deg) scale(1.03)}
+  100%{transform:perspective(700px) rotateY(1080deg) rotateX(0deg) scale(1)}
 }
-@media(max-width:520px){.auth-profile-transition-card{padding:12px 13px;border-radius:16px}.auth-profile-coin{width:52px;height:52px;font-size:17px}.auth-profile-copy strong{font-size:14px}}
+@media(max-width:520px){.auth-profile-transition-card{padding:22px 16px 18px}.auth-profile-coin{width:82px;height:82px;font-size:24px}.auth-profile-copy strong{font-size:22px}.auth-profile-copy span{font-size:12px}}
 @media(prefers-reduced-motion:reduce){#auth-profile-transition.active .auth-profile-transition-card{transition:none}.auth-profile-coin.play{animation:none!important}}
 
 /* LOGIN */
@@ -1081,7 +1080,8 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     </div>
     <div class="auth-profile-copy">
       <strong id="authProfileName">Klipza</strong>
-      <span>Preparando seu perfil…</span>
+      <span id="authProfileMessage">Olá de novo.</span>
+      <button class="auth-profile-continue" id="authProfileContinue" type="button">Continuar</button>
     </div>
   </div>
 </div>
@@ -2184,22 +2184,30 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     try{await supabaseClient.rpc('touch_user_activity');}
     catch(error){console.warn('Não foi possível atualizar a atividade da conta.',error);}
   }
-  async function playAuthProfileTransition(){
+  async function playAuthProfileTransition(firstTime=false){
     const overlay=$('auth-profile-transition');
     const coin=$('authProfileCoin');
     const initial=$('authProfileInitial');
     const nameEl=$('authProfileName');
+    const messageEl=$('authProfileMessage');
+    const continueBtn=$('authProfileContinue');
     if(!overlay||!coin)return;
     const name=String(state.user?.name||'Usuário Klipza').trim()||'Usuário Klipza';
     if(initial)initial.textContent=initials(name);
-    if(nameEl)nameEl.textContent=name;
+    if(nameEl)nameEl.textContent=firstTime?'Obrigado por entrar, '+name+'!':'Olá de novo, '+name+'!';
+    if(messageEl)messageEl.textContent=firstTime?'Que bom ter você aqui. Seu espaço Klipza.IA está pronto.':'Tudo pronto para continuar de onde você parou.';
+    if(continueBtn){
+      continueBtn.disabled=false;
+      continueBtn.textContent='Continuar';
+      continueBtn.onclick=()=>{
+        overlay.classList.remove('active');
+        setTimeout(()=>enter(),420);
+      };
+    }
     overlay.classList.add('active');
     coin.classList.remove('play');
     void coin.offsetWidth;
     coin.classList.add('play');
-    await new Promise(resolve=>setTimeout(resolve,1180));
-    overlay.classList.remove('active');
-    await new Promise(resolve=>setTimeout(resolve,220));
   }
 
   async function finishSupabaseUser(user, options={}){
@@ -2255,8 +2263,8 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
       startDeepJobPolling();
       if(state.user?.id===user.id){
         if(deferEnter){
-          if(options.authTransition) await playAuthProfileTransition();
-          enter();
+          if(options.authTransition) await playAuthProfileTransition(Boolean(options.firstTime));
+          else enter();
         }
         authResolved=true;remoteSyncSuspended=false;queueRemoteStateSync();showResponseStatus('');
       }
@@ -2282,11 +2290,11 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
       if(authMode==='signup'){
         result=await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:authRedirect(),data:{full_name:name}}});
         if(result.error)throw result.error;
-        if(result.data?.session?.user){await finishSupabaseUser(result.data.session.user,{deferEnter:true,authTransition:true});return;}
+        if(result.data?.session?.user){await finishSupabaseUser(result.data.session.user,{deferEnter:true,authTransition:true,firstTime:true});return;}
         if(result.data?.user){
           const directLogin=await supabaseClient.auth.signInWithPassword({email,password});
           if(directLogin.error)throw directLogin.error;
-          if(directLogin.data?.user){await finishSupabaseUser(directLogin.data.user,{deferEnter:true,authTransition:true});return;}
+          if(directLogin.data?.user){await finishSupabaseUser(directLogin.data.user,{deferEnter:true,authTransition:true,firstTime:true});return;}
         }
         throw new Error('Cadastro concluído, mas a sessão não foi criada.');
       }
