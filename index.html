@@ -545,7 +545,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .settings-search input{width:100%;height:44px;padding:0 12px 0 38px;border:1px solid var(--line2);border-radius:22px;background:var(--bg);color:var(--text);font-size:13px}
 .settings-search svg{position:absolute;left:13px;top:13px;width:18px;height:18px;color:var(--muted)}
 .settings-menu{padding:0 8px 14px;overflow:auto}
-.settings-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 10px;border-radius:8px;color:var(--text);text-align:left;font-size:14px;line-height:1.1}
+.settings-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 10px;min-height:42px;border-radius:8px;color:var(--text);text-align:left;font-size:14px;line-height:1.35;overflow:visible}
 .settings-item:hover{background:var(--hover)}
 .settings-item.active{background:var(--hover);font-weight:600}
 .settings-item svg{width:19px;height:19px;flex:0 0 auto;color:var(--text)}
@@ -559,15 +559,15 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 
 .settings-content{width:min(900px,100%);margin:0 auto;padding:20px 28px 70px;color:var(--text);display:block;visibility:visible;opacity:1}
 .settings-titlebar{height:48px;display:flex;align-items:center;margin-bottom:16px;color:var(--text)}
-.settings-titlebar h1{font-size:22px;font-weight:500;letter-spacing:-.4px;color:var(--text)}
+.settings-titlebar h1{font-size:22px;font-weight:500;letter-spacing:-.4px;color:var(--text);line-height:1.3;overflow:visible}
 .settings-panel{border-top:1px solid var(--line);display:block;color:var(--text)}
 .settings-promo{display:none}
 .settings-group-title{font-size:14px;color:var(--text);padding:22px 0 12px}
 .settings-line{min-height:74px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 0}
 .settings-line:first-of-type{border-top:0}
 .settings-line-copy{min-width:0}
-.settings-line-name{font-size:15px;line-height:1.25}
-.settings-line-desc{font-size:13px;line-height:1.45;color:var(--muted);margin-top:5px;max-width:650px}
+.settings-line-name{font-size:15px;line-height:1.35;overflow:visible}
+.settings-line-desc{font-size:13px;line-height:1.5;color:var(--muted);margin-top:5px;max-width:650px;overflow:visible}
 .settings-line-value{font-size:14px;color:var(--text);display:flex;align-items:center;gap:8px;white-space:nowrap}
 .settings-line-value .muted{color:var(--muted)}
 .settings-chevron{width:18px;height:18px;color:var(--muted)}
