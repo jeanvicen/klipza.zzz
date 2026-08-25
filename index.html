@@ -19,14 +19,20 @@
 <script src="/vendor/capacitor-inappbrowser.js"></script>
 <style>
 :root{
-  --bg:#fff;--panel:#fafafa;--panel2:#f4f4f4;--line:#e5e5e5;--line2:#d8d8d8;
-  --text:#111;--muted:#747474;--black:#000;--hover:#f0f0f0;--radius:14px;
-  --sidebar:300px;--content:820px;--danger:#b00020;
-  --install-shadow:0 18px 60px rgba(0,0,0,.20);
+  /* Paleta baseada no segundo código: Apple / Liquid Glass */
+  --bg:#e5e5ea;--panel:rgba(255,255,255,.72);--panel2:rgba(255,255,255,.52);
+  --line:rgba(0,0,0,.15);--line2:rgba(0,0,0,.22);
+  --text:#111111;--muted:#6e6e73;--black:#000000;--hover:rgba(255,255,255,.9);
+  --accent:#007aff;--accent-2:#ff2a5f;--accent-3:#ff9500;
+  --radius:14px;--sidebar:300px;--content:820px;--danger:#ff375f;
+  --install-shadow:0 18px 60px rgba(0,0,0,.18);
 }
 body.dark{
-  --bg:#0f1117;--panel:#171b24;--panel2:#202633;--line:#30394a;--line2:#465166;
-  --text:#f4f7fb;--muted:#aeb8c8;--black:#f4f7fb;--hover:#283142;
+  --bg:#000000;--panel:rgba(30,30,35,.78);--panel2:rgba(60,60,65,.55);
+  --line:rgba(255,255,255,.15);--line2:rgba(255,255,255,.22);
+  --text:#f5f5f7;--muted:#a1a1a6;--black:#ffffff;--hover:rgba(60,60,65,.86);
+  --accent:#0a84ff;--accent-2:#bf5af2;--accent-3:#ff375f;
+  --danger:#ff375f;--install-shadow:0 18px 60px rgba(0,0,0,.8);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
@@ -564,6 +570,13 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
   @media(max-width:640px){.memory-card-head,.memory-notification,.memory-backup-row{align-items:flex-start;flex-direction:column}.memory-notification .settings-badge,.memory-backup-row .settings-badge{width:100%}.artifact-viewer{padding:10px}.artifact-viewer-dialog{width:100%;height:calc(100dvh - 20px)}}
 
 .settings-status-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;background:var(--panel2);color:var(--muted);font-size:10px;font-weight:750}
+.theme-toggle{display:inline-flex;align-items:center;gap:4px;padding:4px;border:1px solid var(--line);border-radius:999px;background:var(--panel2);backdrop-filter:blur(22px) saturate(180%);-webkit-backdrop-filter:blur(22px) saturate(180%);box-shadow:0 4px 12px rgba(0,0,0,.08),inset 0 1px 1px rgba(255,255,255,.45)}
+.theme-toggle-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-width:78px;height:32px;padding:0 10px;border-radius:999px;color:var(--muted);font-size:10px;font-weight:750;transition:background .35s ease,color .3s ease,transform .2s ease,box-shadow .35s ease}
+.theme-toggle-btn svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.theme-toggle-btn:hover{color:var(--text)}
+.theme-toggle-btn:active{transform:scale(.94)}
+.theme-toggle-btn.active{background:var(--black);color:var(--bg);box-shadow:0 4px 12px rgba(0,0,0,.18),inset 0 1px 1px rgba(255,255,255,.18)}
+@media(max-width:640px){.theme-toggle{width:100%;max-width:260px}.theme-toggle-btn{flex:1;min-width:0}}
 @media(max-width:640px){.settings-card-grid{grid-template-columns:1fr}.settings-document-card{align-items:flex-start;flex-direction:column}.settings-document-actions{width:100%}.settings-document-actions a,.settings-document-actions button{flex:1;text-align:center}}
 .settings-divider{height:1px;background:var(--line)}
 .settings-hidden{display:none!important}
@@ -1472,7 +1485,7 @@ body.prime-modal-open{overflow:hidden}
   function applyTheme(){
     const dark=state.theme==='dark';
     document.body.classList.toggle('dark',dark);
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#0f1117':'#ffffff');
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content',dark?'#000000':'#e5e5ea');
   }
   function setTheme(theme){
     state.theme=theme==='dark'?'dark':'light';
@@ -3504,7 +3517,7 @@ s=s.replace(/```([\s\S]*?)```/g,(match,code)=>{
         </div>
         <div class="settings-panel">
           <div class="settings-group-title">Preferências essenciais</div>
-          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Aparência</div><div class="settings-line-desc">Escolha entre a interface clara e o modo cinza confortável.</div></div><div class="settings-line-value"><button class="settings-badge" onclick="window.K.setTheme('${state.theme==='dark'?'light':'dark'}')">${state.theme==='dark'?'Cinza':'Claro'} · trocar</button></div></div>
+          <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">Tema</div><div class="settings-line-desc">Escolha entre o tema claro e o modo escuro inspirado no segundo código.</div></div><div class="settings-line-value"><div class="theme-toggle" role="group" aria-label="Escolher tema"><button type="button" class="theme-toggle-btn ${state.theme==='light'?'active':''}" onclick="window.K.setTheme('light')" aria-pressed="${state.theme==='light'}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg><span>Claro</span></button><button type="button" class="theme-toggle-btn ${state.theme==='dark'?'active':''}" onclick="window.K.setTheme('dark')" aria-pressed="${state.theme==='dark'}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg><span>Escuro</span></button></div></div></div>
           <div class="settings-line"><div class="settings-line-copy"><div class="settings-line-name">País e idioma do web.klip</div><div class="settings-line-desc">Escolha a região e o idioma usados nos resultados da pesquisa pública.</div></div><div class="settings-line-value"><select class="webklip-country-select" aria-label="País e idioma do web.klip" onchange="window.K.setWebKlipCountry(this.value)">${webKlipCountryOptions()}</select></div></div>
         </div>`;
     } else if(active==='dados'){
