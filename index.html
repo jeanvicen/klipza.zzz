@@ -68,6 +68,48 @@ body:not(.dark){--blob-opacity:.7}
 
 @media(prefers-reduced-motion:reduce){.app-color-blob,.app-color-mesh::after{animation:none!important}}
 
+/* Spinner 8-bit exibido somente na entrada automática de uma sessão já autenticada */
+#auto-login-loader{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:400;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+#auto-login-loader.active{display:flex;}
+#auto-login-spinner{
+  animation:autoLoginSpin 1s linear infinite;
+  height:10px;
+  width:10px;
+  position:relative;
+  margin:-5px;
+  border-radius:0;
+  background:transparent;
+  box-shadow:
+    0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent;
+}
+@keyframes autoLoginSpin{
+  0%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+  6.25%{box-shadow:0px -30px transparent,10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px var(--black),-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+  12.5%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px var(--black),-10px 30px var(--black),-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+  18.75%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px transparent,30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px var(--black),-10px 30px var(--black),-20px 20px var(--black),-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+  25%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px transparent,30px -10px transparent,30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px var(--black),-10px 30px var(--black),-20px 20px var(--black),-30px 10px var(--black),-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+  31.25%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px transparent,30px -10px transparent,30px 0px transparent,30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px var(--black),-10px 30px var(--black),-20px 20px var(--black),-30px 10px var(--black),-30px 0px var(--black),-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+  37.5%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px transparent,30px -10px transparent,30px 0px transparent,30px 10px transparent,20px 20px var(--black),10px 30px var(--black),0px 30px var(--black),-10px 30px var(--black),-20px 20px var(--black),-30px 10px var(--black),-30px 0px var(--black),-30px -10px var(--black),-20px -20px transparent,-10px -30px transparent}
+  43.75%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px transparent,30px -10px transparent,30px 0px transparent,30px 10px transparent,20px 20px transparent,10px 30px var(--black),0px 30px var(--black),-10px 30px var(--black),-20px 20px var(--black),-30px 10px var(--black),-30px 0px var(--black),-30px -10px var(--black),-20px -20px var(--black),-10px -30px transparent}
+  50%{box-shadow:0px -30px transparent,10px -30px transparent,20px -20px transparent,30px -10px transparent,30px 0px transparent,30px 10px transparent,20px 20px transparent,10px 30px transparent,0px 30px var(--black),-10px 30px var(--black),-20px 20px var(--black),-30px 10px var(--black),-30px 0px var(--black),-30px -10px var(--black),-20px -20px var(--black),-10px -30px var(--black)}
+  56.25%{box-shadow:0px -30px var(--black),10px -30px transparent,20px -20px transparent,30px -10px transparent,30px 0px transparent,30px 10px transparent,20px 20px transparent,10px 30px transparent,0px 30px transparent,-10px 30px var(--black),-20px 20px var(--black),-30px 10px var(--black),-30px 0px var(--black),-30px -10px var(--black),-20px -20px var(--black),-10px -30px var(--black)}
+  62.5%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px transparent,30px -10px transparent,30px 0px transparent,30px 10px transparent,20px 20px transparent,10px 30px transparent,0px 30px transparent,-10px 30px transparent,-20px 20px var(--black),-30px 10px var(--black),-30px 0px var(--black),-30px -10px var(--black),-20px -20px var(--black),-10px -30px var(--black)}
+  68.75%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px transparent,30px 0px transparent,30px 10px transparent,20px 20px transparent,10px 30px transparent,0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px var(--black),-30px 0px var(--black),-30px -10px var(--black),-20px -20px var(--black),-10px -30px var(--black)}
+  75%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px transparent,30px 10px transparent,20px 20px transparent,10px 30px transparent,0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px var(--black),-30px -10px var(--black),-20px -20px var(--black),-10px -30px var(--black)}
+  81.25%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px transparent,20px 20px transparent,10px 30px transparent,0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px var(--black),-20px -20px var(--black),-10px -30px var(--black)}
+  87.5%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px transparent,10px 30px transparent,0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px var(--black),-10px -30px var(--black)}
+  93.75%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px transparent,0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px var(--black)}
+  100%{box-shadow:0px -30px var(--black),10px -30px var(--black),20px -20px var(--black),30px -10px var(--black),30px 0px var(--black),30px 10px var(--black),20px 20px var(--black),10px 30px var(--black),0px 30px transparent,-10px 30px transparent,-20px 20px transparent,-30px 10px transparent,-30px 0px transparent,-30px -10px transparent,-20px -20px transparent,-10px -30px transparent}
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:rgb(var(--bg-rgb) / .52);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .8s ease,color .5s ease}
@@ -108,7 +150,7 @@ img{max-width:100%}
 /* LOGIN */
 #login{position:fixed;inset:0;background:rgb(var(--bg-rgb) / .52);display:grid;place-items:center;z-index:50;padding:24px}
 .login-card{width:min(390px,100%);text-align:center}
-.login-brand{font-size:34px;line-height:1;font-weight:700;letter-spacing:-1.8px;margin-bottom:12px}
+.login-brand{font-size:34px;line-height:1;font-weight:700;letter-spacing:-1.8px;margin-bottom:12px;}
 .login-brand span{font-weight:400}
 .login-copy{font-size:14px;color:var(--muted);margin-bottom:18px}
 .auth-form{display:grid;gap:10px;text-align:left}
@@ -1002,6 +1044,7 @@ body.anonymous-mode .app-color-mesh{transition:background .8s ease}
 body.anonymous-mode .anonymous-exit{color:#fff;border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.08)}
 body.anonymous-mode .msg.user .msg-avatar{background:#a855f7;color:#fff}
 body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;color:#fff}
+
 </style>
 </head>
 <body>
@@ -1011,6 +1054,8 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
   <div class="app-color-blob two"></div>
   <div class="app-color-blob three"></div>
 </div>
+
+<div id="auto-login-loader" aria-hidden="true"><div id="auto-login-spinner"></div></div>
 
 <div id="login">
   <div class="login-card">
@@ -2254,9 +2299,15 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     });
     const {data}=await supabaseClient.auth.getSession();
     if(data.session?.user){
+      const autoLoader=$('auto-login-loader');
+      autoLoader?.classList.add('active');
       const hash=window.location.hash||'';
-      if(hash.includes('reset-password')||hash.includes('type=recovery'))showRecoveryPanel(true);
-      else await finishSupabaseUser(data.session.user);
+      if(hash.includes('reset-password')||hash.includes('type=recovery')){showRecoveryPanel(true);$('auto-login-loader')?.classList.remove('active');}
+      else {
+        await finishSupabaseUser(data.session.user);
+        const autoLoader=$('auto-login-loader');
+        autoLoader?.classList.remove('active');
+      }
     }else{
       const oldUserId=state.user?.id||state.localOwnerId||null;stopQuotaRealtime();stopAccountNotificationSync();clearLocalAccountResidue(oldUserId);
       authResolved=false;clearTimeout(remoteStateTimer);remoteStateTimer=null;state=emptyLocalAccountState(null);state.quota={energy:ENERGY_MAX,attachUsed:0,resetAt:Date.now()+CYCLE_MS};state.wallet={tokenBalance:0,primeStatus:'inactive',primePlanCode:null,primeSubscriptionId:null,primeCurrentPeriodEnd:null};
