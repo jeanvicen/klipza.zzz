@@ -904,6 +904,25 @@ body.prime-modal-open{overflow:hidden}
   .voice-hint{max-width:140px}
   }
   .artifact-beta-badge{display:inline-flex;align-items:center;border:1px solid rgba(0,0,0,.16);border-radius:999px;padding:2px 7px;font-size:9px;line-height:1;font-weight:800;letter-spacing:.08em;color:#555;background:#f5f5f5;vertical-align:middle}.page-beta-badge{margin-left:8px;font-size:10px}.artifact-viewer-frame{display:block;width:100%;min-height:62vh;border:0;background:#fff}.quota-syncing{opacity:.82}.quota-dot-syncing{background:#8a8a8a;animation:quotaPulse 1.4s ease-in-out infinite}@keyframes quotaPulse{0%,100%{opacity:.35}50%{opacity:1}}@media (prefers-reduced-motion:reduce){.quota-dot-syncing{animation:none}}
+
+/* CONTRASTE DO TEXTO SOBRE O FUNDO COLORIDO */
+body{color:var(--text)}
+.main,.sidebar{background:color-mix(in srgb,var(--bg) 82%,transparent)}
+.messages,.welcome{background:color-mix(in srgb,var(--bg) 62%,transparent)}
+.msg-content,.msg-label,.topbar-title,.topbar-sub,.welcome h1,.welcome p,.settings-content,.settings-title,.settings-name,.settings-detail,.webklip-title,.webklip-subtitle,.webklip-card-title,.webklip-card-summary,.webklip-source,.webklip-results-count,.webklip-meta,.webklip-topbar-label{color:var(--text)}
+.msg-content p,.msg-content li,.msg-content span,.msg-content strong,.msg-content em,.msg-content a{color:inherit}
+.msg-content a{font-weight:650;text-decoration:underline;text-underline-offset:2px}
+.composer-wrap{background:rgba(var(--bg-rgb) / .52);}
+.composer-box{background:color-mix(in srgb,var(--panel) 88%,var(--bg) 12%);}
+.composer-box textarea,.composer-box input{color:var(--text)!important;text-shadow:0 1px 1px rgba(0,0,0,.08)}
+.composer-box textarea::placeholder,.composer-box input::placeholder{color:var(--muted)!important;opacity:1}
+.webklip-view{color:var(--text)}
+.webklip-card,.webklip-tabs,.webklip-search-form,.webklip-browser-toolbar,.webklip-preview-state,.webklip-search-empty{background:color-mix(in srgb,var(--panel) 86%,var(--bg) 14%)}
+.webklip-search-form input{color:var(--text)!important}.webklip-search-form input::placeholder{color:var(--muted)!important;opacity:1}
+.settings-card,.settings-panel,.settings-item,.settings-line,.settings-feature-card,.settings-document-card{background:color-mix(in srgb,var(--panel) 90%,var(--bg) 10%)}
+body.dark .main,body.dark .sidebar{background:color-mix(in srgb,#000 78%,transparent)}
+body.dark .messages,body.dark .welcome{background:rgba(0,0,0,.55)}
+body.dark .composer-box,body.dark .webklip-card,body.dark .webklip-tabs,body.dark .webklip-search-form,body.dark .webklip-browser-toolbar,body.dark .settings-card,body.dark .settings-panel,body.dark .settings-item,body.dark .settings-line,body.dark .settings-feature-card,body.dark .settings-document-card{background:color-mix(in srgb,var(--panel) 92%,#000 8%)}
 </style>
 </head>
 <body>
