@@ -387,6 +387,10 @@ img{max-width:100%}
 @keyframes thinkingLetter6{0%,100%{opacity:.22;transform:translateY(2px)}50%{opacity:1;transform:translateY(-1px)}}
 .thinking-loader6-copy{display:inline-flex;align-items:center;gap:4px;color:var(--muted)}
 .thinking-loader6-copy strong{color:var(--text);font-size:11px}
+.response-bars-loader{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--panel);box-shadow:0 3px 14px rgba(0,0,0,.035);}
+.response-bars-loader span{display:block;width:7px;height:10%;min-height:10px;border-radius:14px;background:var(--accent-strong);animation:responseBars 2.5s infinite linear;transform-origin:center bottom;}
+.response-bars-loader span:nth-child(1){animation-delay:1.4s}.response-bars-loader span:nth-child(2){animation-delay:1.2s}.response-bars-loader span:nth-child(3){animation-delay:1s}.response-bars-loader span:nth-child(4){animation-delay:.8s}.response-bars-loader span:nth-child(5){animation-delay:.6s}.response-bars-loader span:nth-child(6){animation-delay:.4s}.response-bars-loader span:nth-child(7){animation-delay:.2s}.response-bars-loader span:nth-child(8){animation-delay:0s}.response-bars-loader span:nth-child(9){animation-delay:.2s}.response-bars-loader span:nth-child(10){animation-delay:.4s}.response-bars-loader span:nth-child(11){animation-delay:.6s}.response-bars-loader span:nth-child(12){animation-delay:.8s}.response-bars-loader span:nth-child(13){animation-delay:1s}.response-bars-loader span:nth-child(14){animation-delay:1.2s}.response-bars-loader span:nth-child(15){animation-delay:1.4s}
+@keyframes responseBars{0%,100%{background:var(--accent-strong);height:12px;margin-top:12px}50%{background:var(--accent);height:42px;margin-top:0}}
 @keyframes webklipRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes webklipCardIn{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
 @keyframes webklipSheen{0%,100%{transform:translateX(-18%);opacity:.35}50%{transform:translateX(18%);opacity:.7}}
@@ -2691,7 +2695,7 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
     responseState.deepComplexity=pacing.complexity;
     el.classList.remove('show','progress-status'); el.innerHTML='';
     const steps=responseState.deepThinking?deepLiveSteps(responseState.deepMessage,pacing.complexity).slice(0,pacing.steps):['Analisando o pedido…','Estruturando a solução…','Verificando detalhes do código…','Preparando a resposta…'];
-    const render=()=>{if(responseState.deepThinking){if(responseOwnsActiveChat())renderDeepThinkingProgress('',responseState.deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else if(responseOwnsActiveChat())el.innerHTML=`<div class="response-progress"><span class="response-progress-dot"></span><div class="response-progress-copy"><span class="response-progress-label">Preparando sua resposta</span><span class="response-progress-step">${steps[responseState.deepStepIndex]}</span></div></div>`;};
+    const render=()=>{if(responseState.deepThinking){if(responseOwnsActiveChat())renderDeepThinkingProgress('',responseState.deepPlan,responseState.deepMessage,responseState.deepStepIndex);}else if(responseOwnsActiveChat())el.innerHTML=`<div class="response-bars-loader" role="status" aria-label="Gerando resposta">${Array.from({length:15},()=>'<span></span>').join('')}</div>`;};
     render();
     responseState.progressTimer=setInterval(()=>{if(responseState.deepStepIndex<steps.length-1){responseState.deepStepIndex+=1;render();}else{clearInterval(responseState.progressTimer);responseState.progressTimer=null;}},pacing.interval);
   }
