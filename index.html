@@ -20,7 +20,7 @@
 <style>
 :root{
   /* Cores exatamente baseadas no segundo código (Apple / Liquid Glass) */
-  --bg:#e5e5ea;--panel:rgba(255,255,255,.15);--panel2:rgba(255,255,255,.70);
+  --bg:#e5e5ea;--bg-rgb:229 229 234;--panel:rgba(255,255,255,.15);--panel2:rgba(255,255,255,.70);
   --line:rgba(0,0,0,.15);--line2:rgba(255,255,255,.40);
   --text:#111111;--muted:rgba(0,0,0,.50);--black:#000000;--hover:rgba(255,255,255,.70);
   --accent:#007aff;--accent-2:#ff2a5f;--accent-3:#ff9500;
@@ -34,7 +34,7 @@
   --install-shadow:0 18px 60px rgba(0,0,0,.10);
 }
 body.dark{
-  --bg:#000000;--panel:rgba(30,30,35,.45);--panel2:rgba(60,60,65,.80);
+  --bg:#000000;--bg-rgb:0 0 0;--panel:rgba(30,30,35,.45);--panel2:rgba(60,60,65,.80);
   --line:rgba(255,255,255,.15);--line2:rgba(255,255,255,.15);
   --text:#f4f7fb;--muted:rgba(255,255,255,.50);--black:#ffffff;--hover:rgba(60,60,65,.80);
   --accent:#0a84ff;--accent-2:#bf5af2;--accent-3:#ff375f;
@@ -46,9 +46,23 @@ body.dark{
   --icon-color:rgba(255,255,255,.50);--icon-active:#ffffff;--divider:rgba(255,255,255,.15);
   --danger:#ff375f;--install-shadow:0 18px 60px rgba(0,0,0,.80);
 }
+/* FUNDO COLORIDO ANIMADO — inspirado no segundo código */
+.app-color-mesh{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;background:var(--bg);transition:background .8s ease}
+.app-color-mesh::after{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.035) 45%,transparent 62%);opacity:.6;animation:appMeshSheen 14s ease-in-out infinite;pointer-events:none}
+.app-color-blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:var(--blob-opacity);will-change:transform,background,opacity;transition:background .8s ease,opacity .8s ease;animation:appBlobFloat 20s infinite alternate cubic-bezier(.45,.05,.55,.95)}
+.app-color-blob.one{width:50vw;height:50vw;top:-10%;left:-10%;background:var(--accent-2);animation-delay:0s}
+.app-color-blob.two{width:45vw;height:45vw;right:-10%;bottom:-10%;background:var(--accent);animation-delay:-5s}
+.app-color-blob.three{width:35vw;height:35vw;left:40%;top:30%;background:var(--accent-3);animation-delay:-10s}
+body.dark{--blob-opacity:.5}
+body:not(.dark){--blob-opacity:.7}
+#app,#login{position:relative;z-index:1}
+@keyframes appBlobFloat{0%{transform:translate(0,0) scale(1) rotate(0deg)}33%{transform:translate(5%,10%) scale(1.05) rotate(5deg)}66%{transform:translate(-5%,5%) scale(.95) rotate(-5deg)}100%{transform:translate(0,-10%) scale(1.1) rotate(0deg)}}
+@keyframes appMeshSheen{0%,100%{transform:translateX(-18%);opacity:.35}50%{transform:translateX(18%);opacity:.7}}
+@media(prefers-reduced-motion:reduce){.app-color-blob,.app-color-mesh::after{animation:none!important}}
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:100%;height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .8s ease,color .5s ease}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:rgb(var(--bg-rgb) / .52);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .8s ease,color .5s ease}
 button,input,textarea{font:inherit;color:inherit}
 /* Transição suave das cores ao trocar o tema — somente aparência */
 .sidebar,.main,.topbar,.messages,.welcome,.settings-view,.settings-workspace,.settings-sidebar,.settings-main,.settings-card,.settings-panel,.settings-item,.settings-line,.settings-feature-card,.settings-document-card,.composer,.composer-box,.chat-row,.msg-content pre,.msg-action-btn,.icon-btn,.new-chat,.nav-btn,.avatar,.account,.install-prompt,.webklip-view,.webklip-card,.webklip-tabs,.webklip-tab,.webklip-search-form,.webklip-toolbar-button,.modal,.modal-dialog{
@@ -84,7 +98,7 @@ img{max-width:100%}
 #app.settings-mode>.sidebar{transform:translateX(-100%);opacity:0;pointer-events:none}
 
 /* LOGIN */
-#login{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:50;padding:24px}
+#login{position:fixed;inset:0;background:rgb(var(--bg-rgb) / .52);display:grid;place-items:center;z-index:50;padding:24px}
 .login-card{width:min(390px,100%);text-align:center}
 .login-brand{font-size:34px;line-height:1;font-weight:700;letter-spacing:-1.8px;margin-bottom:12px}
 .login-brand span{font-weight:400}
@@ -131,7 +145,7 @@ img{max-width:100%}
 /* APP */
 #app{display:grid;grid-template-columns:var(--sidebar) minmax(0,1fr);height:100dvh;width:100%;transition:grid-template-columns .2s ease}
 #app.sidebar-collapsed{grid-template-columns:0 minmax(0,1fr)}
-.sidebar{height:100dvh;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden;transition:transform .22s ease,opacity .18s ease}
+.sidebar{height:100dvh;background:color-mix(in srgb,var(--panel) 82%,transparent);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:0;overflow:hidden;transition:transform .22s ease,opacity .18s ease}
 #app.sidebar-collapsed .sidebar{transform:translateX(-100%);opacity:0;pointer-events:none}
 .side-head{height:58px;padding:0 12px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);flex:0 0 auto}
 .brand{font-size:17px;font-weight:700;letter-spacing:-.5px;flex:1}
@@ -169,8 +183,8 @@ img{max-width:100%}
 .account-email{font-size:10px;color:#777;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* MAIN */
-.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:var(--bg);position:relative}
-.topbar{height:58px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2vw,28px);flex:0 0 auto}
+.main{height:100dvh;display:flex;flex-direction:column;min-width:0;background:rgb(var(--bg-rgb) / .48);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);position:relative}
+.topbar{height:58px;background:color-mix(in srgb,var(--panel) 42%,transparent);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 clamp(14px,2vw,28px);flex:0 0 auto}
 .topbar-left{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .topbar-title{font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .topbar-sub{font-size:11px;color:#999}
@@ -402,7 +416,7 @@ textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;pad
 .empty-page{padding:60px 10px;text-align:center;color:#999;font-size:13px;border:1px dashed #ddd;border-radius:14px}
 
 /* SETTINGS — REDESIGN */
-.settings-view{height:100%;overflow:auto;background:var(--bg);padding:28px 30px 60px}
+.settings-view{height:100%;overflow:auto;background:rgb(var(--bg-rgb) / .48);backdrop-filter:blur(10px) saturate(120%);-webkit-backdrop-filter:blur(10px) saturate(120%);padding:28px 30px 60px}
 .settings-inner{width:min(1180px,100%);margin:0 auto}
 .settings-top{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px 0 20px}
 .settings-top-main{display:flex;align-items:center;gap:14px;min-width:0}
@@ -886,6 +900,12 @@ body.prime-modal-open{overflow:hidden}
 </style>
 </head>
 <body>
+
+<div class="app-color-mesh" aria-hidden="true">
+  <div class="app-color-blob one"></div>
+  <div class="app-color-blob two"></div>
+  <div class="app-color-blob three"></div>
+</div>
 
 <div id="login">
   <div class="login-card">
