@@ -397,7 +397,7 @@ body.webklip-modal-open{overflow:hidden}.webklip-modal{position:fixed;inset:0;z-
   @media(max-width:720px){.energy-banner{align-items:flex-start;margin:0 0 9px;width:100%;padding:10px}.energy-banner-copy{flex:1}.energy-prime{height:32px;padding:0 10px;font-size:10px}.composer-wrap{position:sticky}}
   @media(prefers-reduced-motion:reduce){.attach-menu,.attach-feature-card{animation:none!important;transition:none!important}}
 .composer-row{display:flex;align-items:flex-end;gap:7px;padding:7px}
-.plus{width:37px;height:37px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;border:1px solid transparent;transition:.15s}.plus:hover{background:var(--hover);border-color:var(--line)}
+.plus{width:37px;height:37px;border-radius:10px;display:grid;place-items:center;flex:0 0 auto;border:1px solid var(--line2);background:var(--panel);color:var(--text);transition:background-color .18s ease,color .18s ease,border-color .18s ease,transform .15s ease,box-shadow .18s ease;box-shadow:0 2px 8px rgba(0,0,0,.06)}.plus:hover{background:var(--hover);border-color:var(--line2)}.plus.active{background:var(--panel2);border-color:var(--line2);color:var(--text);box-shadow:0 4px 14px rgba(0,0,0,.10)}.plus:disabled{opacity:.55;background:var(--panel);color:var(--muted)}
 .plus.active{background:#000;color:#fff;border-color:#000;transform:rotate(45deg)}
 .plus svg{width:18px;height:18px}
 textarea#prompt{flex:1;resize:none;border:0;outline:0;background:transparent;padding:8px 6px;min-height:37px;max-height:180px;font-size:14px;line-height:1.5}
