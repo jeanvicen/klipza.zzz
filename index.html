@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#ffffff">
 <meta name="description" content="Klipza.IA: converse, crie e trabalhe com seus arquivos.">
 <meta name="application-name" content="Klipza.IA">
@@ -17,6 +17,8 @@
 <title>Klipza.IA</title>
 <script src="/vendor/capacitor.js"></script>
 <script src="/vendor/capacitor-inappbrowser.js"></script>
+<!-- Skip link para acessibilidade -->
+<style>.skip-link{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;z-index:9999}.skip-link:focus{position:fixed;left:50%;top:10px;transform:translateX(-50%);width:auto;height:auto;padding:12px 20px;background:#000;color:#fff;font-size:14px;font-weight:700;border-radius:8px;text-decoration:none;box-shadow:0 4px 16px rgba(0,0,0,.2)}</style>
 <style>
 :root{
 /* Cores exatamente baseadas no segundo código (Apple / Liquid Glass) */
@@ -1038,6 +1040,8 @@ body.anonymous-mode .msg.ai .msg-avatar{border-color:#a855f7;background:#180d22;
 </style>
 </head>
 <body>
+<!-- Skip link para acessibilidade -->
+<a href="#main-content" class="skip-link">Pular para conteúdo principal</a>
 <div class="app-color-mesh" aria-hidden="true">
 <div class="app-color-blob one"></div>
 <div class="app-color-blob two"></div>
@@ -1126,7 +1130,7 @@ Nova conversa
 <button class="nav-btn" id="logoutBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 17l5-5-5-5M15 12H3"/><path d="M21 3v18"/></svg><span class="nav-label">Sair</span></button>
 </div>
 </aside>
-<main class="main" id="main"></main>
+<main class="main" id="main-content" role="main" aria-label="Conteúdo principal do chat">
 </div>
 <input class="hidden" id="fileInput" type="file">
 <input class="hidden" id="imageInput" type="file" accept="image/*">
